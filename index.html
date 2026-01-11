@@ -11,7 +11,7 @@
             --mult-blue: #346094; --clack-green: #2e5a2e; --wash-purple: #6a0dad;
         }
 
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
         header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
         .main-wrapper { display: grid; grid-template-columns: 1fr 380px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
         
@@ -19,43 +19,47 @@
         .command-bar { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #222; display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-content: start; overflow-y: auto; flex-grow: 1; }
 
-        /* === UNIT CARDS (From your snippet) === */
+        /* === UPDATED WATERMARK CSS === */
+        .watermark-img {
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            width: 80%; 
+            height: auto; 
+            max-height: 85%; 
+            z-index: 0; 
+            pointer-events: none; 
+            opacity: 0.25;
+            filter: brightness(1.15) contrast(1.05);
+        }
+
+        /* CARD STRUCTURE */
         .unit-card { 
             position: relative; 
-            background-color: #1a1a1a; /* Re-added background */
+            background-color: transparent !important; 
             border: 1px solid rgba(255,255,255,0.2); 
             border-top: 5px solid var(--fire-red); 
             border-radius: 4px; padding: 10px; 
             min-height: 200px; z-index: 1; overflow: hidden;
         }
 
-        .watermark-img {
-            position: absolute; inset:0; margin:auto;
-            width: 80%; max-height: 85%; z-index: 0; 
-            pointer-events: none; opacity: 0.22; 
-            filter: saturate(1.4) brightness(1.1) contrast(1.1);
-        }
-
         .card-content { position: relative; z-index: 10; pointer-events: auto; }
         .unit-name { font-size: 1.35rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
-        .unit-location { font-size: 0.95rem; color: var(--directory-yellow); font-weight: 900; }
+        .unit-location { font-size: 0.95rem; color: var(--directory-yellow); font-weight: 900; text-shadow: 1px 1px 2px #000; }
         
         .status-btn { width: 100%; padding: 10px; font-weight: 900; margin-top: 8px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; }
         
-        /* === TIMESTAMPS === */
+        /* TIMESTAMPS */
         .ts-grid { display: flex; justify-content: space-between; margin-top: 8px; border-top: 1px solid #444; padding-top: 6px; }
         .ts-box { text-align: center; flex: 1; }
         .ts-label { font-size: 0.6rem; color: var(--timestamp-cyan); font-weight: bold; display: block; }
         .ts-val { font-family: monospace; font-size: 1.1rem; font-weight: 900; color: #fff; }
 
-        /* === DIRECTORY === */
-        .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
-        .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
-
-        /* === BUTTONS WITH LOGOS (From your snippet) === */
+        /* DIRECTORY BUTTONS WITH LOGOS */
         .unit-btn { 
-            position: relative; background: #222; border: 1px solid #444; 
-            color: #fff; font-weight: 900; padding: 10px 4px; 
+            position: relative; padding: 10px 4px; color: #fff; font-weight: 900; 
+            background: #222; border: 1px solid #444; 
             border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; 
         }
         .unit-btn span { position: relative; z-index: 5; }
@@ -79,7 +83,7 @@
 
 <div class="main-wrapper">
     <div class="left-side">
-        <div id="debug-log">OPERATIONAL: DRIVE SYNC ACTIVE</div>
+        <div id="debug-log">OPERATIONAL: WATERMARK FILTERS UPDATED</div>
         <div class="command-bar">
             <input type="text" id="global-address" style="background:black; border:1px solid var(--fire-red); color:white; padding:10px; border-radius:4px; flex-grow:1;" placeholder="INCIDENT ADDRESS">
             <button style="background:var(--fire-red); color:white; border:none; padding:10px; border-radius:4px; font-weight:900; cursor:pointer;" onclick="resetBoard()">RESET BOARD</button>
@@ -95,7 +99,6 @@
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbydOog9_C8Kca0yQSfr4Hf29Gq5S64-e_XLgmyVb1yhOc98KA3yV63aMzOigq10siuDyQ/exec";
     
-    // The "Direct Link" method you requested
     const BASE = "https://lh3.googleusercontent.com/u/0/d/";
     const LOGOS = {
         "PORTLAND FIRE & RESCUE": BASE + "1L7x0AmisE2Nd6sco6p8jt5o0EZgidHjk",
