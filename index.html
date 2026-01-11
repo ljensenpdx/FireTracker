@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oregon Fire Ops | Command Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #080808; --panel-bg: #121212; --fire-red: #cc3333; 
+            --directory-yellow: #ffff00; --timestamp-cyan: #00f2ff;
+            --mult-blue: #346094; --clack-green: #2e5a2e; --wash-purple: #6a0dad;
+        }
+
+        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
+        .main-wrapper { display: grid; grid-template-columns: 1fr 380px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
+        
+        #debug-log { background: #000; color: #0f0; font-family: monospace; font-size: 0.75rem; padding: 10px; border: 1px solid #333; height: 45px; overflow-y: scroll; margin-bottom: 5px; flex-shrink: 0; }
+        .command-bar { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #222; display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-content: start; overflow-y: auto; flex-grow: 1; }
+
+        /* TRANSPARENT UNIT CARDS */
+        .unit-card { 
+            position: relative; 
+            background-color: transparent; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-top: 5px solid var(--fire-red); 
+            border-radius: 4px; padding: 10px; 
+            min-height: 195px; z-index: 1; overflow: hidden;
+        }
+
+        .watermark-img {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; height: auto; max-height: 85%; z-index: 0; 
+            pointer-events: none; opacity: 0.3; filter: grayscale(1) brightness(1.2);
+        }
+
+        .card-content { position: relative; z-index: 10; }
+        .unit-name { font-size: 1.35rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
+        .unit-location { font-size: 0.95rem; color: var(--directory-yellow); font-weight: 900; text-shadow: 1px 1px 2px #000; }
+        
+        /* STATUS BUTTON & TIMESTAMPS */
+        .status-btn { width: 100%; padding: 10px; font-weight: 900; margin-top: 8px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; }
+        .ts-grid { display: flex; justify-content: space-between; margin-top: 8px; border-top: 1px solid #444; padding-top: 6px; }
+        .ts-box { text-align: center; flex: 1; }
+        .ts-label { font-size: 0.6rem; color: var(--timestamp-cyan); font-weight: bold; display: block; }
+        .ts-val { font-family: monospace; font-size: 1.1rem; font-weight: 900; color: #fff; }
+
+        /* TRANSPARENT DIRECTORY BUTTONS */
+        .unit-btn { 
+            position: relative; padding: 12px 2px; color: #fff; font-weight: 900; 
+            background: transparent; border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; 
+        }
+        .unit-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--fire-red); }
+
+        .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; }
+        .cat-label { font-size: 0.65rem; font-weight: bold; color: #888; text-transform: uppercase; border-bottom: 1px solid #333; margin: 10px 0 5px 0; padding-bottom: 2px; }
+        .is-hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
+    <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
+</header>
+
+<div class="main-wrapper">
+    <div class="left-side">
+        <div id="debug-log">OPERATIONAL: LOGO PROXY TUNNEL ACTIVE</div>
+        <div class="command-bar">
+            <input type="text" id="global-address" style="background:black; border:1px solid var(--fire-red); color:white; padding:10px; border-radius:4px; flex-grow:1;" placeholder="INCIDENT ADDRESS">
+            <button style="background:var(--fire-red); color:white; border:none; padding:10px; border-radius:4px; font-weight:900; cursor:pointer;" onclick="resetBoard()">RESET BOARD</button>
+        </div>
+        <div class="dashboard-grid" id="active-units"></div>
+    </div>
+    
+    <div class="column">
+        <div class="search-container" style="padding:10px; background:#000;">
+            <input type="text" id="unit-search" style="width:100%; background:#1a1a1a; border:1px solid var(--fire-red); color:#fff; padding:10px; border-radius:4px;" placeholder="SEARCH DIRECTORY..." onkeyup="filterUnits()">
+        </div>
+        <div class="scroll-area" id="accordion-container"></div>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbydOog9_C8Kca0yQSfr4Hf29Gq5S64-e_XLgmyVb1yhOc98KA3yV63aMzOigq10siuDyQ/exec";
+    
+    // THE FIX: Professional Image Proxy to bypass Google Drive blocks
+    const PROXY = "https://wsrv.nl/?url=https://drive.google.com/thumbnail?sz=w1000%26id=";
+
+    const LOGOS = {
+        "PORTLAND FIRE & RESCUE": PROXY + "1L7x0AmisE2Nd6sco6p8jt5o0EZgidHjk",
+        "GRESHAM FIRE & RESCUE": PROXY + "1CBhRQLYVDQffXOWTGdzOQuYxjoAedvgV",
+        "PORT OF PORTLAND FIRE & RESCUE": PROXY + "1o_evQMoyKc9_c1KTL7BMCYqjWaN-BtNX",
+        "CLACKAMAS FIRE DISTRICT #1": PROXY + "1hN8Lpz60WWi6vpmXKJmH5IMUUZ7KlCow",
+        "TVF&R": PROXY + "1kxfmtCyESBzOyAe_t7w6x62KWtsqt314",
+        "HILLSBORO FIRE & RESCUE": PROXY + "1BQERHLZK2m-lq9qAyCodJnu_vcldL4Tj"
+    };
+
+    function log(msg) { document.getElementById('debug-log').innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`; }
+
+    function resetBoard() {
+        if(confirm("Wipe dashboard?")) { document.getElementById('active-units').innerHTML = ""; log("RESET."); }
+    }
+
+    function fetchData() {
+        const s = document.createElement('script');
+        s.src = `${GOOGLE_URL}?callback=setup&ts=${Date.now()}`;
+        document.body.appendChild(s);
+    }
+
+    window.setup = function(raw) {
+        let rows = Array.isArray(raw) ? raw : (raw.data || []);
+        window.unitMap = rows.slice(1).map(row => ({
+            id: String(row[0] || "").toUpperCase(),
+            name: String(row[2] || ""),
+            station: String(row[3] || "Unknown"),
+            agency: String(row[4] || "").toUpperCase().trim(), 
+            type: String(row[6] || "Other")
+        })).filter(u => u.name);
+        log(`SYNC: ${window.unitMap.length} UNITS ONLINE.`);
+        render();
+    }
+
+    function render() {
+        const container = document.getElementById('accordion-container');
+        container.innerHTML = "";
+        
+        const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD/RESCUE/HEAVY RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
+        const counties = [
+            { name: "MULTNOMAH", key: "MULTNOMAH", color: "#346094" },
+            { name: "CLACKAMAS", key: "CLACKAMAS", color: "#2e5a2e" },
+            { name: "WASHINGTON", key: "WASHINGTON", color: "#6a0dad" }
+        ];
+
+        counties.forEach(county => {
+            const h = document.createElement('div');
+            h.className = `accordion-header`;
+            h.style.borderLeft = `10px solid ${county.color}`;
+            h.innerHTML = `<span>${county.name}</span>`;
+            const content = document.createElement('div');
+            content.className = "is-hidden";
+            content.style.padding = "10px";
+            h.onclick = () => content.classList.toggle('is-hidden');
+            container.appendChild(h); container.appendChild(content);
+
+            typeOrder.forEach(type => {
+                const units = window.unitMap.filter(u => u.id.includes(county.key) && (u.type.toUpperCase() === type || (type === "SQUAD/RESCUE/HEAVY RESCUE" && ["SQUAD", "RESCUE", "HEAVY RESCUE"].includes(u.type.toUpperCase()))));
+                if (units.length > 0) {
+                    const label = document.createElement('div'); label.className = 'cat-label'; label.innerText = type; content.appendChild(label);
+                    const grid = document.createElement('div'); grid.style.display = "grid"; grid.style.gridTemplateColumns = "repeat(3, 1fr)"; grid.style.gap = "5px";
+                    units.forEach(u => {
+                        const b = document.createElement('button');
+                        b.className = "unit-btn";
+                        const logoUrl = LOGOS[u.agency] || "";
+                        if (logoUrl) {
+                            b.innerHTML = `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('${logoUrl}') center/contain no-repeat; opacity:0.15;"></div>`;
+                        }
+                        b.innerHTML += `<span style="position:relative; z-index:10;">${u.name}</span>`;
+                        b.onclick = () => addCard(u);
+                        grid.appendChild(b);
+                    });
+                    content.appendChild(grid);
+                }
+            });
+        });
+    }
+
+    function addCard(u) {
+        const dash = document.getElementById('active-units');
+        const card = document.createElement('div');
+        card.className = 'unit-card';
+        
+        const logoUrl = LOGOS[u.agency] || "";
+        const timeNow = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12: false});
+
+        card.innerHTML = `
+            ${logoUrl ? `<img src="${logoUrl}" class="watermark-img" onerror="console.log('Logo failed to load')">` : ''}
+            <div class="card-content">
+                <div style="display:flex; justify-content:space-between;">
+                    <div class="unit-name">${u.name}</div>
+                    <div class="unit-location">${u.station}</div>
+                </div>
+                <button class="status-btn" onclick="cycleStatus(this)">DISPATCHED</button>
+                <div class="ts-grid">
+                    <div class="ts-box"><span class="ts-label">DISP</span><span class="ts-val">${timeNow}</span></div>
+                    <div class="ts-box"><span class="ts-label">ENRT</span><span class="ts-val" id="enrt">--:--</span></div>
+                    <div class="ts-box"><span class="ts-label">SCNE</span><span class="ts-val" id="scne">--:--</span></div>
+                </div>
+                <textarea style="width:100%; background:rgba(0,0,0,0.7); color:white; border:1px solid #444; margin-top:10px; height:50px; resize:none; box-sizing:border-box;" placeholder="NOTES"></textarea>
+            </div>`;
+        
+        dash.prepend(card);
+    }
+
+    function cycleStatus(btn) {
+        const card = btn.closest('.unit-card');
+        const timeNow = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12: false});
+        
+        if (btn.innerText === "DISPATCHED") { 
+            btn.style.background = "#004d99"; btn.innerText = "EN ROUTE"; 
+            card.querySelector('#enrt').innerText = timeNow;
+        }
+        else if (btn.innerText === "EN ROUTE") { 
+            btn.style.background = "#1e5c33"; btn.innerText = "ON SCENE"; 
+            card.querySelector('#scne').innerText = timeNow;
+        }
+        else { card.remove(); }
+    }
+
+    function filterUnits() {
+        const q = document.getElementById('unit-search').value.toUpperCase();
+        document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('is-hidden', !b.innerText.includes(q)));
+    }
+
+    window.onload = fetchData;
+    setInterval(() => { 
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'}); 
+    }, 1000);
+</script>
+</body>
+</html>
