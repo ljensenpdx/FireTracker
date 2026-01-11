@@ -19,7 +19,7 @@
         .command-bar { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #222; display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-content: start; overflow-y: auto; flex-grow: 1; }
 
-        /* === UPDATED WATERMARK CSS === */
+        /* WATERMARK CSS */
         .watermark-img {
             position: absolute; 
             top: 50%; 
@@ -56,7 +56,7 @@
         .ts-label { font-size: 0.6rem; color: var(--timestamp-cyan); font-weight: bold; display: block; }
         .ts-val { font-family: monospace; font-size: 1.1rem; font-weight: 900; color: #fff; }
 
-        /* DIRECTORY BUTTONS WITH LOGOS */
+        /* DIRECTORY BUTTONS */
         .unit-btn { 
             position: relative; padding: 10px 4px; color: #fff; font-weight: 900; 
             background: #222; border: 1px solid #444; 
@@ -83,7 +83,7 @@
 
 <div class="main-wrapper">
     <div class="left-side">
-        <div id="debug-log">OPERATIONAL: WATERMARK FILTERS UPDATED</div>
+        <div id="debug-log">OPERATIONAL: HQ LOGO SYNC ACTIVE</div>
         <div class="command-bar">
             <input type="text" id="global-address" style="background:black; border:1px solid var(--fire-red); color:white; padding:10px; border-radius:4px; flex-grow:1;" placeholder="INCIDENT ADDRESS">
             <button style="background:var(--fire-red); color:white; border:none; padding:10px; border-radius:4px; font-weight:900; cursor:pointer;" onclick="resetBoard()">RESET BOARD</button>
@@ -92,6 +92,9 @@
     </div>
     
     <div class="column">
+        <div class="search-container" style="padding:10px; background:#000;">
+            <input type="text" id="unit-search" style="width:100%; background:#1a1a1a; border:1px solid var(--fire-red); color:#fff; padding:10px; border-radius:4px;" placeholder="SEARCH UNITS..." onkeyup="filterUnits()">
+        </div>
         <div class="scroll-area" id="accordion-container"></div>
     </div>
 </div>
@@ -99,27 +102,26 @@
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbydOog9_C8Kca0yQSfr4Hf29Gq5S64-e_XLgmyVb1yhOc98KA3yV63aMzOigq10siuDyQ/exec";
     
-    const BASE = "https://lh3.googleusercontent.com/u/0/d/";
-const BASE = "https://lh3.googleusercontent.com/d/";
+    // UPDATED LOGO DATA
+    const BASE = "https://lh3.googleusercontent.com/d/";
 
-const LOGOS = {
-    "PORTLAND FIRE & RESCUE":        BASE + "1L7x0AmisE2Nd6sco6p8jt5o0EZgidHjk=s2048",
-    "GRESHAM FIRE & RESCUE":         BASE + "1CBhRQLYVDQffXOWTGdzOQuYxjoAedvgV=s2048",
-    "PORT OF PORTLAND FIRE & RESCUE":BASE + "1o_evQMoyKc9_c1KTL7BMCYqjWaN-BtNX=s2048",
-    "CORBETT FIRE DISTRICT 14":      BASE + "1dxyZD3_nomdim33BH0iIV-Qh2nCUCXql=s2048",
-    "SAUVIE ISLAND FIRE DISTRICT":   BASE + "1s1QbSS-VJ-lyNlxHWHtEi-w9kliRIRyy=s2048",
-    "CLACKAMAS FIRE DISTRICT #1":    BASE + "1hN8Lpz60WWi6vpmXKJmH5IMUUZ7KlCow=s2048",
-    "ESTACADA FIRE DISTRICT #69":    BASE + "1grdNE195bKEEvziRb0fEwq-4agMxEhZt=s2048",
-    "COLTON RURAL FIRE DISTRICT #70":BASE + "108XmIdtg7EUVcosY_86oafU-8RVNwEWC=s2048",
-    "HOODLAND FIRE DISTRICT #74":    BASE + "1SSlUS08_DNk6dwsH4ZvB_gmlncb-hFzw=s2048",
-    "LAKE OSWEGO FIRE DEPARTMENT":   BASE + "1fSlX7aNdl-HoeodAGoG17_G80baAXEae=s2048",
-    "CANBY FIRE DISTRICT #62":       BASE + "1bTc3CxybuUqaNYJr7cKrRVioWTACZ-LU=s2048",
-    "MOLALLA FIRE DISTRICT #73":     BASE + "1t7twrMWayibSJQ7sFFG9wjZQH7FarnFG=s2048",
-    "AURORA FIRE DISTRICT #63":      BASE + "1yoc7ilNLen9nCKhzI0WdbDGrPpM4AbIX=s2048",
-    "TVF&R":                        BASE + "1kxfmtCyESBzOyAe_t7w6x62KWtsqt314=s2048",
-    "HILLSBORO FIRE & RESCUE":       BASE + "1BQERHLZK2m-lq9qAyCodJnu_vcldL4Tj=s2048"
-};
-
+    const LOGOS = {
+        "PORTLAND FIRE & RESCUE":        BASE + "1L7x0AmisE2Nd6sco6p8jt5o0EZgidHjk=s2048",
+        "GRESHAM FIRE & RESCUE":         BASE + "1CBhRQLYVDQffXOWTGdzOQuYxjoAedvgV=s2048",
+        "PORT OF PORTLAND FIRE & RESCUE":BASE + "1o_evQMoyKc9_c1KTL7BMCYqjWaN-BtNX=s2048",
+        "CORBETT FIRE DISTRICT 14":      BASE + "1dxyZD3_nomdim33BH0iIV-Qh2nCUCXql=s2048",
+        "SAUVIE ISLAND FIRE DISTRICT":   BASE + "1s1QbSS-VJ-lyNlxHWHtEi-w9kliRIRyy=s2048",
+        "CLACKAMAS FIRE DISTRICT #1":    BASE + "1hN8Lpz60WWi6vpmXKJmH5IMUUZ7KlCow=s2048",
+        "ESTACADA FIRE DISTRICT #69":    BASE + "1grdNE195bKEEvziRb0fEwq-4agMxEhZt=s2048",
+        "COLTON RURAL FIRE DISTRICT #70":BASE + "108XmIdtg7EUVcosY_86oafU-8RVNwEWC=s2048",
+        "HOODLAND FIRE DISTRICT #74":    BASE + "1SSlUS08_DNk6dwsH4ZvB_gmlncb-hFzw=s2048",
+        "LAKE OSWEGO FIRE DEPARTMENT":   BASE + "1fSlX7aNdl-HoeodAGoG17_G80baAXEae=s2048",
+        "CANBY FIRE DISTRICT #62":       BASE + "1bTc3CxybuUqaNYJr7cKrRVioWTACZ-LU=s2048",
+        "MOLALLA FIRE DISTRICT #73":     BASE + "1t7twrMWayibSJQ7sFFG9wjZQH7FarnFG=s2048",
+        "AURORA FIRE DISTRICT #63":      BASE + "1yoc7ilNLen9nCKhzI0WdbDGrPpM4AbIX=s2048",
+        "TVF&R":                         BASE + "1kxfmtCyESBzOyAe_t7w6x62KWtsqt314=s2048",
+        "HILLSBORO FIRE & RESCUE":       BASE + "1BQERHLZK2m-lq9qAyCodJnu_vcldL4Tj=s2048"
+    };
 
     function log(msg) { document.getElementById('debug-log').innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`; }
 
