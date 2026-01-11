@@ -69,7 +69,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1037</div>
+    <div class="version-tag">V 0.0.1038</div>
 </header>
 
 <div class="main-wrapper">
@@ -113,21 +113,26 @@
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
     
-    // FIX FOR SEARCH: More robust case-insensitive filtering
+    // RESET BOARD: Clears cards, address, ops channel, and notes
+    function resetBoard() {
+        if(confirm("Confirm: Reset all incident data?")) {
+            // Clear Cards
+            document.getElementById('active-units').innerHTML = "";
+            // Clear Command Bar
+            document.getElementById('addr-input').value = "";
+            document.getElementById('ops-select').selectedIndex = 0;
+            // Clear Terminal Notes
+            document.getElementById('call-notes').value = "";
+        }
+    }
+
     function filterUnits() {
         const q = document.getElementById('unit-search').value.toUpperCase().trim();
         const btns = document.querySelectorAll('.unit-btn');
-        
         btns.forEach(btn => {
             const data = btn.getAttribute('data-search') || "";
-            if (data.includes(q)) {
-                btn.classList.remove('is-hidden');
-            } else {
-                btn.classList.add('is-hidden');
-            }
+            btn.classList.toggle('is-hidden', !data.includes(q));
         });
-        
-        // Hide/Show headers if all units in a section are hidden
         document.querySelectorAll('.cat-label').forEach(label => {
             const nextGrid = label.nextElementSibling;
             const hasVisible = Array.from(nextGrid.children).some(b => !b.classList.contains('is-hidden'));
@@ -135,13 +140,10 @@
         });
     }
 
-    // PULSEPOINT AUTO-REFRESH (30 Seconds)
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
-        // Refresh by re-setting the src to avoid browser cache issues
         const currentSrc = frame.src.split('&ts=')[0];
         frame.src = currentSrc + '&ts=' + Date.now();
-        
         const syncText = document.getElementById('sync-timer');
         syncText.innerText = "(Synced: " + new Date().toLocaleTimeString() + ")";
         setTimeout(() => { syncText.innerText = "(Syncing 30s)"; }, 3000);
@@ -158,7 +160,6 @@
     window.setup = function(raw) {
         let rows = Array.isArray(raw) ? raw : (raw.data || []);
         if (rows.length < 1) return;
-
         window.unitMap = rows.slice(1).map(row => ({
             id: String(row[0] || "").toUpperCase(),
             county: String(row[1] || "").toUpperCase().trim(), 
@@ -168,7 +169,6 @@
             type: String(row[6] || "Other").toUpperCase().trim(),
             logoUrl: cleanGitHubUrl(row[8]) 
         })).filter(u => u.name);
-
         window.unitMap.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
         render();
     }
@@ -178,14 +178,12 @@
         container.innerHTML = "";
         const counties = [{ name: "MULTNOMAH", color: "#346094" }, { name: "CLACKAMAS", color: "#2e5a2e" }, { name: "WASHINGTON", color: "#6a0dad" }];
         const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD", "RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
-
         counties.forEach(county => {
             const h = document.createElement('div'); h.className = 'accordion-header';
             h.style.borderLeftColor = county.color; h.innerHTML = `<span>${county.name}</span>`;
             const content = document.createElement('div'); content.className = "is-hidden"; content.style.padding = "10px";
             h.onclick = () => content.classList.toggle('is-hidden');
             container.appendChild(h); container.appendChild(content);
-
             typeOrder.forEach(type => {
                 const units = window.unitMap.filter(u => u.county.includes(county.name) && u.type === type);
                 if (units.length > 0) {
@@ -194,11 +192,9 @@
                     units.forEach(u => {
                         const b = document.createElement('button'); b.className = "unit-btn";
                         b.setAttribute('data-search', `${u.agency} ${u.name} ${u.id}`.toUpperCase());
-                        
                         const bgDiv = document.createElement('div'); bgDiv.className = 'btn-bg';
                         if (u.logoUrl) bgDiv.style.backgroundImage = 'url("' + u.logoUrl + '")';
                         b.appendChild(bgDiv);
-                        
                         const span = document.createElement('span'); span.innerText = u.name;
                         b.appendChild(span);
                         b.onclick = () => addCard(u);
@@ -227,7 +223,6 @@
         else { card.remove(); }
     }
 
-    function resetBoard() { if(confirm("Clear board?")) { document.getElementById('active-units').innerHTML = ""; } }
     function cleanGitHubUrl(url) {
         if (!url || typeof url !== 'string') return "";
         let clean = url.trim();
