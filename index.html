@@ -41,15 +41,7 @@
         #pulse-frame { width: 100%; height: 100%; border: none; background: #000; }
         .iframe-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; border: 2px solid var(--fire-red); box-sizing: border-box; opacity: 0.2; }
 
-        /* Unit Cards */
-        .unit-card { position: relative; background-color: var(--panel-bg) !important; border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
-        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
-        .card-content { position: relative; z-index: 10; pointer-events: auto; }
-        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
-        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
-        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
-
-        /* Directory */
+        /* Directory Styling */
         .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
         .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
         .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray) !important; border: 1px solid #555 !important; border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; margin-bottom: 4px; text-align: center; }
@@ -60,8 +52,14 @@
         .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
         .cat-label { font-size: 0.6rem; font-weight: bold; color: #aaa; text-transform: uppercase; border-bottom: 1px solid #333; margin: 8px 0 4px; }
         .cmd-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; outline: none; font-size: 0.85rem;}
-        
-        .refresh-status { font-size: 0.6rem; color: var(--timestamp-cyan); font-weight: normal; }
+
+        /* Card Logic */
+        .unit-card { position: relative; background-color: var(--panel-bg) !important; border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
+        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
+        .card-content { position: relative; z-index: 10; pointer-events: auto; }
+        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
+        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
+        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
     </style>
 </head>
 <body>
@@ -69,7 +67,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1038</div>
+    <div class="version-tag">V 0.0.1039</div>
 </header>
 
 <div class="main-wrapper">
@@ -101,10 +99,10 @@
         <textarea id="call-notes" placeholder="TYPE CALL NOTES HERE..."></textarea>
         
         <div class="terminal-header" style="border-top: 1px solid #333;">
-            <span>LIVE REGIONAL FEED <span class="refresh-status" id="sync-timer">(Syncing 30s)</span></span>
+            <span>LIVE FEED (FIRE ONLY) <span id="sync-timer" style="font-size:0.6rem; color:var(--timestamp-cyan);">(30s Refresh)</span></span>
         </div>
         <div class="live-feed-container">
-            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016"></iframe>
+            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&filter=fire"></iframe>
             <div class="iframe-overlay"></div>
         </div>
     </div>
@@ -113,15 +111,11 @@
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
     
-    // RESET BOARD: Clears cards, address, ops channel, and notes
     function resetBoard() {
         if(confirm("Confirm: Reset all incident data?")) {
-            // Clear Cards
             document.getElementById('active-units').innerHTML = "";
-            // Clear Command Bar
             document.getElementById('addr-input').value = "";
             document.getElementById('ops-select').selectedIndex = 0;
-            // Clear Terminal Notes
             document.getElementById('call-notes').value = "";
         }
     }
@@ -133,20 +127,17 @@
             const data = btn.getAttribute('data-search') || "";
             btn.classList.toggle('is-hidden', !data.includes(q));
         });
-        document.querySelectorAll('.cat-label').forEach(label => {
-            const nextGrid = label.nextElementSibling;
-            const hasVisible = Array.from(nextGrid.children).some(b => !b.classList.contains('is-hidden'));
-            label.style.display = hasVisible ? 'block' : 'none';
-        });
     }
 
+    // UPDATED REFRESH: Keeps the "FIRE ONLY" filter active
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
-        const currentSrc = frame.src.split('&ts=')[0];
-        frame.src = currentSrc + '&ts=' + Date.now();
+        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&filter=fire";
+        frame.src = baseUrl + '&ts=' + Date.now();
+        
         const syncText = document.getElementById('sync-timer');
         syncText.innerText = "(Synced: " + new Date().toLocaleTimeString() + ")";
-        setTimeout(() => { syncText.innerText = "(Syncing 30s)"; }, 3000);
+        setTimeout(() => { syncText.innerText = "(30s Refresh)"; }, 3000);
     }
 
     setInterval(refreshPulsePoint, 30000);
@@ -169,7 +160,6 @@
             type: String(row[6] || "Other").toUpperCase().trim(),
             logoUrl: cleanGitHubUrl(row[8]) 
         })).filter(u => u.name);
-        window.unitMap.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
         render();
     }
 
