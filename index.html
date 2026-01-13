@@ -69,7 +69,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1040</div>
+    <div class="version-tag">V 0.0.1041</div>
 </header>
 
 <div class="main-wrapper">
@@ -101,10 +101,10 @@
         <textarea id="call-notes" placeholder="TYPE CALL NOTES HERE..."></textarea>
         
         <div class="terminal-header" style="border-top: 1px solid #333;">
-            <span>LIVE FEED (FIRE ONLY) <span id="sync-timer" style="font-size:0.6rem; color:var(--timestamp-cyan);">(30s Refresh)</span></span>
+            <span>LIVE FEED (NO MEDICAL) <span id="sync-timer" style="font-size:0.6rem; color:var(--timestamp-cyan);">(30s Refresh)</span></span>
         </div>
         <div class="live-feed-container">
-            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&filter=fire"></iframe>
+            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&nomed=1"></iframe>
             <div class="iframe-overlay"></div>
         </div>
     </div>
@@ -113,6 +113,27 @@
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
     
+    const counties = [
+      { name: "BAKER", color: "#E6194B" }, { name: "BENTON", color: "#3CB44B" },
+      { name: "CLACKAMAS", color: "#FFE119" }, { name: "CLATSOP", color: "#4363D8" },
+      { name: "COLUMBIA", color: "#F58231" }, { name: "COOS", color: "#911EB4" },
+      { name: "CROOK", color: "#42D4F4" }, { name: "CURRY", color: "#F032E6" },
+      { name: "DESCHUTES", color: "#BFEF45" }, { name: "DOUGLAS", color: "#FABED4" },
+      { name: "GILLIAM", color: "#469990" }, { name: "GRANT", color: "#DCBEFF" },
+      { name: "HARNEY", color: "#9A6324" }, { name: "HOOD RIVER", color: "#FFFAC8" },
+      { name: "JACKSON", color: "#FF69B4" }, { name: "JEFFERSON", color: "#AAFFC3" },
+      { name: "JOSEPHINE", color: "#808000" }, { name: "KLAMATH", color: "#FFD8B1" },
+      { name: "LAKE", color: "#000075" }, { name: "LANE", color: "#A9A9A9" },
+      { name: "LINCOLN", color: "#FF7F50" }, { name: "LINN", color: "#228B22" },
+      { name: "MALHEUR", color: "#DAA520" }, { name: "MARION", color: "#5F9EA0" },
+      { name: "MORROW", color: "#D2691E" }, { name: "MULTNOMAH", color: "#FFFF00" },
+      { name: "POLK", color: "#FABEBE" }, { name: "SHERMAN", color: "#008080" },
+      { name: "TILLAMOOK", color: "#E6BEFF" }, { name: "UMATILLA", color: "#7B68EE" },
+      { name: "UNION", color: "#00FF7F" }, { name: "WALLOWA", color: "#00FF00" },
+      { name: "WASCO", color: "#8B4513" }, { name: "WASHINGTON", color: "#FF1493" },
+      { name: "WHEELER", color: "#1E90FF" }, { name: "YAMHILL", color: "#32CD32" }
+    ];
+
     function resetBoard() {
         if(confirm("Confirm: Reset all incident data?")) {
             document.getElementById('active-units').innerHTML = "";
@@ -131,9 +152,10 @@
         });
     }
 
+    // UPDATED REFRESH: Maintaining the nomed=1 parameter
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
-        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&filter=fire";
+        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&nomed=1";
         frame.src = baseUrl + '&ts=' + Date.now();
         const syncText = document.getElementById('sync-timer');
         syncText.innerText = "(Synced: " + new Date().toLocaleTimeString() + ")";
@@ -161,7 +183,6 @@
             logoUrl: cleanGitHubUrl(row[8]) 
         })).filter(u => u.name);
 
-        // NATURAL SORT: Handles numeric strings correctly (e.g., E1, E2, E10)
         window.unitMap.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
         render();
     }
@@ -169,53 +190,19 @@
     function render() {
         const container = document.getElementById('accordion-container');
         container.innerHTML = "";
-const counties = [
-  { name: "BAKER", color: "#E6194B" },
-  { name: "BENTON", color: "#3CB44B" },
-  { name: "CLACKAMAS", color: "#FFE119" },
-  { name: "CLATSOP", color: "#4363D8" },
-  { name: "COLUMBIA", color: "#F58231" },
-  { name: "COOS", color: "#911EB4" },
-  { name: "CROOK", color: "#42D4F4" },
-  { name: "CURRY", color: "#F032E6" },
-  { name: "DESCHUTES", color: "#BFEF45" },
-  { name: "DOUGLAS", color: "#FABED4" },
-  { name: "GILLIAM", color: "#469990" },
-  { name: "GRANT", color: "#DCBEFF" },
-  { name: "HARNEY", color: "#9A6324" },
-  { name: "HOOD RIVER", color: "#FFFAC8" },
-  { name: "JACKSON", color: "#FF69B4" }, // Swapped to Hot Pink for visibility
-  { name: "JEFFERSON", color: "#AAFFC3" },
-  { name: "JOSEPHINE", color: "#808000" },
-  { name: "KLAMATH", color: "#FFD8B1" },
-  { name: "LAKE", color: "#000075" },
-  { name: "LANE", color: "#A9A9A9" },
-  { name: "LINCOLN", color: "#FF7F50" },
-  { name: "LINN", color: "#228B22" },
-  { name: "MALHEUR", color: "#DAA520" },
-  { name: "MARION", color: "#5F9EA0" },
-  { name: "MORROW", color: "#D2691E" },
-  { name: "MULTNOMAH", color: "#FFFF00" }, // Bright Yellow for dark backgrounds
-  { name: "POLK", color: "#FABEBE" },
-  { name: "SHERMAN", color: "#008080" },
-  { name: "TILLAMOOK", color: "#E6BEFF" },
-  { name: "UMATILLA", color: "#7B68EE" },
-  { name: "UNION", color: "#00FF7F" }, // Spring Green
-  { name: "WALLOWA", color: "#00FF00" },
-  { name: "WASCO", color: "#8B4513" },
-  { name: "WASHINGTON", color: "#FF1493" },
-  { name: "WHEELER", color: "#1E90FF" },
-  { name: "YAMHILL", color: "#32CD32" }
-];        const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD", "RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
+        const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD", "RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
+        
         counties.forEach(county => {
             const h = document.createElement('div'); h.className = 'accordion-header';
             h.style.borderLeftColor = county.color; h.innerHTML = `<span>${county.name}</span>`;
             const content = document.createElement('div'); content.className = "is-hidden"; content.style.padding = "10px";
             h.onclick = () => content.classList.toggle('is-hidden');
-            container.appendChild(h); container.appendChild(content);
+            
+            let countyHasUnits = false;
             typeOrder.forEach(type => {
-                const units = window.unitMap.filter(u => u.county.includes(county.name) && u.type === type);
+                const units = window.unitMap.filter(u => u.county === county.name && u.type === type);
                 if (units.length > 0) {
+                    countyHasUnits = true;
                     const label = document.createElement('div'); label.className = 'cat-label'; label.innerText = type; content.appendChild(label);
                     const grid = document.createElement('div'); grid.style.display = "grid"; grid.style.gridTemplateColumns = "repeat(2, 1fr)"; grid.style.gap = "5px";
                     units.forEach(u => {
@@ -232,6 +219,10 @@ const counties = [
                     content.appendChild(grid);
                 }
             });
+            if (countyHasUnits) {
+                container.appendChild(h);
+                container.appendChild(content);
+            }
         });
     }
 
