@@ -48,10 +48,6 @@
         .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
         .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
         .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
-        .ts-grid { display: flex; justify-content: space-between; margin-top: 6px; border-top: 1px solid #444; padding-top: 4px; }
-        .ts-box { text-align: center; flex: 1; }
-        .ts-label { font-size: 0.45rem; color: var(--timestamp-cyan); font-weight: bold; display: block; }
-        .ts-val { font-family: monospace; font-size: 0.85rem; font-weight: 900; color: #fff; }
 
         /* Directory */
         .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
@@ -73,7 +69,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1049</div>
+    <div class="version-tag">V 0.0.1050</div>
 </header>
 
 <div class="main-wrapper">
@@ -116,7 +112,7 @@
             <span>LIVE FEED (NO MEDICAL) <span id="sync-timer" style="font-size:0.6rem; color:var(--timestamp-cyan);">(30s Refresh)</span></span>
         </div>
         <div class="live-feed-container">
-            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186&nomed=1"></iframe>
+            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219&nomed=1"></iframe>
             <div class="iframe-overlay"></div>
         </div>
     </div>
@@ -166,7 +162,7 @@
 
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
-        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186&nomed=1";
+        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219&nomed=1";
         frame.src = baseUrl + '&ts=' + Date.now();
         const syncText = document.getElementById('sync-timer');
         syncText.innerText = "(Synced: " + new Date().toLocaleTimeString() + ")";
