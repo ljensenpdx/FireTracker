@@ -31,6 +31,7 @@
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; overflow-y: auto; flex-grow: 1; }
 
+        /* SPLIT TERMINAL PANEL */
         .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
         .terminal-header { background: #111; padding: 8px 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: bold; color: #aaa; }
         
@@ -40,17 +41,7 @@
         #pulse-frame { width: 100%; height: 100%; border: none; background: #000; }
         .iframe-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; border: 2px solid var(--fire-red); box-sizing: border-box; opacity: 0.2; }
 
-        .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
-        .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
-        .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray) !important; border: 1px solid #555 !important; border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; margin-bottom: 4px; text-align: center; }
-        .unit-btn span { position: relative; z-index: 5; text-shadow: 1px 1px 3px #000; }
-        .unit-btn .btn-bg { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.25; pointer-events: none; }
-        .is-hidden { display: none !important; }
-
-        .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
-        .cat-label { font-size: 0.6rem; font-weight: bold; color: #aaa; text-transform: uppercase; border-bottom: 1px solid #333; margin: 8px 0 4px; }
-        .cmd-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; outline: none; font-size: 0.85rem;}
-
+        /* Unit Cards */
         .unit-card { position: relative; background-color: var(--panel-bg) !important; border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
         .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
         .card-content { position: relative; z-index: 10; pointer-events: auto; }
@@ -61,6 +52,20 @@
         .ts-box { text-align: center; flex: 1; }
         .ts-label { font-size: 0.45rem; color: var(--timestamp-cyan); font-weight: bold; display: block; }
         .ts-val { font-family: monospace; font-size: 0.85rem; font-weight: 900; color: #fff; }
+
+        /* Directory */
+        .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
+        .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
+        .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray) !important; border: 1px solid #555 !important; border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; margin-bottom: 4px; text-align: center; }
+        .unit-btn span { position: relative; z-index: 5; text-shadow: 1px 1px 3px #000; }
+        .unit-btn .btn-bg { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.25; pointer-events: none; }
+        .is-hidden { display: none !important; }
+
+        .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
+        .cat-label { font-size: 0.6rem; font-weight: bold; color: #aaa; text-transform: uppercase; border-bottom: 1px solid #333; margin: 8px 0 4px; }
+        .cmd-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; outline: none; font-size: 0.85rem;}
+        
+        .refresh-status { font-size: 0.6rem; color: var(--timestamp-cyan); font-weight: normal; }
     </style>
 </head>
 <body>
@@ -68,7 +73,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1045</div>
+    <div class="version-tag">V 0.0.1048</div>
 </header>
 
 <div class="main-wrapper">
@@ -111,7 +116,7 @@
             <span>LIVE FEED (NO MEDICAL) <span id="sync-timer" style="font-size:0.6rem; color:var(--timestamp-cyan);">(30s Refresh)</span></span>
         </div>
         <div class="live-feed-container">
-            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167&nomed=1"></iframe>
+            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176&nomed=1"></iframe>
             <div class="iframe-overlay"></div>
         </div>
     </div>
@@ -161,7 +166,7 @@
 
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
-        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165&nomed=1";
+        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176&nomed=1";
         frame.src = baseUrl + '&ts=' + Date.now();
         const syncText = document.getElementById('sync-timer');
         syncText.innerText = "(Synced: " + new Date().toLocaleTimeString() + ")";
@@ -188,8 +193,6 @@
             type: String(row[6] || "Other").toUpperCase().trim(),
             logoUrl: cleanGitHubUrl(row[8]) 
         })).filter(u => u.name);
-
-        // NATURAL ORDER SORT
         window.unitMap.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
         render();
     }
@@ -198,13 +201,11 @@
         const container = document.getElementById('accordion-container');
         container.innerHTML = "";
         const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD", "RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
-        
         counties.forEach(county => {
             const h = document.createElement('div'); h.className = 'accordion-header';
             h.style.borderLeftColor = county.color; h.innerHTML = `<span>${county.name}</span>`;
             const content = document.createElement('div'); content.className = "is-hidden"; content.style.padding = "10px";
             h.onclick = () => content.classList.toggle('is-hidden');
-            
             typeOrder.forEach(type => {
                 const units = (window.unitMap || []).filter(u => u.county === county.name && u.type === type);
                 if (units.length > 0) {
@@ -224,7 +225,6 @@
                     content.appendChild(grid);
                 }
             });
-            
             container.appendChild(h);
             container.appendChild(content);
         });
