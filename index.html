@@ -69,7 +69,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1042</div>
+    <div class="version-tag">V 0.0.1043</div>
 </header>
 
 <div class="main-wrapper">
@@ -104,7 +104,7 @@
             <span>LIVE FEED (NO MEDICAL) <span id="sync-timer" style="font-size:0.6rem; color:var(--timestamp-cyan);">(30s Refresh)</span></span>
         </div>
         <div class="live-feed-container">
-            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&nomed=1"></iframe>
+            <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015&nomed=1"></iframe>
             <div class="iframe-overlay"></div>
         </div>
     </div>
@@ -152,9 +152,10 @@
         });
     }
 
+    // UPDATED REFRESH: Maintaining the new link with Aumsville
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
-        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&nomed=1";
+        const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015&nomed=1";
         frame.src = baseUrl + '&ts=' + Date.now();
         const syncText = document.getElementById('sync-timer');
         syncText.innerText = "(Synced: " + new Date().toLocaleTimeString() + ")";
@@ -197,11 +198,9 @@
             const content = document.createElement('div'); content.className = "is-hidden"; content.style.padding = "10px";
             h.onclick = () => content.classList.toggle('is-hidden');
             
-            let countyHasUnits = false;
             typeOrder.forEach(type => {
                 const units = (window.unitMap || []).filter(u => u.county === county.name && u.type === type);
                 if (units.length > 0) {
-                    countyHasUnits = true;
                     const label = document.createElement('div'); label.className = 'cat-label'; label.innerText = type; content.appendChild(label);
                     const grid = document.createElement('div'); grid.style.display = "grid"; grid.style.gridTemplateColumns = "repeat(2, 1fr)"; grid.style.gap = "5px";
                     units.forEach(u => {
@@ -219,7 +218,6 @@
                 }
             });
             
-            // SHOW ALL COUNTIES REGARDLESS OF UNITS
             container.appendChild(h);
             container.appendChild(content);
         });
