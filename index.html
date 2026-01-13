@@ -169,8 +169,44 @@
     function render() {
         const container = document.getElementById('accordion-container');
         container.innerHTML = "";
-        const counties = [{ name: "MULTNOMAH", color: "#346094" }, { name: "CLACKAMAS", color: "#2e5a2e" }, { name: "WASHINGTON", color: "#6a0dad" }];
-        const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD", "RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
+const counties = [
+  { name: "BAKER", color: "#E6194B" },
+  { name: "BENTON", color: "#3CB44B" },
+  { name: "CLACKAMAS", color: "#FFE119" },
+  { name: "CLATSOP", color: "#4363D8" },
+  { name: "COLUMBIA", color: "#F58231" },
+  { name: "COOS", color: "#911EB4" },
+  { name: "CROOK", color: "#42D4F4" },
+  { name: "CURRY", color: "#F032E6" },
+  { name: "DESCHUTES", color: "#BFEF45" },
+  { name: "DOUGLAS", color: "#FABED4" },
+  { name: "GILLIAM", color: "#469990" },
+  { name: "GRANT", color: "#DCBEFF" },
+  { name: "HARNEY", color: "#9A6324" },
+  { name: "HOOD RIVER", color: "#FFFAC8" },
+  { name: "JACKSON", color: "#FF69B4" }, // Swapped to Hot Pink for visibility
+  { name: "JEFFERSON", color: "#AAFFC3" },
+  { name: "JOSEPHINE", color: "#808000" },
+  { name: "KLAMATH", color: "#FFD8B1" },
+  { name: "LAKE", color: "#000075" },
+  { name: "LANE", color: "#A9A9A9" },
+  { name: "LINCOLN", color: "#FF7F50" },
+  { name: "LINN", color: "#228B22" },
+  { name: "MALHEUR", color: "#DAA520" },
+  { name: "MARION", color: "#5F9EA0" },
+  { name: "MORROW", color: "#D2691E" },
+  { name: "MULTNOMAH", color: "#FFFF00" }, // Bright Yellow for dark backgrounds
+  { name: "POLK", color: "#FABEBE" },
+  { name: "SHERMAN", color: "#008080" },
+  { name: "TILLAMOOK", color: "#E6BEFF" },
+  { name: "UMATILLA", color: "#7B68EE" },
+  { name: "UNION", color: "#00FF7F" }, // Spring Green
+  { name: "WALLOWA", color: "#00FF00" },
+  { name: "WASCO", color: "#8B4513" },
+  { name: "WASHINGTON", color: "#FF1493" },
+  { name: "WHEELER", color: "#1E90FF" },
+  { name: "YAMHILL", color: "#32CD32" }
+];        const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD", "RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
         counties.forEach(county => {
             const h = document.createElement('div'); h.className = 'accordion-header';
             h.style.borderLeftColor = county.color; h.innerHTML = `<span>${county.name}</span>`;
