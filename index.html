@@ -31,7 +31,6 @@
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; overflow-y: auto; flex-grow: 1; }
 
-        /* SPLIT TERMINAL PANEL */
         .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
         .terminal-header { background: #111; padding: 8px 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: bold; color: #aaa; }
         
@@ -41,15 +40,6 @@
         #pulse-frame { width: 100%; height: 100%; border: none; background: #000; }
         .iframe-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; border: 2px solid var(--fire-red); box-sizing: border-box; opacity: 0.2; }
 
-        /* Unit Cards */
-        .unit-card { position: relative; background-color: var(--panel-bg) !important; border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
-        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
-        .card-content { position: relative; z-index: 10; pointer-events: auto; }
-        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
-        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
-        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
-
-        /* Directory */
         .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
         .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
         .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray) !important; border: 1px solid #555 !important; border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; margin-bottom: 4px; text-align: center; }
@@ -60,8 +50,17 @@
         .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
         .cat-label { font-size: 0.6rem; font-weight: bold; color: #aaa; text-transform: uppercase; border-bottom: 1px solid #333; margin: 8px 0 4px; }
         .cmd-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; outline: none; font-size: 0.85rem;}
-        
-        .refresh-status { font-size: 0.6rem; color: var(--timestamp-cyan); font-weight: normal; }
+
+        .unit-card { position: relative; background-color: var(--panel-bg) !important; border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
+        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
+        .card-content { position: relative; z-index: 10; pointer-events: auto; }
+        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
+        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
+        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
+        .ts-grid { display: flex; justify-content: space-between; margin-top: 6px; border-top: 1px solid #444; padding-top: 4px; }
+        .ts-box { text-align: center; flex: 1; }
+        .ts-label { font-size: 0.45rem; color: var(--timestamp-cyan); font-weight: bold; display: block; }
+        .ts-val { font-family: monospace; font-size: 0.85rem; font-weight: 900; color: #fff; }
     </style>
 </head>
 <body>
@@ -69,7 +68,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1043</div>
+    <div class="version-tag">V 0.0.1044</div>
 </header>
 
 <div class="main-wrapper">
@@ -78,6 +77,14 @@
             <input type="text" class="cmd-input" id="addr-input" style="flex: 2;" placeholder="INCIDENT ADDRESS">
             <select class="cmd-input" id="ops-select" style="flex: 1.2;">
                 <option value="">OPS CHANNEL</option>
+                <optgroup label="MARION COUNTY">
+                    <option>North 1</option><option>North 2</option><option>North 6</option><option>North 7</option>
+                    <option>South 1</option><option>South 2</option><option>South 3</option><option>South 4</option>
+                    <option>West 2</option><option>West 3</option><option>West 4</option>
+                    <option>OPS 51</option><option>OPS 52</option><option>OPS 53</option><option>OPS 54</option>
+                    <option>Keizer OPS 21</option><option>Keizer OPS 22</option><option>Keizer OPS 23</option>
+                    <option>1A (Fire-Tac)</option>
+                </optgroup>
                 <optgroup label="MULTNOMAH"><option>OPS 1</option><option>OPS 2</option><option>OPS 3</option><option>OPS 4</option><option>OPS 5</option><option>OPS 6</option><option>OPS 7</option><option>OPS 8</option><option>OPS 9</option><option>OPS 10</option><option>OPS 11</option><option>OPS 12</option></optgroup>
                 <optgroup label="CLACKAMAS"><option>OPS 22</option><option>OPS 23</option><option>OPS 24</option><option>OPS 25</option><option>OPS 26</option><option>OPS 27</option><option>OPS 28</option></optgroup>
                 <optgroup label="WASHINGTON"><option>OPS 32</option><option>OPS 33</option><option>OPS 34</option><option>OPS 35</option><option>OPS 36</option><option>OPS 37</option><option>OPS 38</option></optgroup>
@@ -152,7 +159,6 @@
         });
     }
 
-    // UPDATED REFRESH: Maintaining the new link with Aumsville
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
         const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015&nomed=1";
@@ -182,7 +188,6 @@
             type: String(row[6] || "Other").toUpperCase().trim(),
             logoUrl: cleanGitHubUrl(row[8]) 
         })).filter(u => u.name);
-
         window.unitMap.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
         render();
     }
@@ -191,13 +196,11 @@
         const container = document.getElementById('accordion-container');
         container.innerHTML = "";
         const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "SQUAD", "RESCUE", "TENDER", "BRUSH", "MARINE", "REHAB", "SPECIAL", "HAZMAT", "RESERVE"];
-        
         counties.forEach(county => {
             const h = document.createElement('div'); h.className = 'accordion-header';
             h.style.borderLeftColor = county.color; h.innerHTML = `<span>${county.name}</span>`;
             const content = document.createElement('div'); content.className = "is-hidden"; content.style.padding = "10px";
             h.onclick = () => content.classList.toggle('is-hidden');
-            
             typeOrder.forEach(type => {
                 const units = (window.unitMap || []).filter(u => u.county === county.name && u.type === type);
                 if (units.length > 0) {
@@ -217,7 +220,6 @@
                     content.appendChild(grid);
                 }
             });
-            
             container.appendChild(h);
             container.appendChild(content);
         });
