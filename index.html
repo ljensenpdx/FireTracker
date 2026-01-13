@@ -69,7 +69,7 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1041</div>
+    <div class="version-tag">V 0.0.1042</div>
 </header>
 
 <div class="main-wrapper">
@@ -152,7 +152,6 @@
         });
     }
 
-    // UPDATED REFRESH: Maintaining the nomed=1 parameter
     function refreshPulsePoint() {
         const frame = document.getElementById('pulse-frame');
         const baseUrl = "https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016&nomed=1";
@@ -172,7 +171,7 @@
 
     window.setup = function(raw) {
         let rows = Array.isArray(raw) ? raw : (raw.data || []);
-        if (rows.length < 1) return;
+        if (rows.length < 1) { render(); return; }
         window.unitMap = rows.slice(1).map(row => ({
             id: String(row[0] || "").toUpperCase(),
             county: String(row[1] || "").toUpperCase().trim(), 
@@ -200,7 +199,7 @@
             
             let countyHasUnits = false;
             typeOrder.forEach(type => {
-                const units = window.unitMap.filter(u => u.county === county.name && u.type === type);
+                const units = (window.unitMap || []).filter(u => u.county === county.name && u.type === type);
                 if (units.length > 0) {
                     countyHasUnits = true;
                     const label = document.createElement('div'); label.className = 'cat-label'; label.innerText = type; content.appendChild(label);
@@ -219,10 +218,10 @@
                     content.appendChild(grid);
                 }
             });
-            if (countyHasUnits) {
-                container.appendChild(h);
-                container.appendChild(content);
-            }
+            
+            // SHOW ALL COUNTIES REGARDLESS OF UNITS
+            container.appendChild(h);
+            container.appendChild(content);
         });
     }
 
