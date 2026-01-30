@@ -1,107 +1,245 @@
-// --- BRIDGE CONFIGURATION ---
-const BRIDGE_URL = "https://fire-ops-bridge.onrender.com/incidents";
-const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
-
-// --- PulsePoint Sync Logic ---
-async function syncPulsePoint() {
-    const light = document.getElementById('bridge-status-light');
-    try {
-        // Fetch from your verified live bridge
-        const response = await fetch(BRIDGE_URL);
-        if (!response.ok) throw new Error("Bridge response was not OK");
-        
-        const incidents = await response.json();
-        
-        // Update Status Light to Online (Green)
-        light.classList.add('status-online');
-        
-        const grid = document.getElementById('active-units-grid');
-        grid.innerHTML = ""; // Clear grid for fresh data
-
-        if (incidents.length === 0) {
-            grid.innerHTML = `<div style="color:#444; padding:20px; font-weight:bold; grid-column: 1 / -1; text-align:center;">
-                                NO ACTIVE FIRE INCIDENTS REPORTED
-                              </div>`;
-            return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oregon Fire Ops | Command Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #080808; --panel-bg: #121212; --fire-red: #cc3333; 
+            --directory-yellow: #ffff00; --timestamp-cyan: #00f2ff;
+            --btn-light-gray: #3a3a3a; --terminal-green: #00ff00;
         }
 
-        // Process each incident and its units
-        incidents.forEach(inc => {
-            if (inc.Unit && Array.isArray(inc.Unit)) {
-                inc.Unit.forEach(unit => {
-                    // Match UnitID to your Google Sheet database
-                    const dbUnit = (window.unitMap || []).find(u => u.id === unit.UnitID);
-                    createUnitCard(unit, inc, dbUnit);
-                });
-            }
-        });
-    } catch (e) { 
-        console.error("Bridge Connection Lost:", e);
-        light.classList.remove('status-online'); // Light turns gray
-    }
-}
+        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        
+        header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .version-tag { position: absolute; bottom: 2px; right: 10px; font-size: 0.65rem; color: #444; font-family: monospace; font-weight: bold; }
+        
+        /* Status Light Styling */
+        .status-link { text-decoration: none; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .status-light { width: 10px; height: 10px; border-radius: 50%; background: #444; transition: 0.3s; }
+        .status-online { background: var(--terminal-green); box-shadow: 0 0 8px var(--terminal-green); }
 
-// --- Card Creation Logic ---
-function createUnitCard(unitData, incidentData, dbData) {
-    const grid = document.getElementById('active-units-grid');
-    const card = document.createElement('div');
-    card.className = 'unit-card';
+        .main-wrapper { display: grid; grid-template-columns: 1fr 320px 450px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
+        .left-side { display: flex; flex-direction: column; overflow: hidden; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; overflow-y: auto; flex-grow: 1; }
+
+        .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
+        .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
+
+        /* Unit Cards */
+        .unit-card { position: relative; background-color: var(--panel-bg); border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; overflow: hidden; margin-bottom: 5px; }
+        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
+        .card-content { position: relative; z-index: 10; }
+        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
+        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
+        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
+
+        /* Directory */
+        .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
+        .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray); border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 11px; margin-bottom: 4px; text-align: center; }
+        .unit-btn span { position: relative; z-index: 5; }
+        .btn-bg { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.25; }
+        .is-hidden { display: none !important; }
+
+        .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
+        #call-notes { background: #000; color: var(--terminal-green); font-family: 'Courier New', monospace; font-size: 1rem; padding: 15px; border: none; width: 100%; height: 40%; resize: none; outline: none; border-bottom: 2px solid #333; }
+        #pulse-frame { width: 100%; height: 60%; border: none; background: #000; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
+    <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
+    <a href="https://fire-ops-bridge.onrender.com/test" target="_blank" class="status-link">
+        <span id="bridge-status-light" class="status-light"></span>
+        <span style="font-size:0.6rem; color:#aaa; font-weight:bold;">BRIDGE STATUS</span>
+    </a>
+    <div class="version-tag">V 0.0.1052.2</div>
+</header>
+
+<div class="main-wrapper">
+    <div class="left-side">
+        <div style="background:#111; padding:8px; border-bottom:1px solid #333; font-size:0.75rem; font-weight:bold; color:var(--fire-red); margin-bottom:10px;">ACTIVE DISPATCHES</div>
+        <div class="dashboard-grid" id="active-units-grid"></div>
+    </div>
     
-    // Fallback logic if unit isn't in your Google Sheet yet
-    const unitName = dbData ? dbData.name : unitData.UnitID;
-    const station = dbData ? dbData.station : "MUTUAL AID / UNKNOWN";
-    const logo = dbData ? dbData.logoUrl : ""; 
-    const bgStyle = logo ? `style="background-image: url('${logo}')"` : "";
-    
-    card.innerHTML = `
-        <div class="card-background" ${bgStyle}></div>
-        <div class="card-content">
-            <div style="display:flex; justify-content:space-between; align-items:start;">
-                <div class="unit-name">${unitName}</div>
-                <div class="unit-location">${station}</div>
-            </div>
-            <div style="font-size: 0.65rem; color: #aaa; margin: 6px 0 2px;">${incidentData.CallSummary || 'FIRE CALL'}</div>
-            <div style="font-size: 0.75rem; color: #fff; font-weight: bold; margin-bottom: 10px; line-height:1.2;">
-                ${incidentData.FullAddress || 'ADDRESS PROTECTED'}
-            </div>
-            
-            <button class="status-btn">${unitData.PulsePointDispatchStatus || 'DISPATCHED'}</button>
-            
-            <div style="display:flex; justify-content:space-between; margin-top:8px; border-top:1px solid #333; padding-top:5px;">
-                <span style="font-size:0.55rem; color:var(--timestamp-cyan);">ID: ${unitData.UnitID}</span>
-                <span style="font-size:0.55rem; color:#666;">AGENCY: ${incidentData.agency_id || 'OR'}</span>
-            </div>
+    <div class="column">
+        <div class="search-container" style="padding:10px; background:#000;">
+            <input type="text" id="unit-search" class="cmd-input" style="width:100%;" placeholder="SEARCH DIRECTORY..." oninput="filterUnits()">
         </div>
-    `;
-    grid.appendChild(card);
-}
+        <div class="scroll-area" id="accordion-container"></div>
+    </div>
 
-// --- Initialization ---
-window.onload = () => {
-    // 1. Load Google Sheet Data (Station Directory & Logos)
-    const s = document.createElement('script');
-    s.src = `${GOOGLE_URL}?callback=setup&ts=${Date.now()}`;
-    document.body.appendChild(s);
+    <div class="terminal-panel">
+        <div style="background: #111; padding: 8px 15px; border-bottom: 1px solid #333; font-size: 0.75rem; font-weight: bold; color: #aaa;">COMMAND LOG</div>
+        <textarea id="call-notes" placeholder="TYPE NOTES HERE..."></textarea>
+        <iframe id="pulse-frame" src="https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219&nomed=1"></iframe>
+    </div>
+</div>
+
+<script>
+    const BRIDGE_URL = "https://fire-ops-bridge.onrender.com/incidents";
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
     
-    // 2. Start the PulsePoint bridge sync (every 20 seconds)
-    setInterval(syncPulsePoint, 20000); 
-};
+    // --- County Data ---
+    const counties = [
+      { name: "BAKER", color: "#E6194B" }, { name: "BENTON", color: "#3CB44B" },
+      { name: "CLACKAMAS", color: "#FFE119" }, { name: "CLATSOP", color: "#4363D8" },
+      { name: "COLUMBIA", color: "#F58231" }, { name: "COOS", color: "#911EB4" },
+      { name: "CROOK", color: "#42D4F4" }, { name: "CURRY", color: "#F032E6" },
+      { name: "DESCHUTES", color: "#BFEF45" }, { name: "DOUGLAS", color: "#FABED4" },
+      { name: "GILLIAM", color: "#469990" }, { name: "GRANT", color: "#DCBEFF" },
+      { name: "HARNEY", color: "#9A6324" }, { name: "HOOD RIVER", color: "#FFFAC8" },
+      { name: "JACKSON", color: "#FF69B4" }, { name: "JEFFERSON", color: "#AAFFC3" },
+      { name: "JOSEPHINE", color: "#808000" }, { name: "KLAMATH", color: "#FFD8B1" },
+      { name: "LAKE", color: "#000075" }, { name: "LANE", color: "#A9A9A9" },
+      { name: "LINCOLN", color: "#FF7F50" }, { name: "LINN", color: "#228B22" },
+      { name: "MALHEUR", color: "#DAA520" }, { name: "MARION", color: "#5F9EA0" },
+      { name: "MORROW", color: "#D2691E" }, { name: "MULTNOMAH", color: "#FFFF00" },
+      { name: "POLK", color: "#FABEBE" }, { name: "SHERMAN", color: "#008080" },
+      { name: "TILLAMOOK", color: "#E6BEFF" }, { name: "UMATILLA", color: "#7B68EE" },
+      { name: "UNION", color: "#00FF7F" }, { name: "WALLOWA", color: "#00FF00" },
+      { name: "WASCO", color: "#8B4513" }, { name: "WASHINGTON", color: "#FF1493" },
+      { name: "WHEELER", color: "#1E90FF" }, { name: "YAMHILL", color: "#32CD32" }
+    ];
 
-// This function runs once Google Sheet data is loaded
-window.setup = function(raw) {
-    let rows = Array.isArray(raw) ? raw : (raw.data || []);
-    window.unitMap = rows.slice(1).map(row => ({
-        id: String(row[0] || "").toUpperCase().trim(),
-        name: String(row[2] || ""),
-        station: String(row[3] || "Unknown"),
-        logoUrl: cleanGitHubUrl(row[8]) 
-    }));
-    
-    // Initial sync immediately after directory is ready
-    syncPulsePoint(); 
-};
+    // --- PulsePoint Automated Sync ---
+    async function syncPulsePoint() {
+        const light = document.getElementById('bridge-status-light');
+        try {
+            const response = await fetch(BRIDGE_URL);
+            if (!response.ok) throw new Error("Bridge sleeping");
+            
+            const incidents = await response.json();
+            light.classList.add('status-online');
+            
+            const grid = document.getElementById('active-units-grid');
+            grid.innerHTML = ""; // Clear grid for live data
 
-function cleanGitHubUrl(url) {
-    if (!url || typeof url !== 'string') return "";
-    return url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
-}
+            if (incidents.length === 0) {
+                grid.innerHTML = "<div style='color:#444; padding:20px; font-weight:bold; grid-column:1/-1; text-align:center;'>NO ACTIVE FIRE INCIDENTS</div>";
+                return;
+            }
+
+            incidents.forEach(inc => {
+                if (inc.Unit) {
+                    inc.Unit.forEach(unit => {
+                        const dbUnit = (window.unitMap || []).find(u => u.id === unit.UnitID);
+                        createUnitCard(unit, inc, dbUnit);
+                    });
+                }
+            });
+        } catch (e) { 
+            console.log("Bridge Syncing...");
+            light.classList.remove('status-online');
+        }
+    }
+
+    function createUnitCard(unitData, incidentData, dbData) {
+        const grid = document.getElementById('active-units-grid');
+        const card = document.createElement('div');
+        card.className = 'unit-card';
+        
+        const unitName = dbData ? dbData.name : unitData.UnitID;
+        const station = dbData ? dbData.station : "Mutual Aid / Pending DB";
+        const logo = dbData ? dbData.logoUrl : "";
+        const bgStyle = logo ? `style="background-image: url('${logo}')"` : "";
+        
+        card.innerHTML = `
+            <div class="card-background" ${bgStyle}></div>
+            <div class="card-content">
+                <div style="display:flex; justify-content:space-between;">
+                    <div class="unit-name">${unitName}</div>
+                    <div class="unit-location">${station}</div>
+                </div>
+                <div style="font-size: 0.65rem; color: #aaa; margin: 4px 0;">${incidentData.CallSummary}</div>
+                <div style="font-size: 0.7rem; color: #fff; font-weight: bold; margin-bottom: 8px;">${incidentData.FullAddress}</div>
+                <button class="status-btn">${unitData.PulsePointDispatchStatus || 'DISPATCHED'}</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    }
+
+    // --- Directory & Search ---
+    function fetchData() {
+        const s = document.createElement('script');
+        s.src = `${GOOGLE_URL}?callback=setup&ts=${Date.now()}`;
+        document.body.appendChild(s);
+    }
+
+    window.setup = function(raw) {
+        let rows = Array.isArray(raw) ? raw : (raw.data || []);
+        window.unitMap = rows.slice(1).map(row => ({
+            id: String(row[0] || "").toUpperCase().trim(),
+            county: String(row[1] || "").toUpperCase().trim(), 
+            name: String(row[2] || ""),
+            station: String(row[3] || "Unknown"),
+            type: String(row[6] || "Other").toUpperCase().trim(),
+            logoUrl: cleanGitHubUrl(row[8]) 
+        })).filter(u => u.name);
+        
+        renderDirectory();
+        syncPulsePoint(); // Start first bridge check
+    }
+
+    function renderDirectory() {
+        const container = document.getElementById('accordion-container');
+        container.innerHTML = "";
+        const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "RESCUE", "TENDER", "BRUSH"];
+        
+        counties.forEach(county => {
+            const h = document.createElement('div'); h.className = 'accordion-header';
+            h.style.borderLeftColor = county.color; h.innerHTML = `<span>${county.name}</span>`;
+            const content = document.createElement('div'); content.className = "is-hidden"; content.style.padding = "10px";
+            h.onclick = () => content.classList.toggle('is-hidden');
+            
+            typeOrder.forEach(type => {
+                const units = window.unitMap.filter(u => u.county === county.name && u.type === type);
+                if (units.length > 0) {
+                    const label = document.createElement('div'); label.className = 'cat-label'; label.innerText = type; content.appendChild(label);
+                    const grid = document.createElement('div'); grid.style.display = "grid"; grid.style.gridTemplateColumns = "1fr 1fr"; grid.style.gap = "5px";
+                    units.forEach(u => {
+                        const b = document.createElement('button'); b.className = "unit-btn";
+                        b.setAttribute('data-search', `${u.name} ${u.id}`.toUpperCase());
+                        const bgDiv = document.createElement('div'); bgDiv.className = 'btn-bg';
+                        if (u.logoUrl) bgDiv.style.backgroundImage = `url("${u.logoUrl}")`;
+                        b.appendChild(bgDiv);
+                        const span = document.createElement('span'); span.innerText = u.name;
+                        b.appendChild(span);
+                        grid.appendChild(b);
+                    });
+                    content.appendChild(grid);
+                }
+            });
+            container.appendChild(h);
+            container.appendChild(content);
+        });
+    }
+
+    function filterUnits() {
+        const q = document.getElementById('unit-search').value.toUpperCase().trim();
+        document.querySelectorAll('.unit-btn').forEach(btn => {
+            const data = btn.getAttribute('data-search') || "";
+            btn.classList.toggle('is-hidden', !data.includes(q));
+        });
+    }
+
+    function cleanGitHubUrl(url) {
+        if (!url || typeof url !== 'string') return "";
+        return url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+    }
+
+    window.onload = () => {
+        fetchData();
+        setInterval(syncPulsePoint, 20000); // Sync bridge every 20s
+        setInterval(() => { 
+            const clock = document.getElementById('clock');
+            if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'}); 
+        }, 1000);
+    };
+</script>
+</body>
+</html>
