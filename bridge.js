@@ -9,86 +9,87 @@ async function run() {
 
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--lang=en-US,en',
-            '--force-color-profile=srgb'
-        ] 
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1920,1080'] 
     });
     const page = await browser.newPage();
-    
-    // 🌍 FORCE THE BROWSER TO PORTLAND TIME
-    await page.emulateTimezone('America/Los_Angeles');
     await page.setViewport({ width: 1920, height: 1080 });
 
     try {
+        // --- STEP 1: WIPE THE DATA (Debugging Mode) ---
+        console.log("🧹 Wiping old data file...");
+        let sha = "";
+        try {
+            const res = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            sha = res.data.sha;
+            // Push an empty array to "clear" the dashboard while we work
+            await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                message: "🧹 WIPING FOR REFRESH",
+                content: Buffer.from(JSON.stringify([], null, 2)).toString('base64'),
+                sha: sha
+            }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+        } catch (e) { console.log("No file to wipe yet."); }
+
+        // --- STEP 2: SCRAPE WITH STEALTH ---
         console.log("🌐 Navigating to PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
             waitUntil: 'networkidle2', 
             timeout: 90000 
         });
 
-        console.log("⏳ Deep-waiting for unit animations (30s)...");
-        await new Promise(r => setTimeout(r, 30000));
+        // Mimic a human scrolling down to see the list
+        console.log("🖱️ Mimicking human interaction...");
+        await page.mouse.move(500, 500);
+        await page.mouse.wheel({ deltaY: 300 });
+        await new Promise(r => setTimeout(r, 25000)); // 25s wait for the data to populate
 
         const data = await page.evaluate(() => {
             const results = [];
-            const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row')).filter(r => r.innerText.length > 50);
+            // Target the most common container names PulsePoint uses
+            const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row, tr')).filter(r => r.innerText.length > 50);
             
             rows.forEach(row => {
                 if (row.innerText.includes('Recent')) return;
-
-                // 🚨 TIME FIX: We grab the text, but we also create a 'Scrape Time' 
-                // inside the browser while it's in the LA/Portland timezone.
                 const text = row.innerText;
-                const timeMatch = text.match(/\d{1,2}:\d{2}\s[AP]M/);
+                const lines = text.split('\n').map(l => l.trim());
                 
-                // 🚨 UNIT FIX: We scan for ANY element that has a background color.
-                // PulsePoint units are almost always colored boxes.
+                // UNIT SEARCH: Every element with a background color
                 const units = [];
-                const allElements = Array.from(row.querySelectorAll('*'));
-                
-                allElements.forEach(el => {
+                row.querySelectorAll('*').forEach(el => {
                     const style = window.getComputedStyle(el);
-                    const bgColor = style.backgroundColor;
-                    const val = el.innerText.trim();
-                    
-                    // Logic: Background is NOT transparent AND text is short (1-6 chars)
-                    if (bgColor !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 7) {
-                        units.push(val);
+                    if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && el.innerText.length > 0 && el.innerText.length < 8) {
+                        units.push(el.innerText.trim());
                     }
                 });
 
                 results.push({
-                    agency: text.split('\n')[0] || "Unknown",
-                    type: text.split('\n')[2] || "Emergency",
-                    time: timeMatch ? timeMatch[0] : "Active",
-                    address: text.split('\n').find(l => l.includes(',')) || "Restricted",
-                    unitStatuses: [...new Set(units)], // Dedupes units found twice
-                    localUpdateTime: new Date().toLocaleTimeString("en-US", {hour: '2-digit', minute:'2-digit'})
+                    agency: lines[0] || "Unknown",
+                    type: lines[2] || "Emergency",
+                    time: text.match(/\d{1,2}:\d{2}\s[AP]M/)?.[0] || "Active",
+                    address: lines.find(l => l.includes(',')) || "Restricted",
+                    unitStatuses: [...new Set(units)]
                 });
             });
             return results;
         });
 
-        console.log(`📡 Success! Found ${data.length} incidents.`);
+        console.log(`📡 Captured ${data.length} incidents.`);
 
+        // --- STEP 3: PUSH THE NEW DATA ---
         if (data.length > 0) {
-            const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            let sha = "";
-            try {
-                const res = await axios.get(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-                sha = res.data.sha;
-            } catch (e) {}
-
-            await axios.put(url, {
-                message: "📟 REFRESH: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+            // Get the NEW sha after the wipe
+            const finalRes = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            
+            await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                message: "✅ SUCCESSFUL SYNC: " + new Date().toLocaleTimeString(),
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
-                sha: sha || undefined
+                sha: finalRes.data.sha
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            console.log("✅ Sync successful.");
         }
+
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
     } finally {
