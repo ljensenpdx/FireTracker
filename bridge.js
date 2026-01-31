@@ -9,64 +9,60 @@ async function run() {
 
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--window-size=1920,1080',
-            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        ] 
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
     });
     const page = await browser.newPage();
-    
-    // 🌍 FORCE PACIFIC TIMEZONE AT THE BROWSER LEVEL
-    await page.emulateTimezone('America/Los_Angeles');
     await page.setViewport({ width: 1920, height: 1080 });
 
     try {
-        console.log("🌐 Navigating to PulsePoint...");
+        console.log("🌐 Navigating...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
             waitUntil: 'networkidle0', 
-            timeout: 60000 
+            timeout: 90000 
         });
 
-        console.log("⏳ Waiting for unit chips to render...");
-        await new Promise(r => setTimeout(r, 20000));
+        // 🚨 NEW: Wait for the specific container that holds the list
+        console.log("⏳ Waiting for incident container...");
+        await page.waitForSelector('.incident_list, [role="grid"]', { timeout: 30000 }).catch(() => console.log("Timeout waiting for selector."));
+
+        // 🚨 NEW: Human Interaction (Scroll down 100px and back up)
+        await page.mouse.wheel({ deltaY: 100 });
+        await new Promise(r => setTimeout(r, 2000));
+        await page.mouse.wheel({ deltaY: -100 });
+
+        console.log("⏳ Stabilizing for 15 seconds...");
+        await new Promise(r => setTimeout(r, 15000));
 
         const data = await page.evaluate(() => {
             const results = [];
-            const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row'))
-                             .filter(r => r.innerText.length > 50);
+            // Target the actual row elements
+            const rows = Array.from(document.querySelectorAll('div[role="row"], tr')).filter(r => r.innerText.length > 30);
             
             rows.forEach(row => {
-                if (row.innerText.includes('Recent')) return;
-
                 const text = row.innerText;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                
-                // 🚨 BETTER UNIT DETECTION
-                // Scans for small boxes with background colors (like MED21, T21)
-                const units = Array.from(row.querySelectorAll('span, div'))
-                    .filter(el => {
-                        const style = window.getComputedStyle(el);
-                        return style.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
-                               el.innerText.trim().length > 0 && 
-                               el.innerText.trim().length < 8;
-                    })
-                    .map(el => el.innerText.trim().replace(/[?^*]/g, ''));
+                if (text.includes('Recent') || text.length < 20) return;
 
+                // Grab Units by looking for elements with background colors (Chips)
+                const units = [];
+                const chips = Array.from(row.querySelectorAll('*')).filter(el => {
+                    const style = window.getComputedStyle(el);
+                    return style.backgroundColor !== 'rgba(0, 0, 0, 0)' && el.innerText.trim().length > 0 && el.innerText.trim().length < 8;
+                });
+                chips.forEach(c => units.push(c.innerText.trim().replace(/[?^*]/g, '')));
+
+                const lines = text.split('\n').map(l => l.trim());
                 results.push({
                     agency: lines[0] || "Unknown",
                     type: lines[2] || "Emergency",
                     time: text.match(/\d{1,2}:\d{2}\s[AP]M/)?.[0] || "Active",
                     address: lines.find(l => l.includes(',')) || "Restricted",
-                    unitStatuses: [...new Set(units)], // List of unit IDs
-                    scrapeStamp: new Date().toLocaleTimeString("en-US", {hour: '2-digit', minute:'2-digit'})
+                    unitStatuses: [...new Set(units)]
                 });
             });
             return results;
         });
 
-        console.log(`📡 Captured ${data.length} incidents.`);
+        console.log(`📡 Success! Found ${data.length} incidents.`);
 
         if (data.length > 0) {
             const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -77,12 +73,15 @@ async function run() {
             } catch (e) {}
 
             await axios.put(url, {
-                message: "📟 REFRESH: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+                message: "📟 UPDATE: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            console.log("✅ GitHub Updated.");
+        } else {
+            // Log the HTML structure if it fails to see what's actually there
+            console.log("Empty data. Current body text starts with: " + (await page.evaluate(() => document.body.innerText.substring(0, 100))));
         }
+
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
     } finally {
