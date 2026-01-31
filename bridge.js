@@ -9,82 +9,87 @@ async function run() {
 
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        ] 
     });
     const page = await browser.newPage();
     
-    // Set a wide viewport to ensure columns don't collapse
-    await page.setViewport({ width: 1600, height: 1200 });
+    // Set a standard high-res viewport
+    await page.setViewport({ width: 1920, height: 1080 });
 
     try {
         console.log("🌐 Navigating to PulsePoint...");
+        
+        // Go to the site and wait for the main structure
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle0', 
+            waitUntil: 'networkidle2', 
             timeout: 120000 
         });
 
-        // ⏳ CRITICAL: Give it 20 seconds for units to "pop"
-        console.log("⏳ Waiting for units to render...");
-        await new Promise(r => setTimeout(r, 20000));
+        console.log("⏳ Waiting for incident list to appear...");
+        
+        // 🚨 NEW: Instead of just waiting for time, we wait for a specific 
+        // element that only exists when data is loaded (like the "Agency" column header)
+        try {
+            await page.waitForSelector('div[role="row"]', { timeout: 30000 });
+        } catch (e) {
+            console.log("⚠️ Row selector not found, attempting generic wait...");
+            await new Promise(r => setTimeout(r, 20000));
+        }
 
         const data = await page.evaluate(() => {
             const results = [];
-            // Target the actual row containers
-            const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row'));
+            // We broaden the search to find ANY element that looks like a row
+            const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row, tr'))
+                             .filter(r => r.innerText.length > 50);
             
             rows.forEach(row => {
-                if (row.innerText.includes('Recent') || row.innerText.length < 50) return;
+                if (row.innerText.includes('Recent')) return;
 
-                // 1. IMPROVED TIME EXTRACTION (Handles Zulu/UTC issues)
                 const text = row.innerText;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                 const timeMatch = text.match(/\d{1,2}:\d{2}\s[AP]M/);
-                let localTime = timeMatch ? timeMatch[0] : "Just Now";
 
-                // 2. AGGRESSIVE UNIT SEARCH
-                // We look for anything that looks like a Unit ID (e.g., E1, L1, TR10)
-                // Inside the row, find all small badges or spans
-                const unitElements = Array.from(row.querySelectorAll('span, div, .unit_chip'))
+                // Find Units by looking for the colored chips
+                const units = Array.from(row.querySelectorAll('span, div'))
                     .filter(el => {
-                        const val = el.innerText.trim();
-                        // Regex: 1-7 chars, starts with letter/number, might have special symbols
-                        return /^[A-Z0-9]{1,7}[?^*]*$/.test(val) && val.length > 0;
+                        const style = window.getComputedStyle(el);
+                        // PulsePoint units usually have a solid background color
+                        return style.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+                               el.innerText.trim().length > 0 && 
+                               el.innerText.trim().length < 8;
                     });
 
                 const unitMap = { "On Scene": [], "En Route": [], "Dispatched": [] };
-
-                unitElements.forEach(el => {
+                units.forEach(el => {
                     const name = el.innerText.trim().replace(/[?^*]/g, '');
-                    const style = window.getComputedStyle(el);
-                    const bgColor = style.backgroundColor;
-                    const rgb = bgColor.match(/\d+/g).map(Number);
-
-                    // PulsePoint Color Logic
+                    const rgb = window.getComputedStyle(el).backgroundColor.match(/\d+/g).map(Number);
                     if (rgb[0] > 150 && rgb[1] < 100) unitMap["On Scene"].push(name);
                     else if (rgb[1] > 150 && rgb[0] < 150) unitMap["En Route"].push(name);
                     else unitMap["Dispatched"].push(name);
                 });
 
-                const statusList = Object.entries(unitMap)
-                    .filter(([key, val]) => val.length > 0)
-                    .map(([key, val]) => `${key}: ${val.join(', ')}`);
-
                 results.push({
-                    agency: text.split('\n')[0]?.toUpperCase() || "UNKNOWN",
-                    type: text.split('\n')[2] || "Emergency",
-                    time: localTime,
-                    address: text.split('\n').find(l => l.includes(',')) || "Restricted",
-                    unitStatuses: statusList,
-                    // Internal check to ensure file updates
-                    scrapeStamp: new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"})
+                    agency: lines[0] || "Unknown",
+                    type: lines[2] || "Emergency",
+                    time: timeMatch ? timeMatch[0] : "Just Now",
+                    address: lines.find(l => l.includes(',')) || "Location Restricted",
+                    unitStatuses: Object.entries(unitMap)
+                                    .filter(([k,v]) => v.length > 0)
+                                    .map(([k,v]) => `${k}: ${v.join(', ')}`),
+                    scrapeStamp: new Date().toLocaleTimeString()
                 });
             });
             return results;
         });
 
-        console.log(`📡 Scrape complete. Found ${data.length} incidents.`);
-        
-        // Push to GitHub (Logic remains the same)
+        console.log(`📡 Found ${data.length} incidents.`);
+
         if (data.length > 0) {
+            // ... (Keep your GitHub Push logic here) ...
             const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
             try {
@@ -93,13 +98,15 @@ async function run() {
             } catch (e) {}
 
             await axios.put(url, {
-                message: "📟 SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+                message: "📟 SYNC: " + new Date().toLocaleString(),
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+            console.log("✅ GitHub updated!");
         }
+
     } catch (err) {
-        console.error("💥 Error:", err.message);
+        console.error("💥 Run Failed:", err.message);
     } finally {
         await browser.close();
     }
