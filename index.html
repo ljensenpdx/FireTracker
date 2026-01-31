@@ -2,140 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Oregon Fire Ops | Command Dashboard</title>
+    <title>Oregon Command Dashboard V4</title>
     <style>
-        :root {
-            --bg-dark: #080808; --panel-bg: #121212; --fire-red: #cc3333; 
-            --directory-yellow: #ffff00; --timestamp-cyan: #00f2ff;
-            --terminal-green: #00ff00;
-        }
-
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); display: flex; justify-content: space-between; align-items: center; }
-
-        .main-wrapper { display: grid; grid-template-columns: 1fr 450px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
-
-        /* THE LIVE FEED BOX */
-        .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
-        .terminal-header { background: #111; padding: 8px 15px; border-bottom: 1px solid #333; font-size: 0.75rem; font-weight: bold; color: #aaa; display: flex; justify-content: space-between; }
-        
-        .live-feed-container { flex-grow: 1; background: #000; overflow-y: auto; padding: 20px; font-family: 'Courier New', monospace; }
-
-        /* GREEN COMPUTER TEXT STYLING */
-        .incident-entry { border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 20px; border-left: 3px solid var(--fire-red); padding-left: 15px; }
-        .inc-agency { color: var(--terminal-green); font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; }
-        .inc-type { color: #fff; font-size: 1.2rem; font-weight: bold; margin: 2px 0; }
-        .inc-addr { color: var(--directory-yellow); font-size: 0.85rem; }
-        
-        .status-row { margin-left: 15px; font-weight: bold; font-size: 1.1rem; }
-        .scne-text { color: #ff3333; text-shadow: 0 0 5px #ff3333; } /* On Scene - Red */
-        .hosp-text { color: #ffff00; text-shadow: 0 0 5px #ffff00; } /* To Hospital - Yellow */
-        .enrt-text { color: #33ff33; } /* En Route - Green */
-
-        /* CONFIG INPUT BOX */
-        .config-bar { background: #111; padding: 10px; border-top: 1px solid #333; display: flex; gap: 10px; }
-        .config-input { background: #000; border: 1px solid #444; color: var(--timestamp-cyan); padding: 8px; flex-grow: 1; font-family: monospace; font-size: 0.8rem; outline: none; border-radius: 4px; }
+        :root { --bg: #080808; --panel: #121212; --red: #cc3333; --yellow: #ffff00; --green: #00ff00; --cyan: #00f2ff; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--red); display: flex; justify-content: space-between; align-items: center; }
+        .main-wrapper { display: grid; grid-template-columns: 1fr 320px 450px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
+        .column { background: var(--panel); border-radius: 6px; border: 1px solid #222; display: flex; flex-direction: column; overflow: hidden; }
+        .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .unit-card { background: #1a1a1a; border-top: 4px solid var(--red); padding: 10px; border-radius: 4px; }
+        .accordion-header { background: #1a1a1a; padding: 10px; font-weight: bold; border-bottom: 1px solid #000; cursor: pointer; border-left: 5px solid #444; }
+        .unit-btn { width: 100%; padding: 8px; background: #3a3a3a; border: 1px solid #555; color: #fff; cursor: pointer; text-align: left; }
+        .is-hidden { display: none !important; }
+        .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; height: 100%; }
+        .terminal-header { background: #111; padding: 8px; border-bottom: 1px solid #333; font-size: 0.7rem; color: #888; display: flex; justify-content: space-between; }
+        #call-notes { height: 30%; background: #000; color: var(--green); border: none; padding: 10px; font-family: monospace; border-bottom: 2px solid #333; resize: none; }
+        .live-feed-container { flex-grow: 1; overflow-y: auto; padding: 15px; font-family: 'Courier New', monospace; }
+        .incident-entry { border-left: 2px solid var(--red); padding-left: 10px; margin-bottom: 15px; }
+        .status-row { margin-left: 10px; font-weight: bold; }
+        .scne-text { color: #ff3333; } .hosp-text { color: #ffff00; } .enrt-text { color: #33ff33; }
+        .config-bar { background: #111; padding: 8px; border-top: 1px solid #333; display: flex; gap: 5px; }
+        .config-input { flex-grow: 1; background: #000; border: 1px solid #444; color: var(--cyan); font-size: 0.7rem; padding: 5px; }
     </style>
 </head>
 <body>
-
 <header>
-    <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
-    <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
+    <div style="font-weight:900;">OREGON <span style="color:var(--red)">COMMAND DASHBOARD</span></div>
+    <div id="clock" style="font-family:monospace; font-size:1.2rem;">00:00:00</div>
 </header>
-
 <div class="main-wrapper">
-    <div class="column" style="background:var(--panel-bg); border-radius:6px; border:1px solid #222;">
-        <div style="padding:20px; text-align:center; opacity:0.3;">[ INCIDENT UNIT CARDS WILL LOAD HERE ]</div>
-    </div>
-
+    <div class="column"><div class="terminal-header">UNIT ASSIGNMENTS</div><div class="dashboard-grid scroll-area" id="active-units"></div></div>
+    <div class="column"><div style="padding:8px;"><input type="text" id="unit-search" class="config-input" placeholder="SEARCH DIRECTORY..." oninput="filterUnits()"></div><div class="scroll-area" id="accordion-container"></div></div>
     <div class="terminal-panel">
-        <div class="terminal-header">
-            <span>LIVE INTELLIGENCE FEED</span>
-            <span id="sync-indicator" style="color:var(--timestamp-cyan);">STANDBY</span>
-        </div>
-        
-        <div class="live-feed-container" id="feed-root">
-            [ INITIALIZING FREQUENCIES... ]
-        </div>
-
+        <div class="terminal-header">COMMAND NOTES</div><textarea id="call-notes" placeholder="TYPE NOTES..."></textarea>
+        <div class="terminal-header">REGIONAL FEED <span id="sync-status">STANDBY</span></div>
+        <div class="live-feed-container" id="feed-root">[ INITIALIZING... ]</div>
         <div class="config-bar">
-            <input type="text" id="bridge-url" class="config-input" 
-                   placeholder="PASTE PINGGY URL HERE" 
-                   value="https://hzgca-204-195-74-174.a.free.pinggy.link/incidents">
+            <input type="text" id="bridge-url" class="config-input" value="https://hzgca-204-195-74-174.a.free.pinggy.link/incidents">
+            <button onclick="toggleProxy()" id="proxy-btn" style="font-size:0.6rem; cursor:pointer;">PROXY: OFF</button>
         </div>
     </div>
 </div>
-
 <script>
-    async function updateLiveFeed() {
-        let url = document.getElementById('bridge-url').value.trim();
-        const feedRoot = document.getElementById('feed-root');
-        const syncText = document.getElementById('sync-indicator');
+    let useProxy = false;
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
 
-        // Auto-fix: Ensure the URL ends with /incidents
-        if (url && !url.endsWith('/incidents')) {
-            url = url.endsWith('/') ? url + 'incidents' : url + '/incidents';
-        }
-
-        try {
-            // Added {mode: 'cors'} and headers to force connection
-            const response = await fetch(url, { 
-                mode: 'cors',
-                headers: { 'Accept': 'application/json' }
-            });
-            
-            if (!response.ok) throw new Error("HTTP Error");
-            
-            const data = await response.json();
-            
-            if (data.length === 0) {
-                feedRoot.innerHTML = "[ MONITORING FREQUENCIES - NO ACTIVE CALLS ]";
-            } else {
-                let html = "";
-                data.forEach(inc => {
-                    let statuses = "";
-                    inc.unitStatuses.forEach(s => {
-                        let cClass = "enrt-text";
-                        if (s.includes("On Scene")) cClass = "scne-text";
-                        else if (s.includes("To Hospital")) cClass = "hosp-text";
-                        
-                        statuses += `<div class="status-row ${cClass}">> ${s}</div>`;
-                    });
-
-                    html += `
-                        <div class="incident-entry">
-                            <span style="float:right; color:var(--timestamp-cyan); font-size:0.7rem;">${inc.time}</span>
-                            <div class="inc-agency">[ ${inc.agency} ]</div>
-                            <div class="inc-type">${inc.type}</div>
-                            <div class="inc-addr">${inc.address}</div>
-                            ${statuses}
-                        </div>`;
-                });
-                feedRoot.innerHTML = html;
-            }
-            syncText.innerText = `SYNCED: ${new Date().toLocaleTimeString()}`;
-        } catch (e) {
-            syncText.innerText = "BRIDGE OFFLINE";
-            feedRoot.innerHTML = `
-                <div style="color:red; font-weight:bold;">[ BRIDGE CONNECTION ERROR ]</div>
-                <div style="font-size:0.8rem; margin-top:10px; color:#888;">
-                    1. Ensure PowerShell is running 'node server.js'<br>
-                    2. Verify the Pinggy link ends with <b>/incidents</b><br>
-                    3. Check if the bridge URL in the box above matches your terminal.
-                </div>`;
-        }
+    function toggleProxy() {
+        useProxy = !useProxy;
+        document.getElementById('proxy-btn').innerText = "PROXY: " + (useProxy ? "ON" : "OFF");
+        updateFeed();
     }
 
-    // Refresh every 5 seconds
-    setInterval(updateLiveFeed, 5000);
-    updateLiveFeed();
+    async function updateFeed() {
+        let url = document.getElementById('bridge-url').value.trim();
+        if (!url.endsWith('/incidents')) url += '/incidents';
+        const finalUrl = useProxy ? "https://corsproxy.io/?url=" + encodeURIComponent(url) : url;
+        
+        try {
+            const res = await fetch(finalUrl);
+            const data = await res.json();
+            let html = "";
+            data.forEach(inc => {
+                let sHtml = "";
+                inc.unitStatuses.forEach(s => {
+                    let c = s.includes("On Scene") ? "scne-text" : s.includes("To Hospital") ? "hosp-text" : "enrt-text";
+                    sHtml += `<div class="status-row ${c}">> ${s}</div>`;
+                });
+                html += `<div class="incident-entry"><span style="float:right; opacity:0.5; font-size:0.6rem;">${inc.time}</span><div style="color:var(--green); font-size:0.7rem;">[ ${inc.agency} ]</div><div style="color:#fff; font-weight:bold;">${inc.type}</div><div style="color:var(--yellow); font-size:0.7rem;">${inc.address}</div>${sHtml}</div>`;
+            });
+            document.getElementById('feed-root').innerHTML = html || "[ NO ACTIVE CALLS ]";
+            document.getElementById('sync-status').innerText = "SYNC: " + new Date().toLocaleTimeString();
+        } catch (e) { document.getElementById('sync-status').innerText = "OFFLINE"; }
+    }
 
-    // Clock Logic
-    setInterval(() => { 
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'}); 
-    }, 1000);
+    function initDirectory(raw) {
+        const container = document.getElementById('accordion-container');
+        const rows = Array.isArray(raw) ? raw : (raw.data || []);
+        const groups = {};
+        rows.slice(1).forEach(row => {
+            const cty = (row[1] || "OTHER").toUpperCase();
+            if (!groups[cty]) groups[cty] = [];
+            groups[cty].push({ name: row[2] });
+        });
+        Object.keys(groups).sort().forEach(cty => {
+            const h = document.createElement('div'); h.className='accordion-header'; h.innerText=cty;
+            const content = document.createElement('div'); content.className='is-hidden';
+            groups[cty].forEach(u => {
+                const b = document.createElement('button'); b.className='unit-btn'; b.innerText=u.name;
+                b.onclick = () => {
+                    const card = document.createElement('div'); card.className='unit-card';
+                    card.innerHTML = `<div style="font-weight:bold;">${u.name}</div><button onclick="this.parentElement.remove()" style="width:100%; background:#7a5d00; color:#fff; border:none; margin-top:5px; cursor:pointer;">CLEAR</button>`;
+                    document.getElementById('active-units').prepend(card);
+                };
+                content.appendChild(b);
+            });
+            h.onclick = () => content.classList.toggle('is-hidden');
+            container.appendChild(h); container.appendChild(content);
+        });
+    }
+
+    window.onload = () => {
+        const s = document.createElement('script'); s.src = `${GOOGLE_URL}?callback=initDirectory&ts=${Date.now()}`;
+        document.body.appendChild(s); setInterval(updateFeed, 5000); updateFeed();
+    };
+
+    function filterUnits() {
+        const q = document.getElementById('unit-search').value.toUpperCase();
+        document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('is-hidden', !b.innerText.includes(q)));
+    }
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
 </script>
 </body>
 </html>
