@@ -1,16 +1,23 @@
 [
   {
-    "agency": "Portland F&R",
-    "type": "Fire",
-    "time": "7:58 PM",
-    "address": "7600 N HEREFORD AVE, PORTLAND, OR",
+    "agency": "Hubbard Fire",
+    "type": "Medical Emergency",
+    "time": "8:12 PM",
+    "address": "PACIFIC HIGHWAY 99E, HUBBARD, OR",
     "unitStatuses": []
   },
   {
     "agency": "Portland F&R",
+    "type": "Odor Investigation",
+    "time": "8:10 PM",
+    "address": "NW 10TH AVE & NW HOYT ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
     "type": "Medical Emergency",
-    "time": "7:54 PM",
-    "address": "SE HOLGATE BLVD, PORTLAND, OR",
+    "time": "8:04 PM",
+    "address": "SW WESTERN AVE & SW ALLEN BLVD, BEAVERTON, OR",
     "unitStatuses": []
   },
   {
@@ -49,20 +56,6 @@
     "unitStatuses": []
   },
   {
-    "agency": "Portland F&R",
-    "type": "Medical Emergency",
-    "time": "7:47 PM",
-    "address": "SE LINN ST, PORTLAND, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "time": "7:43 PM",
-    "address": "S RIVER ST, NEWBERG, OR",
-    "unitStatuses": []
-  },
-  {
     "agency": "Estacada Fire",
     "type": "Medical Emergency",
     "time": "7:41 PM",
@@ -88,13 +81,6 @@
     "type": "Medical Emergency",
     "time": "7:33 PM",
     "address": "E BERKELEY ST, GLADSTONE, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Clackamas FD",
-    "type": "Medical Emergency",
-    "time": "7:30 PM",
-    "address": "SE KELSO RD, BORING, OR",
     "unitStatuses": []
   },
   {
@@ -176,6 +162,20 @@
   },
   {
     "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "8:02 PM",
+    "address": "SW 11TH AVE & SW JEFFERSON ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Fire",
+    "time": "7:58 PM",
+    "address": "7600 N HEREFORD AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
     "type": "Outside Fire",
     "time": "7:55 PM",
     "address": "206 NW 23RD AVE, PORTLAND, OR",
@@ -184,8 +184,29 @@
   {
     "agency": "Portland F&R",
     "type": "Medical Emergency",
+    "time": "7:54 PM",
+    "address": "SE HOLGATE BLVD, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "7:47 PM",
+    "address": "SE LINN ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
     "time": "7:44 PM",
     "address": "SE 92ND AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:43 PM",
+    "address": "S RIVER ST, NEWBERG, OR",
     "unitStatuses": []
   },
   {
@@ -228,6 +249,13 @@
     "type": "Alarm",
     "time": "7:32 PM",
     "address": "2503 NW SUNDIAL RD, TROUTDALE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "7:30 PM",
+    "address": "SE KELSO RD, BORING, OR",
     "unitStatuses": []
   },
   {
@@ -830,48 +858,6 @@
     "type": "Medical Emergency",
     "time": "2:40 PM",
     "address": "SW GRANT AVE, TIGARD, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Clackamas FD",
-    "type": "Medical Emergency",
-    "time": "2:37 PM",
-    "address": "CORNELL AVE, GLADSTONE, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Keizer Fire",
-    "type": "Medical Emergency",
-    "time": "2:32 PM",
-    "address": "LOCKHAVEN DR NE, KEIZER, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Clackamas FD",
-    "type": "Medical Emergency",
-    "time": "2:31 PM",
-    "address": "CASCADE ST, OREGON CITY, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Portland F&R",
-    "type": "Outside Fire",
-    "time": "2:31 PM",
-    "address": "SW NAITO PKWY & MORRISON BRG & WASHINGTON ST RAMP, PORTLAND, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Hazardous Condition",
-    "time": "2:28 PM",
-    "address": "5450 SW ERICKSON AVE, STE B201, BEAVERTON, OR",
-    "unitStatuses": []
-  },
-  {
-    "agency": "Portland F&R",
-    "type": "Waterflow Alarm",
-    "time": "2:28 PM",
-    "address": "10239 NE MARX ST, PORTLAND, OR",
     "unitStatuses": []
   }
 ]
