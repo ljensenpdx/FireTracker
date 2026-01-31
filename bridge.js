@@ -12,69 +12,57 @@ async function run() {
 
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--disable-blink-features=AutomationControlled'
-        ] 
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
     });
     const page = await browser.newPage();
     
-    // 🌍 FORCE PACIFIC TIME AT THE BROWSER LEVEL
     await page.emulateTimezone('America/Los_Angeles');
     await page.setViewport({ width: 1920, height: 1080 });
 
     try {
-        // --- 🧹 STEP 1: WIPE OLD DATA ---
-        console.log("🧹 Wiping for fresh sync...");
-        let currentSha = "";
+        console.log("🧹 Wiping old data...");
+        // (Wipe logic remains the same to ensure fresh sync)
         try {
             const res = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
             });
-            currentSha = res.data.sha;
             await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                message: "🧹 WIPING FOR REFRESH",
+                message: "🧹 WIPING",
                 content: Buffer.from(JSON.stringify([], null, 2)).toString('base64'),
-                sha: currentSha
+                sha: res.data.sha
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-        } catch (e) { console.log("Init sync..."); }
+        } catch (e) {}
 
-        // --- 🌐 STEP 2: STEALTH NAVIGATION ---
-        console.log("🕵️ Navigating PulsePoint in Stealth Mode...");
+        console.log("🕵️ Navigating PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle2', 
+            waitUntil: 'networkidle0', // Harder wait for all data
             timeout: 90000 
         });
 
-        // 🖱️ Trigger the list by scrolling
-        await page.mouse.wheel({ deltaY: 400 });
-        await new Promise(r => setTimeout(r, 2000));
-        await page.mouse.wheel({ deltaY: -400 });
+        // 🚨 THE CRITICAL FIX: Wait for the actual incident rows to exist
+        console.log("⏳ Waiting for incident list to populate...");
+        await page.waitForSelector('div[role="row"]', { timeout: 45000 }).catch(() => console.log("Timeout: List container didn't appear."));
 
-        console.log("⏳ Waiting for units to stabilize...");
-        await new Promise(r => setTimeout(r, 30000));
+        // Force a "Pulse" to trigger the JavaScript
+        await page.mouse.wheel({ deltaY: 200 });
+        await new Promise(r => setTimeout(r, 2000));
 
         const data = await page.evaluate(() => {
             const results = [];
-            // Find rows, ignoring "Recent Incidents"
-            const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row'))
+            // Target the specific incident rows
+            const rows = Array.from(document.querySelectorAll('div[role="row"]'))
                              .filter(r => r.innerText.length > 50 && !r.innerText.includes('Recent'));
             
             rows.forEach(row => {
                 const text = row.innerText;
                 const lines = text.split('\n').map(l => l.trim());
                 
-                // 🚑 UNIT HUNTER
+                // UNIT HUNTER: Looking for colored badges
                 const units = [];
-                // Scan all child elements for background colors (colored badges)
                 row.querySelectorAll('*').forEach(el => {
                     const style = window.getComputedStyle(el);
-                    const bg = style.backgroundColor;
-                    const val = el.innerText.trim();
-                    // PulsePoint unit badges have a background and are short (1-7 chars)
-                    if (bg !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 8) {
-                        units.push(val);
+                    if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && el.innerText.length > 0 && el.innerText.length < 8) {
+                        units.push(el.innerText.trim());
                     }
                 });
 
@@ -83,31 +71,26 @@ async function run() {
                     type: lines[2] || "Emergency",
                     time: text.match(/\d{1,2}:\d{2}\s[AP]M/)?.[0] || "Active",
                     address: lines.find(l => l.includes(',')) || "Restricted",
-                    unitStatuses: [...new Set(units)] // Dedupes badges
+                    unitStatuses: [...new Set(units)]
                 });
             });
             return results;
         });
 
-        console.log(`📡 Success! Found ${data.length} incidents.`);
+        console.log(`📡 Captured ${data.length} incidents.`);
 
-        // --- 📟 STEP 3: PUSH DATA ---
         if (data.length > 0) {
             const finalRes = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
             });
 
-            const pstTime = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
-
             await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                message: "📟 SYNC: " + pstTime,
+                message: "📟 SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
                 sha: finalRes.data.sha
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            
-            console.log("✅ GitHub Updated at: " + pstTime);
+            console.log("✅ GitHub Updated.");
         }
-
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
     } finally {
