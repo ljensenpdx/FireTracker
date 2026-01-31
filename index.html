@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oregon Fire Ops | Command Dashboard V4</title>
+    <title>Oregon Fire Ops | Command Dashboard</title>
     <style>
         :root {
             --bg-dark: #080808; --panel-bg: #121212; --fire-red: #cc3333; 
@@ -15,10 +15,8 @@
         
         header { 
             background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); 
-            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; position: relative;
+            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
         }
-
-        .version-tag { position: absolute; bottom: 2px; right: 10px; font-size: 0.65rem; color: #444; font-family: monospace; font-weight: bold; }
 
         .main-wrapper { 
             display: grid; 
@@ -26,49 +24,40 @@
             gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; 
         }
         
-        .left-side { display: flex; flex-direction: column; overflow: hidden; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; overflow-y: auto; flex-grow: 1; padding-top: 10px; }
-
-        /* --- UNIT CARDS WITH BACKGROUND LOGOS --- */
-        .unit-card { position: relative; background-color: var(--panel-bg) !important; border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
-        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
-        .card-content { position: relative; z-index: 10; pointer-events: auto; }
-        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
-        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
-        
-        /* --- UNIT CARD TIMESTAMPS --- */
-        .ts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 8px; border-top: 1px solid #333; padding-top: 8px; }
-        .ts-box { text-align: center; }
-        .ts-label { display: block; font-size: 0.6rem; color: #888; font-weight: bold; }
-        .ts-val { font-family: monospace; font-size: 0.75rem; color: var(--timestamp-cyan); }
-
-        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
-
-        /* --- DIRECTORY COLUMN --- */
+        /* DIRECTORY COLUMN */
         .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
         .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
         .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
-        .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray); border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; margin-bottom: 4px; text-align: center; }
+        .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray); border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 11px; margin-bottom: 4px; text-align: center; overflow: hidden; }
         .btn-bg { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.25; pointer-events: none; }
-        .unit-btn span { position: relative; z-index: 5; text-shadow: 1px 1px 3px #000; }
 
-        /* --- RIGHT PANEL: TERMINAL & LIVE FEED --- */
+        /* RIGHT PANEL: TERMINAL & LIVE FEED */
         .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
         .terminal-header { background: #111; padding: 8px 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: bold; color: #aaa; }
-        #call-notes { background: #000; color: var(--terminal-green); font-family: 'Courier New', monospace; font-size: 1rem; padding: 15px; border: none; width: 100%; height: 35%; resize: none; outline: none; box-sizing: border-box; border-bottom: 2px solid #333; }
         
-        .live-feed-container { flex-grow: 1; background: #000; padding: 15px; overflow-y: auto; font-family: 'Courier New', monospace; }
+        #call-notes { background: #000; color: var(--terminal-green); font-family: 'Courier New', monospace; font-size: 1rem; padding: 15px; border: none; width: 100%; height: 35%; resize: none; outline: none; border-bottom: 2px solid #333; }
+        
+        .live-feed-container { flex-grow: 1; background: #000; padding: 15px; overflow-y: auto; font-family: 'Courier New', monospace; color: var(--terminal-green); }
         .incident-entry { border-left: 2px solid var(--fire-red); padding-left: 10px; margin-bottom: 15px; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px; }
         .inc-agency { color: var(--terminal-green); font-weight: 900; font-size: 0.75rem; }
-        .inc-type { color: #fff; font-weight: bold; font-size: 1rem; }
-        .status-row { margin-left: 10px; font-weight: bold; font-size: 0.9rem; }
+        .status-row { margin-left: 10px; font-weight: bold; }
         
-        .scne-text { color: #ff3333; text-shadow: 0 0 3px #ff3333; } /* On Scene (Red) */
-        .hosp-text { color: #ffff00; text-shadow: 0 0 3px #ffff00; } /* To Hospital (Yellow) */
-        .enrt-text { color: #33ff33; } /* En Route (Green) */
+        .scne-text { color: #ff3333; text-shadow: 0 0 3px #ff3333; }
+        .hosp-text { color: #ffff00; text-shadow: 0 0 3px #ffff00; }
+        .enrt-text { color: #33ff33; }
 
+        .config-bar { background: #111; padding: 8px; border-top: 1px solid #333; display: flex; gap: 5px; }
+        .config-input { flex-grow: 1; background: #000; border: 1px solid #444; color: var(--timestamp-cyan); font-size: 0.7rem; padding: 5px; outline: none; }
+        .connect-btn { background: #222; color: #fff; border: 1px solid #444; padding: 2px 10px; font-size: 0.6rem; cursor: pointer; font-weight: bold; }
+        .connect-btn:hover { background: #333; border-color: var(--timestamp-cyan); }
+
+        /* UNIT CARDS (Left) */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow-y: auto; flex-grow: 1; padding: 10px; }
+        .unit-card { position: relative; background: var(--panel-bg); border: 1px solid #333; border-top: 4px solid var(--fire-red); padding: 10px; border-radius: 4px; overflow: hidden; }
+        .card-background { position: absolute; inset: 0; opacity: 0.15; background-position: center; background-repeat: no-repeat; background-size: contain; pointer-events: none; }
+        .ts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 5px; }
+        .ts-val { font-size: 0.7rem; color: var(--timestamp-cyan); font-family: monospace; }
         .is-hidden { display: none !important; }
-        .config-bar { background: #111; padding: 5px 10px; border-top: 1px solid #333; display: flex; gap: 5px; }
     </style>
 </head>
 <body>
@@ -76,34 +65,31 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900; color: var(--timestamp-cyan);">00:00:00</div>
-    <div class="version-tag">V 0.0.1052</div>
 </header>
 
 <div class="main-wrapper">
-    <div class="left-side">
-        <div class="command-bar" style="background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #333; display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="addr-input" style="flex: 2; background:#000; color:#fff; padding:8px; border:1px solid #444;" placeholder="INCIDENT ADDRESS">
-            <button onclick="resetBoard()" style="background:var(--fire-red); color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:900; cursor:pointer;">RESET</button>
-        </div>
+    <div class="column" style="grid-column: span 1;">
+        <div class="terminal-header">ACTIVE ASSIGNMENTS</div>
         <div class="dashboard-grid" id="active-units"></div>
     </div>
     
     <div class="column">
-        <div style="padding:10px; background:#000;"><input type="text" id="unit-search" style="width:100%; background:#000; color:#fff; padding:8px; border:1px solid #444;" placeholder="SEARCH UNITS..." oninput="filterUnits()"></div>
+        <div style="padding:10px; background:#000;"><input type="text" id="unit-search" class="config-input" style="width:90%" placeholder="SEARCH DIRECTORY..." oninput="filterUnits()"></div>
         <div class="scroll-area" id="accordion-container"></div>
     </div>
 
     <div class="terminal-panel">
         <div class="terminal-header">COMMAND LOG / NOTES</div>
-        <textarea id="call-notes" placeholder="TYPE CALL NOTES..."></textarea>
+        <textarea id="call-notes" placeholder="TYPE NOTES..."></textarea>
         
-        <div class="terminal-header">LIVE REGIONAL INTELLIGENCE <span id="sync-status">(STANDBY)</span></div>
+        <div class="terminal-header">LIVE INTELLIGENCE FEED <span id="sync-status">(WAITING)</span></div>
         <div class="live-feed-container" id="feed-root">
-            [ INITIALIZING FEED... ]
+            [ BRIDGE CONNECTION REQUIRED ]<br>PASTE PINGGY LINK BELOW TO INITIALIZE...
         </div>
         <div class="config-bar">
-            <input type="text" id="bridge-url" style="flex-grow:1; background:#000; color:var(--timestamp-cyan); border:1px solid #333; font-size:0.7rem;" value="https://hzgca-204-195-74-174.a.free.pinggy.link/incidents">
-            <button onclick="toggleProxy()" id="proxy-btn" style="font-size:0.6rem; background:#333; color:#fff; border:1px solid #555;">PROXY: OFF</button>
+            <input type="text" id="bridge-url" class="config-input" placeholder="PASTE PINGGY LINK HERE...">
+            <button class="connect-btn" onclick="manualConnect()">CONNECT</button>
+            <button onclick="toggleProxy()" id="proxy-btn" class="connect-btn">PROXY: OFF</button>
         </div>
     </div>
 </div>
@@ -111,13 +97,27 @@
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
     let useProxy = false;
-    let unitMap = [];
+    let feedInterval = null;
 
-    // --- LIVE FEED LOGIC ---
-    function toggleProxy() { useProxy = !useProxy; document.getElementById('proxy-btn').innerText = "PROXY: " + (useProxy ? "ON" : "OFF"); updateFeed(); }
+    function toggleProxy() {
+        useProxy = !useProxy;
+        document.getElementById('proxy-btn').innerText = "PROXY: " + (useProxy ? "ON" : "OFF");
+        if(document.getElementById('bridge-url').value) updateFeed();
+    }
+
+    function manualConnect() {
+        if(!document.getElementById('bridge-url').value) {
+            alert("Please paste a Pinggy link first.");
+            return;
+        }
+        document.getElementById('feed-root').innerHTML = "[ CONNECTING TO BRIDGE... ]";
+        updateFeed();
+        if(!feedInterval) feedInterval = setInterval(updateFeed, 5000);
+    }
 
     async function updateFeed() {
         let url = document.getElementById('bridge-url').value.trim();
+        if (!url) return;
         if (!url.endsWith('/incidents')) url += '/incidents';
         const finalUrl = useProxy ? "https://corsproxy.io/?url=" + encodeURIComponent(url) : url;
         
@@ -131,34 +131,38 @@
                     let c = s.includes("On Scene") ? "scne-text" : s.includes("To Hospital") ? "hosp-text" : "enrt-text";
                     sHtml += `<div class="status-row ${c}">> ${s}</div>`;
                 });
-                html += `<div class="incident-entry"><span style="float:right; opacity:0.5; font-size:0.65rem;">${inc.time}</span><div class="inc-agency">[ ${inc.agency} ]</div><div class="inc-type">${inc.type}</div><div style="color:var(--directory-yellow); font-size:0.75rem;">${inc.address}</div>${sHtml}</div>`;
+                html += `<div class="incident-entry"><span style="float:right; opacity:0.5; font-size:0.6rem;">${inc.time}</span><div class="inc-agency">[ ${inc.agency} ]</div><div style="color:#fff; font-weight:bold;">${inc.type}</div><div style="color:var(--directory-yellow); font-size:0.7rem;">${inc.address}</div>${sHtml}</div>`;
             });
             document.getElementById('feed-root').innerHTML = html || "[ NO ACTIVE CALLS ]";
             document.getElementById('sync-status').innerText = "(SYNCED: " + new Date().toLocaleTimeString() + ")";
-        } catch (e) { document.getElementById('sync-status').innerText = "(OFFLINE)"; }
+        } catch (e) {
+            document.getElementById('sync-status').innerText = "(OFFLINE)";
+        }
     }
 
-    // --- DIRECTORY & CARDS ---
     function initDirectory(raw) {
         const container = document.getElementById('accordion-container');
         const rows = Array.isArray(raw) ? raw : (raw.data || []);
-        unitMap = rows.slice(1).map(r => ({ id: r[0], county: r[1], name: r[2], station: r[3], logoUrl: cleanGitHubUrl(r[8]) }));
-        
-        const groups = {}; 
-        unitMap.forEach(u => {
-            const cty = (u.county || "OTHER").toUpperCase();
+        const groups = {};
+        rows.slice(1).forEach(row => {
+            const cty = (row[1] || "OTHER").toUpperCase();
             if (!groups[cty]) groups[cty] = [];
-            groups[cty].push(u);
+            groups[cty].push({ name: row[2], station: row[3], logo: row[8] });
         });
-
         Object.keys(groups).sort().forEach(cty => {
-            const h = document.createElement('div'); h.className = 'accordion-header'; h.innerText = cty;
-            const content = document.createElement('div'); content.className = 'is-hidden'; content.style.padding = "5px";
+            const h = document.createElement('div'); h.className='accordion-header'; h.innerText=cty;
+            const content = document.createElement('div'); content.className='is-hidden'; content.style.padding="5px";
             groups[cty].forEach(u => {
-                const b = document.createElement('button'); b.className = 'unit-btn';
-                const bg = u.logoUrl ? `<div class="btn-bg" style="background-image:url('${u.logoUrl}')"></div>` : "";
-                b.innerHTML = `${bg}<span>${u.name}</span>`;
-                b.onclick = () => addCard(u);
+                const b = document.createElement('button'); b.className='unit-btn';
+                const cleanLogo = u.logo ? u.logo.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/") : "";
+                if(cleanLogo) b.innerHTML = `<div class="btn-bg" style="background-image:url('${cleanLogo}')"></div><span>${u.name}</span>`;
+                else b.innerHTML = `<span>${u.name}</span>`;
+                b.onclick = () => {
+                    const card = document.createElement('div'); card.className='unit-card';
+                    const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
+                    card.innerHTML = `<div class="card-background" style="background-image:url('${cleanLogo}')"></div><div style="font-weight:900; position:relative; z-index:2;">${u.name}</div><div style="font-size:0.6rem; color:var(--directory-yellow); position:relative; z-index:2;">${u.station}</div><div class="ts-grid" style="position:relative; z-index:2;"><span class="ts-val">D: ${time}</span><span class="ts-val">E: --:--</span><span class="ts-val">S: --:--</span></div><button onclick="this.parentElement.remove()" style="width:100%; background:var(--fire-red); color:white; border:none; margin-top:5px; font-size:0.6rem; cursor:pointer; position:relative; z-index:2;">CLEAR</button>`;
+                    document.getElementById('active-units').prepend(card);
+                };
                 content.appendChild(b);
             });
             h.onclick = () => content.classList.toggle('is-hidden');
@@ -166,55 +170,16 @@
         });
     }
 
-    function addCard(u) {
-        const dash = document.getElementById('active-units');
-        const card = document.createElement('div'); card.className = 'unit-card';
-        const timeNow = new Date().toLocaleTimeString('en-US', {hour12: false, hour:'2-digit', minute:'2-digit'});
-        const bgStyle = u.logoUrl ? `style="background-image:url('${u.logoUrl}')"` : "";
-        
-        card.innerHTML = `
-            <div class="card-background" ${bgStyle}></div>
-            <div class="card-content">
-                <div style="display:flex; justify-content:space-between;">
-                    <div class="unit-name">${u.name}</div>
-                    <div class="unit-location">${u.station || ""}</div>
-                </div>
-                <button class="status-btn" onclick="cycleStatus(this)">DISPATCHED</button>
-                <div class="ts-grid">
-                    <div class="ts-box"><span class="ts-label">DISP</span><span class="ts-val">${timeNow}</span></div>
-                    <div class="ts-box"><span class="ts-label">ENRT</span><span class="ts-val">--:--</span></div>
-                    <div class="ts-box"><span class="ts-label">SCNE</span><span class="ts-val">--:--</span></div>
-                </div>
-            </div>`;
-        dash.prepend(card);
-    }
-
-    function cycleStatus(btn) {
-        const timeNow = new Date().toLocaleTimeString('en-US', {hour12: false, hour:'2-digit', minute:'2-digit'});
-        const card = btn.closest('.unit-card');
-        if (btn.innerText === "DISPATCHED") { btn.style.background = "#004d99"; btn.innerText = "EN ROUTE"; card.querySelectorAll('.ts-val')[1].innerText = timeNow; }
-        else if (btn.innerText === "EN ROUTE") { btn.style.background = "#1e5c33"; btn.innerText = "ON SCENE"; card.querySelectorAll('.ts-val')[2].innerText = timeNow; }
-        else { card.remove(); }
-    }
-
-    function cleanGitHubUrl(url) {
-        if (!url) return "";
-        return url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
-    }
+    window.onload = () => {
+        const s = document.createElement('script'); s.src = `${GOOGLE_URL}?callback=initDirectory&ts=${Date.now()}`;
+        document.body.appendChild(s);
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
+    };
 
     function filterUnits() {
         const q = document.getElementById('unit-search').value.toUpperCase();
         document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('is-hidden', !b.innerText.toUpperCase().includes(q)));
     }
-
-    function resetBoard() { if(confirm("Reset Dashboard?")) document.getElementById('active-units').innerHTML = ""; }
-
-    window.onload = () => {
-        const s = document.createElement('script'); s.src = `${GOOGLE_URL}?callback=initDirectory&ts=${Date.now()}`;
-        document.body.appendChild(s);
-        setInterval(updateFeed, 5000); updateFeed();
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
-    };
 </script>
 </body>
 </html>
