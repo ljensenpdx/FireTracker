@@ -12,86 +12,69 @@ async function run() {
         args: ['--no-sandbox', '--disable-setuid-sandbox'] 
     });
     const page = await browser.newPage();
-    await page.setViewport({ width: 1400, height: 1200 });
-
+    
     try {
-        console.log("🌐 Navigating...");
+        console.log("🌐 Navigating to PulsePoint...");
+        // Use a 2-minute timeout for the initial load
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle0', // Wait until ALL data is downloaded
-            timeout: 90000 
+            waitUntil: 'networkidle0', 
+            timeout: 120000 
         });
 
-        // CRITICAL: Wait 15 seconds for the "Unit Chips" to animate in
-        console.log("⏳ Waiting for data to stabilize...");
-        await new Promise(r => setTimeout(r, 15000)); 
+        console.log("⏳ Waiting for table to stabilize...");
+        await new Promise(r => setTimeout(r, 20000)); // Increase wait to 20s
 
         const data = await page.evaluate(() => {
             const results = [];
-            // Target the specific incident containers
-            const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row'));
+            // NEW: Look for multiple possible containers
+            const rows = Array.from(document.querySelectorAll('.incident_row, [role="row"], tr')).filter(r => r.innerText.length > 30);
             
-            for (const row of rows) {
-                if (row.innerText.includes('Recent') || row.innerText.length < 20) continue;
+            rows.forEach(row => {
+                if (row.innerText.includes('Recent')) return;
+                const text = row.innerText;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                 
-                const lines = row.innerText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                // Better Time Detection
+                const timeMatch = text.match(/\d{1,2}:\d{2}\s[AP]M/);
                 
-                // Find the dispatch time specifically
-                const timeMatch = row.innerText.match(/\d{1,2}:\d{2}\s[AP]M/);
-                const time = timeMatch ? timeMatch[0] : "Pending";
-
-                // Find ALL unit chips (they have specific classes in PulsePoint)
-                const unitChips = Array.from(row.querySelectorAll('.unit_chip, [class*="unit"]'))
-                    .filter(el => el.innerText.length > 0 && el.innerText.length < 10);
-
-                const unitMap = { "On Scene": [], "En Route": [], "Dispatched": [] };
-
-                unitChips.forEach(chip => {
-                    const name = chip.innerText.trim().replace(/[?^*]/g, '');
-                    const color = window.getComputedStyle(chip).backgroundColor;
-                    const rgb = color.match(/\d+/g).map(Number);
-
-                    // Color Logic for Status
-                    if (rgb[0] > 150 && rgb[1] < 100) unitMap["On Scene"].push(name);
-                    else if (rgb[1] > 150 && rgb[0] < 150) unitMap["En Route"].push(name);
-                    else unitMap["Dispatched"].push(name);
-                });
-
-                // Format statuses for easy reading
-                const statusList = Object.entries(unitMap)
-                    .filter(([key, val]) => val.length > 0)
-                    .map(([key, val]) => `${key}: ${val.join(', ')}`);
-
                 results.push({
-                    agency: lines[0]?.toUpperCase() || "UNKNOWN",
+                    agency: lines[0] || "Unknown",
                     type: lines[2] || "Emergency",
-                    time: time,
-                    address: lines.find(l => l.includes(',')) || "Restricted",
-                    unitStatuses: statusList
+                    time: timeMatch ? timeMatch[0] : "Just Now",
+                    address: lines.find(l => l.includes(',')) || "Location Restricted",
+                    lastUpdated: new Date().toLocaleTimeString() // FORCE a new timestamp
                 });
-            }
+            });
             return results;
         });
 
-        console.log(`📡 Success! Captured ${data.length} incidents with units.`);
-        
-        // PUSH LOGIC (Same as before)
+        console.log(`📡 Scrape complete. Found ${data.length} incidents.`);
+
         if (data.length > 0) {
             const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            const base64Content = Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
+            
+            // 1. Get current file's SHA (required for update)
             let sha = "";
             try {
                 const res = await axios.get(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
                 sha = res.data.sha;
-            } catch (e) {}
+            } catch (e) { console.log("New file will be created."); }
+
+            // 2. Push the update
+            const base64Content = Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
             await axios.put(url, {
-                message: "📟 DATA FIX: " + new Date().toLocaleTimeString(),
+                message: "📟 SYNC UPDATE: " + new Date().toLocaleString(),
                 content: base64Content,
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+            
+            console.log("✅ GitHub updated successfully.");
+        } else {
+            console.log("⚠️ No incidents found. Check the selectors.");
         }
 
     } catch (err) {
-        console.error("💥 Run Failed:", err.message);
+        console.error("💥 Critical Failure:", err.message);
     } finally {
         await browser.close();
     }
