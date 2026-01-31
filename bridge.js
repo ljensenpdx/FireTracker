@@ -20,44 +20,38 @@ async function run() {
     await page.setViewport({ width: 1920, height: 1080 });
 
     try {
-        console.log("🧹 Wiping old data...");
-        // (Wipe logic remains the same to ensure fresh sync)
-        try {
-            const res = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-            });
-            await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                message: "🧹 WIPING",
-                content: Buffer.from(JSON.stringify([], null, 2)).toString('base64'),
-                sha: res.data.sha
-            }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-        } catch (e) {}
-
         console.log("🕵️ Navigating PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle0', // Harder wait for all data
+            waitUntil: 'networkidle0', 
             timeout: 90000 
         });
 
-        // 🚨 THE CRITICAL FIX: Wait for the actual incident rows to exist
-        console.log("⏳ Waiting for incident list to populate...");
-        await page.waitForSelector('div[role="row"]', { timeout: 45000 }).catch(() => console.log("Timeout: List container didn't appear."));
+        // 🚨 AGGRESSIVE WAIT
+        console.log("⏳ Waiting for incident list...");
+        let listFound = true;
+        await page.waitForSelector('div[role="row"]', { timeout: 30000 }).catch(() => {
+            console.log("⚠️ TIMEOUT: Could not find incident rows.");
+            listFound = false;
+        });
 
-        // Force a "Pulse" to trigger the JavaScript
-        await page.mouse.wheel({ deltaY: 200 });
-        await new Promise(r => setTimeout(r, 2000));
+        // If it failed, take a screenshot and upload it for us to see
+        if (!listFound) {
+            console.log("📸 Saving debug screenshot...");
+            const screenshot = await page.screenshot({ encoding: 'base64' });
+            await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/debug_error.png`, {
+                message: "📸 Debug: Site state at failure",
+                content: screenshot
+            }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } }).catch(e => console.log("Failed to upload debug image."));
+        }
 
         const data = await page.evaluate(() => {
             const results = [];
-            // Target the specific incident rows
             const rows = Array.from(document.querySelectorAll('div[role="row"]'))
                              .filter(r => r.innerText.length > 50 && !r.innerText.includes('Recent'));
             
             rows.forEach(row => {
                 const text = row.innerText;
                 const lines = text.split('\n').map(l => l.trim());
-                
-                // UNIT HUNTER: Looking for colored badges
                 const units = [];
                 row.querySelectorAll('*').forEach(el => {
                     const style = window.getComputedStyle(el);
@@ -80,19 +74,20 @@ async function run() {
         console.log(`📡 Captured ${data.length} incidents.`);
 
         if (data.length > 0) {
-            const finalRes = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            const res = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
             });
 
             await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 message: "📟 SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
-                sha: finalRes.data.sha
+                sha: res.data.sha
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            console.log("✅ GitHub Updated.");
+            console.log("✅ Sync complete.");
         }
+
     } catch (err) {
-        console.error("💥 Run Failed:", err.message);
+        console.error("💥 Error:", err.message);
     } finally {
         await browser.close();
     }
