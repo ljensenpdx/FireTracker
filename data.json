@@ -1,19 +1,43 @@
 [
   {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "7:05 PM",
+    "address": "SE ROOTS RD, MILWAUKIE, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Gas Leak",
+    "time": "7:05 PM",
+    "address": "20015 NE SANDY BLVD, GRESHAM, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Estacada Fire",
+    "type": "Medical Emergency",
+    "time": "7:04 PM",
+    "address": "S KINZY RD, ESTACADA, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:02 PM",
+    "address": "SW ALDERBROOK CIR, TIGARD, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
     "agency": "Tualatin Valley F&R",
     "type": "Medical Emergency",
     "time": "7:00 PM",
     "address": "W 9TH ST, NEWBERG, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Portland F&R",
-    "type": "Medical Emergency",
-    "time": "6:57 PM",
-    "address": "SE RHONE ST, PORTLAND, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Hillsboro Fire",
@@ -21,15 +45,7 @@
     "time": "6:57 PM",
     "address": "SE 73RD AVE, HILLSBORO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Portland F&R",
-    "type": "Odor Investigation",
-    "time": "6:52 PM",
-    "address": "1312 SW 10TH AVE, STE 713, PORTLAND, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Forest Grove FR",
@@ -37,23 +53,7 @@
     "time": "6:51 PM",
     "address": "ELM ST, FOREST GROVE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Clackamas FD",
-    "type": "Public Service",
-    "time": "6:51 PM",
-    "address": "14933 SE NORTH CT, DAMASCUS, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "time": "6:47 PM",
-    "address": "NW 88TH AVE, PORTLAND, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -61,7 +61,7 @@
     "time": "6:42 PM",
     "address": "SW 182ND AVE, BEAVERTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -69,7 +69,7 @@
     "time": "6:42 PM",
     "address": "SW GRANT AVE, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Hillsboro Fire",
@@ -77,15 +77,7 @@
     "time": "6:33 PM",
     "address": "NE CORNELL RD, HILLSBORO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Fire Alarm",
-    "time": "6:30 PM",
-    "address": "12555 SW LEVETON DR, TUALATIN, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -93,15 +85,7 @@
     "time": "6:23 PM",
     "address": "NW VAUGHAN CT, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "time": "6:18 PM",
-    "address": "SW 65TH AVE, LAKE OSWEGO, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -109,7 +93,7 @@
     "time": "6:14 PM",
     "address": "SE JOHNSON CREEK BLVD, HAPPY VALLEY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -117,7 +101,7 @@
     "time": "6:10 PM",
     "address": "SE 147TH AVE, CLACKAMAS, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -125,7 +109,7 @@
     "time": "6:06 PM",
     "address": "BLUFF RD, SANDY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Keizer Fire",
@@ -133,7 +117,7 @@
     "time": "6:04 PM",
     "address": "BELINDA CT SE, SALEM, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -141,7 +125,7 @@
     "time": "5:51 PM",
     "address": "SW 78TH AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Gaston Rural FD",
@@ -149,7 +133,7 @@
     "time": "5:47 PM",
     "address": "SW SOUTHWIND DR, GASTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -157,7 +141,23 @@
     "time": "3:16 PM",
     "address": "11774 SE JENNIFER ST, STE B, CLACKAMAS, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Alarm",
+    "time": "7:06 PM",
+    "address": "3114 NE FREMONT ST, PORTLAND, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "6:57 PM",
+    "address": "SE RHONE ST, PORTLAND, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Gresham Fire",
@@ -165,7 +165,7 @@
     "time": "6:54 PM",
     "address": "3039 NE 181ST AVE, GRESHAM, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -173,7 +173,23 @@
     "time": "6:53 PM",
     "address": "HWY 18 MP 50, DAYTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Odor Investigation",
+    "time": "6:52 PM",
+    "address": "1312 SW 10TH AVE, STE 713, PORTLAND, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Public Service",
+    "time": "6:51 PM",
+    "address": "14933 SE NORTH CT, DAMASCUS, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -181,7 +197,7 @@
     "time": "6:50 PM",
     "address": "215 SE 9TH AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -189,7 +205,15 @@
     "time": "6:47 PM",
     "address": "NE GLISAN ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:47 PM",
+    "address": "NW 88TH AVE, PORTLAND, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -197,7 +221,7 @@
     "time": "6:43 PM",
     "address": "1212 SW CLAY ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -205,7 +229,7 @@
     "time": "6:35 PM",
     "address": "SW 17TH AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -213,7 +237,7 @@
     "time": "6:31 PM",
     "address": "7701 N CHAUTAUQUA BLVD, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -221,7 +245,15 @@
     "time": "6:31 PM",
     "address": "SW BRIDGEPORT RD, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Fire Alarm",
+    "time": "6:30 PM",
+    "address": "12555 SW LEVETON DR, TUALATIN, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -229,7 +261,7 @@
     "time": "6:28 PM",
     "address": "2314 SW IDAHO ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -237,7 +269,15 @@
     "time": "6:24 PM",
     "address": "NE 16TH AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:18 PM",
+    "address": "SW 65TH AVE, LAKE OSWEGO, OR",
+    "unitStatuses": [],
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -245,7 +285,7 @@
     "time": "6:13 PM",
     "address": "LANGENSAND RD, SANDY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -253,7 +293,7 @@
     "time": "6:13 PM",
     "address": "SW MILES ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Marion County Fire",
@@ -261,7 +301,7 @@
     "time": "6:08 PM",
     "address": "2884 HOWELL PRAIRIE RD NE, MARION CO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -269,7 +309,7 @@
     "time": "5:59 PM",
     "address": "SE 122ND AVE, CLACKAMAS, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -277,7 +317,7 @@
     "time": "5:49 PM",
     "address": "SE MATHER RD, CLACKAMAS, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Molalla Fire",
@@ -285,7 +325,7 @@
     "time": "5:48 PM",
     "address": "E 5TH ST, MOLALLA, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -293,7 +333,7 @@
     "time": "5:46 PM",
     "address": "NW PUMPKIN RIDGE RD, NORTH PLAINS, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -301,7 +341,7 @@
     "time": "5:45 PM",
     "address": "E 2ND ST, NEWBERG, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -309,7 +349,7 @@
     "time": "5:36 PM",
     "address": "SW 106TH AVE, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Gresham Fire",
@@ -317,7 +357,7 @@
     "time": "5:31 PM",
     "address": "1060 NE CLEVELAND AVE, GRESHAM, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Gresham Fire",
@@ -325,7 +365,7 @@
     "time": "5:24 PM",
     "address": "NE HALSEY ST, FAIRVIEW, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -333,7 +373,7 @@
     "time": "5:17 PM",
     "address": "NE 122ND AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -341,7 +381,7 @@
     "time": "5:17 PM",
     "address": "SW 135TH AVE, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Molalla Fire",
@@ -349,7 +389,7 @@
     "time": "5:13 PM",
     "address": "S EBY RD, MOLALLA, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -357,7 +397,7 @@
     "time": "5:12 PM",
     "address": "SW 115TH AVE, TUALATIN, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -365,7 +405,7 @@
     "time": "5:11 PM",
     "address": "NW 192ND AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -373,7 +413,7 @@
     "time": "4:57 PM",
     "address": "SW ALIBHAI ST, BEAVERTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -381,7 +421,7 @@
     "time": "4:55 PM",
     "address": "E HAYES ST, NEWBERG, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Marion County Fire",
@@ -389,7 +429,7 @@
     "time": "4:53 PM",
     "address": "SETTLERS DR NE, MARION COUNTY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Hillsboro Fire",
@@ -397,7 +437,7 @@
     "time": "4:53 PM",
     "address": "NE CORNELL RD, HILLSBORO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -405,7 +445,7 @@
     "time": "4:52 PM",
     "address": "SE 132ND AVE, CLACKAMAS, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -413,7 +453,7 @@
     "time": "4:52 PM",
     "address": "4655 SW GRIFFITH DR, STE 150, BEAVERTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Hillsboro Fire",
@@ -421,7 +461,7 @@
     "time": "4:48 PM",
     "address": "NE HYDE ST, HILLSBORO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Gresham Fire",
@@ -429,7 +469,7 @@
     "time": "4:47 PM",
     "address": "SW 14TH ST, GRESHAM, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Lake Oswego Fire",
@@ -437,7 +477,7 @@
     "time": "4:37 PM",
     "address": "CARMAN DR, LAKE OSWEGO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Hillsboro Fire",
@@ -445,7 +485,7 @@
     "time": "4:34 PM",
     "address": "NE ALEX WAY, HILLSBORO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -453,7 +493,7 @@
     "time": "4:33 PM",
     "address": "4557 NE GOING ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -461,7 +501,7 @@
     "time": "4:15 PM",
     "address": "21970 SW SHERWOOD BLVD, SHERWOOD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -469,7 +509,7 @@
     "time": "4:13 PM",
     "address": "SE LOSTINE DR, CLACKAMAS, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Gaston Rural FD",
@@ -477,7 +517,7 @@
     "time": "4:12 PM",
     "address": "NW OLSON RD, GASTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -485,7 +525,7 @@
     "time": "4:08 PM",
     "address": "NW TULLAMORRIE WAY, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -493,7 +533,7 @@
     "time": "4:04 PM",
     "address": "SW BARNES RD, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -501,7 +541,7 @@
     "time": "4:03 PM",
     "address": "GILMAN DR, OREGON CITY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Canby Fire",
@@ -509,7 +549,7 @@
     "time": "3:58 PM",
     "address": "NW 6TH AVE, CANBY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -517,7 +557,7 @@
     "time": "3:53 PM",
     "address": "17238 SE DIVISION ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Keizer Fire",
@@ -525,7 +565,7 @@
     "time": "3:47 PM",
     "address": "HIDDEN CREEK DR NE, KEIZER, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -533,7 +573,7 @@
     "time": "3:47 PM",
     "address": "NE 2ND AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -541,7 +581,7 @@
     "time": "3:46 PM",
     "address": "SE ROETHE RD, MILWAUKIE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -549,7 +589,7 @@
     "time": "3:39 PM",
     "address": "N VANCOUVER AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -557,7 +597,7 @@
     "time": "3:35 PM",
     "address": "22813 SW MAIN ST, STE A, SHERWOOD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -565,7 +605,7 @@
     "time": "3:35 PM",
     "address": "N HEREFORD AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -573,7 +613,7 @@
     "time": "3:28 PM",
     "address": "SW SUMMERFIELD DR, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -581,7 +621,7 @@
     "time": "3:25 PM",
     "address": "SW SUMMERFIELD DR, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -589,7 +629,7 @@
     "time": "3:24 PM",
     "address": "SE BYRON DR, MILWAUKIE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -597,7 +637,7 @@
     "time": "3:22 PM",
     "address": "W OLD HIGHWAY 99 W, NEWBERG, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -605,7 +645,7 @@
     "time": "3:14 PM",
     "address": "SW FRENCH PRAIRIE RD, WILSONVILLE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Gresham Fire",
@@ -613,7 +653,7 @@
     "time": "3:11 PM",
     "address": "SE MAIN ST, GRESHAM, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -621,7 +661,7 @@
     "time": "3:10 PM",
     "address": "1333 SE 28TH AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -629,7 +669,7 @@
     "time": "3:05 PM",
     "address": "NW CEDAR FALLS DR, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -637,7 +677,7 @@
     "time": "3:04 PM",
     "address": "NE STANTON ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Hillsboro Fire",
@@ -645,7 +685,7 @@
     "time": "3:00 PM",
     "address": "NE CORNELL RD, HILLSBORO, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -653,7 +693,7 @@
     "time": "2:43 PM",
     "address": "SW GRANT AVE, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -661,7 +701,7 @@
     "time": "2:40 PM",
     "address": "SW GRANT AVE, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -669,7 +709,7 @@
     "time": "2:37 PM",
     "address": "CORNELL AVE, GLADSTONE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Keizer Fire",
@@ -677,7 +717,7 @@
     "time": "2:32 PM",
     "address": "LOCKHAVEN DR NE, KEIZER, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -685,7 +725,7 @@
     "time": "2:31 PM",
     "address": "CASCADE ST, OREGON CITY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -693,7 +733,7 @@
     "time": "2:31 PM",
     "address": "SW NAITO PKWY & MORRISON BRG & WASHINGTON ST RAMP, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -701,7 +741,7 @@
     "time": "2:28 PM",
     "address": "5450 SW ERICKSON AVE, STE B201, BEAVERTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -709,7 +749,7 @@
     "time": "2:28 PM",
     "address": "10239 NE MARX ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -717,7 +757,7 @@
     "time": "2:23 PM",
     "address": "S GARDEN LN, OREGON CITY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -725,7 +765,7 @@
     "time": "2:18 PM",
     "address": "NW 22ND AVE & NW NORTHRUP ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -733,7 +773,7 @@
     "time": "2:11 PM",
     "address": "NW CORNELL RD, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -741,7 +781,7 @@
     "time": "2:07 PM",
     "address": "SE FLAVEL ST & SE 82ND AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -749,7 +789,7 @@
     "time": "2:03 PM",
     "address": "SE HULL AVE, MILWAUKIE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -757,7 +797,7 @@
     "time": "2:00 PM",
     "address": "SE CAUSEY AVE, HAPPY VALLEY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -765,7 +805,7 @@
     "time": "1:58 PM",
     "address": "NE TILLAMOOK ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -773,7 +813,7 @@
     "time": "1:55 PM",
     "address": "MAIN ST, OREGON CITY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -781,7 +821,7 @@
     "time": "1:53 PM",
     "address": "NW 2ND AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -789,7 +829,7 @@
     "time": "1:51 PM",
     "address": "SW 72ND AVE, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -797,7 +837,7 @@
     "time": "1:48 PM",
     "address": "NW NORTHRUP ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -805,7 +845,7 @@
     "time": "1:47 PM",
     "address": "N HOLLAND ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -813,7 +853,7 @@
     "time": "1:47 PM",
     "address": "SW ALLEN BLVD, BEAVERTON, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -821,7 +861,7 @@
     "time": "1:41 PM",
     "address": "SE PINEHURST AVE, MILWAUKIE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -829,7 +869,7 @@
     "time": "1:35 PM",
     "address": "NW NORTHRUP ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -837,7 +877,7 @@
     "time": "1:28 PM",
     "address": "NE RUSSELL ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -845,7 +885,7 @@
     "time": "1:26 PM",
     "address": "SE OATFIELD HILL RD, MILWAUKIE, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -853,7 +893,7 @@
     "time": "1:20 PM",
     "address": "N INTERSTATE AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -861,7 +901,7 @@
     "time": "1:15 PM",
     "address": "SW GRANT AVE, TIGARD, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Clackamas FD",
@@ -869,7 +909,7 @@
     "time": "1:05 PM",
     "address": "37600 SUNSET ST, STE 37, SANDY, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Tualatin Valley F&R",
@@ -877,7 +917,7 @@
     "time": "1:02 PM",
     "address": "NW ASH ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -885,7 +925,7 @@
     "time": "1:00 PM",
     "address": "1101 SE SHERMAN ST, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Portland F&R",
@@ -893,7 +933,7 @@
     "time": "12:54 PM",
     "address": "N GLOUCESTER AVE, PORTLAND, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   },
   {
     "agency": "Estacada Fire",
@@ -901,62 +941,6 @@
     "time": "12:42 PM",
     "address": "SE SUMMER RD, ESTACADA, OR",
     "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "time": "12:35 PM",
-    "address": "SW HART RD, BEAVERTON, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Portland F&R",
-    "type": "Medical Emergency",
-    "time": "12:26 PM",
-    "address": "SE 127TH AVE, PORTLAND, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Portland F&R",
-    "type": "Medical Emergency",
-    "time": "12:23 PM",
-    "address": "SW VIEW POINT TER, PORTLAND, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "time": "12:20 PM",
-    "address": "SW HOODVIEW DR, TIGARD, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Hillsboro Fire",
-    "type": "Medical Emergency",
-    "time": "12:13 PM",
-    "address": "SE 62ND AVE, HILLSBORO, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "time": "12:10 PM",
-    "address": "S EVEREST RD, NEWBERG, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "time": "12:10 PM",
-    "address": "SW MUELLER DR, BEAVERTON, OR",
-    "unitStatuses": [],
-    "scrapeStamp": "7:02:55 PM"
+    "scrapeStamp": "7:11:57 PM"
   }
 ]
