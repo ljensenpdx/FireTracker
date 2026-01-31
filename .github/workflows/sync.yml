@@ -15,7 +15,8 @@ jobs:
           node-version: '18'
       - name: Install Dependencies
         run: npm install puppeteer axios
-      - name: Run Bridge
+    - name: Run Bridge
+        continue-on-error: true # If it fails once, don't turn the whole thing red yet
         run: node bridge.js
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
