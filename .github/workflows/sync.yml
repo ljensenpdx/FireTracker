@@ -1,8 +1,8 @@
 name: PulsePoint Sync
 on:
   schedule:
-    - cron: '*/5 * * * *' # Runs every 5 minutes
-  workflow_dispatch: # Allows you to run it manually from the Actions tab
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,7 +18,6 @@ jobs:
         with:
           node-version: '20'
 
-      # ⚡ CACHING: This saves the browser so it doesn't download every 5 minutes
       - name: Cache Node Modules
         uses: actions/cache@v3
         with:
@@ -33,12 +32,10 @@ jobs:
           path: ~/.cache/puppeteer
           key: ${{ runner.os }}-puppeteer-${{ hashFiles('**/package.json') }}
 
-      # 🕵️ INSTALL STEALTH TOOLS: Required for Option A
       - name: Install Dependencies
         run: npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth axios
 
-      # 📟 RUN THE BRIDGE: Executes your scraper logic
       - name: Run Bridge
         run: node bridge.js
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }} # Ensure this secret is in your repo settings
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
