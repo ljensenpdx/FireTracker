@@ -9,64 +9,78 @@ async function run() {
 
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--lang=en-US,en' // Force US English locale
+        ] 
     });
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 2000 });
+    
+    // Set extra headers to look like a real Portland-based user
+    await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
+    await page.setViewport({ width: 1600, height: 1200 });
 
     try {
-        console.log("🌐 Navigating to PulsePoint...");
+        console.log("🌐 Navigating...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle0', 
-            timeout: 90000 
+            waitUntil: 'networkidle2', 
+            timeout: 120000 
         });
 
-        // ⏳ CRITICAL: Wait 25 seconds for those unit chips (MED21, E53) to animate in
-        console.log("⏳ Waiting for units to stabilize...");
-        await new Promise(r => setTimeout(r, 25000));
+        console.log("⏳ Waiting for specific unit elements...");
+        // This forces the script to wait until at least one unit-style chip is on screen
+        try {
+            await page.waitForSelector('.unit_chip, [style*="background-color"]', { timeout: 45000 });
+        } catch (e) {
+            console.log("⚠️ No chips found via selector, using emergency 30s wait.");
+            await new Promise(r => setTimeout(r, 30000));
+        }
 
         const data = await page.evaluate(() => {
             const results = [];
             const rows = Array.from(document.querySelectorAll('div[role="row"], .incident_row'));
             
             rows.forEach(row => {
-                if (row.innerText.includes('Recent') || row.innerText.length < 40) return;
-
                 const text = row.innerText;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                
-                // Better time capture: PulsePoint usually has the time as a distinct line
+                if (text.includes('Recent') || text.length < 50) return;
+
+                // 🚨 TIME FIX: Get the raw text time and strip any UTC markers
                 const timeMatch = text.match(/\d{1,2}:\d{2}\s[AP]M/);
-                const displayTime = timeMatch ? timeMatch[0] : "Active";
-
-                // 🚨 NEW UNIT CAPTURE: Look for all small badges/chips in this row
+                
+                // 🚨 UNIT FIX: Scrape all elements that have a background color
+                // and contain typical fire/ems unit IDs (letters followed by numbers)
                 const units = [];
-                const chips = Array.from(row.querySelectorAll('span, div')).filter(el => {
+                const possibleChips = Array.from(row.querySelectorAll('*'));
+                
+                possibleChips.forEach(el => {
                     const style = window.getComputedStyle(el);
-                    const hasBg = style.backgroundColor !== 'rgba(0, 0, 0, 0)';
-                    const isShort = el.innerText.trim().length > 0 && el.innerText.trim().length < 8;
-                    return hasBg && isShort;
-                });
-
-                chips.forEach(chip => {
-                    const unitName = chip.innerText.trim().replace(/[?^*]/g, '');
-                    if (unitName) units.push(unitName);
+                    const bg = style.backgroundColor;
+                    const val = el.innerText.trim();
+                    
+                    // Logic: Must have a background color AND be short (E1, MED21, etc)
+                    if (bg !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 8) {
+                        units.push(val);
+                    }
                 });
 
                 results.push({
-                    agency: lines[0]?.toUpperCase() || "UNKNOWN",
-                    type: lines[2] || "Emergency",
-                    time: displayTime,
-                    address: lines.find(l => l.includes(',')) || "Restricted",
-                    unitStatuses: units.length > 0 ? [`Active Units: ${[...new Set(units)].join(', ')}`] : [],
-                    scrapeStamp: new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"})
+                    agency: text.split('\n')[0] || "Unknown",
+                    type: text.split('\n')[2] || "Emergency",
+                    time: timeMatch ? timeMatch[0] : "Active",
+                    address: text.split('\n').find(l => l.includes(',')) || "Restricted",
+                    unitStatuses: [...new Set(units)] // Dedupes units found twice
                 });
             });
             return results;
         });
 
-        console.log(`📡 Captured ${data.length} incidents.`);
-        
+        // 🚨 FINAL TIME SYNC: Force Pacific Time manually for the "Last Updated" stamp
+        const now = new Date();
+        const pacificTime = now.toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
+
+        console.log(`📡 Scrape Finished. Found ${data.length} incidents.`);
+
         if (data.length > 0) {
             const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
@@ -76,15 +90,15 @@ async function run() {
             } catch (e) {}
 
             await axios.put(url, {
-                message: "📟 DATA REFRESH: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+                message: "📟 REFRESH: " + pacificTime,
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            console.log("✅ GitHub updated with local time.");
+            console.log("✅ Sync successful at " + pacificTime);
         }
 
     } catch (err) {
-        console.error("💥 Run Failed:", err.message);
+        console.error("💥 Error:", err.message);
     } finally {
         await browser.close();
     }
