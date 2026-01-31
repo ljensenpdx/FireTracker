@@ -2,57 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Oregon Command Dashboard V4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oregon Fire Ops | Command Dashboard</title>
     <style>
-        :root { --bg: #080808; --panel: #121212; --red: #cc3333; --yellow: #ffff00; --green: #00ff00; --cyan: #00f2ff; }
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--red); display: flex; justify-content: space-between; align-items: center; }
-        .main-wrapper { display: grid; grid-template-columns: 1fr 320px 450px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
-        .column { background: var(--panel); border-radius: 6px; border: 1px solid #222; display: flex; flex-direction: column; overflow: hidden; }
+        :root {
+            --bg-dark: #080808; --panel-bg: #121212; --fire-red: #cc3333; 
+            --directory-yellow: #ffff00; --timestamp-cyan: #00f2ff;
+            --btn-light-gray: #3a3a3a; --terminal-green: #00ff00;
+        }
+
+        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        
+        header { 
+            background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); 
+            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; position: relative;
+        }
+
+        .main-wrapper { 
+            display: grid; 
+            grid-template-columns: 1fr 320px 450px; 
+            gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; 
+        }
+        
+        .left-side { display: flex; flex-direction: column; overflow: hidden; }
+        .command-bar { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #333; display: flex; gap: 8px; align-items: center; flex-shrink: 0; margin-bottom: 10px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; overflow-y: auto; flex-grow: 1; }
+
+        /* DIRECTORY COLUMN */
+        .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
         .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .unit-card { background: #1a1a1a; border-top: 4px solid var(--red); padding: 10px; border-radius: 4px; }
-        .accordion-header { background: #1a1a1a; padding: 10px; font-weight: bold; border-bottom: 1px solid #000; cursor: pointer; border-left: 5px solid #444; }
-        .unit-btn { width: 100%; padding: 8px; background: #3a3a3a; border: 1px solid #555; color: #fff; cursor: pointer; text-align: left; }
+        .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
+        .unit-btn { width: 100%; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray); border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 11px; margin-bottom: 4px; text-align: center; }
+
+        /* RIGHT PANEL: TERMINAL & LIVE FEED */
+        .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
+        .terminal-header { background: #111; padding: 8px 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: bold; color: #aaa; }
+        
+        #call-notes { background: #000; color: var(--terminal-green); font-family: 'Courier New', monospace; font-size: 1rem; padding: 15px; border: none; width: 100%; height: 35%; resize: none; outline: none; box-sizing: border-box; border-bottom: 2px solid #333; }
+        
+        /* THE CUSTOM LIVE FEED (Bottom Right) */
+        .live-feed-container { flex-grow: 1; background: #000; padding: 15px; overflow-y: auto; font-family: 'Courier New', monospace; }
+        .incident-entry { border-left: 2px solid var(--fire-red); padding-left: 10px; margin-bottom: 15px; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px; }
+        .inc-agency { color: var(--terminal-green); font-weight: 900; font-size: 0.75rem; }
+        .inc-type { color: #fff; font-weight: bold; font-size: 1rem; }
+        .status-row { margin-left: 10px; font-weight: bold; font-size: 0.9rem; }
+        .scne-text { color: #ff3333; text-shadow: 0 0 3px #ff3333; } /* Red */
+        .hosp-text { color: #ffff00; text-shadow: 0 0 3px #ffff00; } /* Yellow */
+        .enrt-text { color: #33ff33; } /* Green */
+
+        /* UNIT CARDS */
+        .unit-card { background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; }
+        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; background: #7a5d00; border: 1px solid rgba(255,255,255,0.2); font-size: 0.75rem;}
         .is-hidden { display: none !important; }
-        .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; height: 100%; }
-        .terminal-header { background: #111; padding: 8px; border-bottom: 1px solid #333; font-size: 0.7rem; color: #888; display: flex; justify-content: space-between; }
-        #call-notes { height: 30%; background: #000; color: var(--green); border: none; padding: 10px; font-family: monospace; border-bottom: 2px solid #333; resize: none; }
-        .live-feed-container { flex-grow: 1; overflow-y: auto; padding: 15px; font-family: 'Courier New', monospace; }
-        .incident-entry { border-left: 2px solid var(--red); padding-left: 10px; margin-bottom: 15px; }
-        .status-row { margin-left: 10px; font-weight: bold; }
-        .scne-text { color: #ff3333; } .hosp-text { color: #ffff00; } .enrt-text { color: #33ff33; }
-        .config-bar { background: #111; padding: 8px; border-top: 1px solid #333; display: flex; gap: 5px; }
-        .config-input { flex-grow: 1; background: #000; border: 1px solid #444; color: var(--cyan); font-size: 0.7rem; padding: 5px; }
+        
+        .config-bar { background: #111; padding: 5px 10px; border-top: 1px solid #333; display: flex; gap: 5px; }
     </style>
 </head>
 <body>
+
 <header>
-    <div style="font-weight:900;">OREGON <span style="color:var(--red)">COMMAND DASHBOARD</span></div>
-    <div id="clock" style="font-family:monospace; font-size:1.2rem;">00:00:00</div>
+    <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
+    <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
 </header>
+
 <div class="main-wrapper">
-    <div class="column"><div class="terminal-header">UNIT ASSIGNMENTS</div><div class="dashboard-grid scroll-area" id="active-units"></div></div>
-    <div class="column"><div style="padding:8px;"><input type="text" id="unit-search" class="config-input" placeholder="SEARCH DIRECTORY..." oninput="filterUnits()"></div><div class="scroll-area" id="accordion-container"></div></div>
+    <div class="left-side">
+        <div class="command-bar">
+            <input type="text" class="cmd-input" id="addr-input" style="flex: 2; background:#000; color:#fff; padding:8px; border:1px solid #444;" placeholder="INCIDENT ADDRESS">
+            <button onclick="resetBoard()" style="background:var(--fire-red); color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:900; cursor:pointer;">RESET</button>
+        </div>
+        <div class="dashboard-grid" id="active-units"></div>
+    </div>
+    
+    <div class="column">
+        <div style="padding:10px; background:#000;"><input type="text" id="unit-search" style="width:100%; background:#000; color:#fff; padding:8px; border:1px solid #444;" placeholder="SEARCH UNITS..." oninput="filterUnits()"></div>
+        <div class="scroll-area" id="accordion-container"></div>
+    </div>
+
     <div class="terminal-panel">
-        <div class="terminal-header">COMMAND NOTES</div><textarea id="call-notes" placeholder="TYPE NOTES..."></textarea>
-        <div class="terminal-header">REGIONAL FEED <span id="sync-status">STANDBY</span></div>
-        <div class="live-feed-container" id="feed-root">[ INITIALIZING... ]</div>
+        <div class="terminal-header">COMMAND LOG / NOTES</div>
+        <textarea id="call-notes" placeholder="TYPE CALL NOTES..."></textarea>
+        
+        <div class="terminal-header">LIVE REGIONAL INTELLIGENCE <span id="sync-status">(STANDBY)</span></div>
+        <div class="live-feed-container" id="feed-root">
+            [ INITIALIZING FEED... ]
+        </div>
         <div class="config-bar">
-            <input type="text" id="bridge-url" class="config-input" value="https://hzgca-204-195-74-174.a.free.pinggy.link/incidents">
-            <button onclick="toggleProxy()" id="proxy-btn" style="font-size:0.6rem; cursor:pointer;">PROXY: OFF</button>
+            <input type="text" id="bridge-url" style="flex-grow:1; background:#000; color:var(--timestamp-cyan); border:1px solid #333; font-size:0.7rem;" value="https://hzgca-204-195-74-174.a.free.pinggy.link/incidents">
+            <button onclick="toggleProxy()" id="proxy-btn" style="font-size:0.6rem;">PROXY: OFF</button>
         </div>
     </div>
 </div>
-<script>
-    let useProxy = false;
-    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
 
-    function toggleProxy() {
-        useProxy = !useProxy;
-        document.getElementById('proxy-btn').innerText = "PROXY: " + (useProxy ? "ON" : "OFF");
-        updateFeed();
-    }
+<script>
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
+    let useProxy = false;
+
+    // --- 1. LIVE FEED LOGIC (Bottom Right) ---
+    function toggleProxy() { useProxy = !useProxy; document.getElementById('proxy-btn').innerText = "PROXY: " + (useProxy ? "ON" : "OFF"); updateFeed(); }
 
     async function updateFeed() {
         let url = document.getElementById('bridge-url').value.trim();
@@ -69,32 +116,29 @@
                     let c = s.includes("On Scene") ? "scne-text" : s.includes("To Hospital") ? "hosp-text" : "enrt-text";
                     sHtml += `<div class="status-row ${c}">> ${s}</div>`;
                 });
-                html += `<div class="incident-entry"><span style="float:right; opacity:0.5; font-size:0.6rem;">${inc.time}</span><div style="color:var(--green); font-size:0.7rem;">[ ${inc.agency} ]</div><div style="color:#fff; font-weight:bold;">${inc.type}</div><div style="color:var(--yellow); font-size:0.7rem;">${inc.address}</div>${sHtml}</div>`;
+                html += `<div class="incident-entry"><span style="float:right; opacity:0.5; font-size:0.65rem;">${inc.time}</span><div class="inc-agency">[ ${inc.agency} ]</div><div class="inc-type">${inc.type}</div><div style="color:var(--directory-yellow); font-size:0.75rem;">${inc.address}</div>${sHtml}</div>`;
             });
             document.getElementById('feed-root').innerHTML = html || "[ NO ACTIVE CALLS ]";
-            document.getElementById('sync-status').innerText = "SYNC: " + new Date().toLocaleTimeString();
-        } catch (e) { document.getElementById('sync-status').innerText = "OFFLINE"; }
+            document.getElementById('sync-status').innerText = "(SYNCED: " + new Date().toLocaleTimeString() + ")";
+        } catch (e) { document.getElementById('sync-status').innerText = "(OFFLINE)"; }
     }
 
+    // --- 2. DIRECTORY & UNIT CARDS LOGIC (Left & Middle) ---
     function initDirectory(raw) {
         const container = document.getElementById('accordion-container');
         const rows = Array.isArray(raw) ? raw : (raw.data || []);
-        const groups = {};
+        const groups = {}; 
         rows.slice(1).forEach(row => {
-            const cty = (row[1] || "OTHER").toUpperCase();
-            if (!groups[cty]) groups[cty] = [];
-            groups[cty].push({ name: row[2] });
+            const county = (row[1] || "OTHER").toUpperCase();
+            if (!groups[county]) groups[county] = [];
+            groups[county].push({ name: row[2], id: row[0] });
         });
-        Object.keys(groups).sort().forEach(cty => {
-            const h = document.createElement('div'); h.className='accordion-header'; h.innerText=cty;
-            const content = document.createElement('div'); content.className='is-hidden';
-            groups[cty].forEach(u => {
-                const b = document.createElement('button'); b.className='unit-btn'; b.innerText=u.name;
-                b.onclick = () => {
-                    const card = document.createElement('div'); card.className='unit-card';
-                    card.innerHTML = `<div style="font-weight:bold;">${u.name}</div><button onclick="this.parentElement.remove()" style="width:100%; background:#7a5d00; color:#fff; border:none; margin-top:5px; cursor:pointer;">CLEAR</button>`;
-                    document.getElementById('active-units').prepend(card);
-                };
+        Object.keys(groups).sort().forEach(county => {
+            const h = document.createElement('div'); h.className = 'accordion-header'; h.innerText = county;
+            const content = document.createElement('div'); content.className = 'is-hidden';
+            groups[county].forEach(u => {
+                const b = document.createElement('button'); b.className = 'unit-btn'; b.innerText = u.name;
+                b.onclick = () => addCard(u.name);
                 content.appendChild(b);
             });
             h.onclick = () => content.classList.toggle('is-hidden');
@@ -102,16 +146,26 @@
         });
     }
 
-    window.onload = () => {
-        const s = document.createElement('script'); s.src = `${GOOGLE_URL}?callback=initDirectory&ts=${Date.now()}`;
-        document.body.appendChild(s); setInterval(updateFeed, 5000); updateFeed();
-    };
+    function addCard(name) {
+        const dash = document.getElementById('active-units');
+        const card = document.createElement('div'); card.className = 'unit-card';
+        card.innerHTML = `<div style="font-weight:900; font-size:1.1rem; color:#fff;">${name}</div><button class="status-btn" onclick="this.parentElement.remove()">CLEAR UNIT</button>`;
+        dash.prepend(card);
+    }
 
     function filterUnits() {
         const q = document.getElementById('unit-search').value.toUpperCase();
         document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('is-hidden', !b.innerText.includes(q)));
     }
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
+
+    function resetBoard() { if(confirm("Reset Board?")) document.getElementById('active-units').innerHTML = ""; }
+
+    window.onload = () => {
+        const s = document.createElement('script'); s.src = `${GOOGLE_URL}?callback=initDirectory&ts=${Date.now()}`;
+        document.body.appendChild(s);
+        setInterval(updateFeed, 5000); updateFeed();
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
+    };
 </script>
 </body>
 </html>
