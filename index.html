@@ -2,79 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oregon Fire Ops | Command Dashboard</title>
     <style>
         :root {
             --bg-dark: #080808; --panel-bg: #121212; --fire-red: #cc3333; 
             --directory-yellow: #ffff00; --timestamp-cyan: #00f2ff;
-            --btn-light-gray: #3a3a3a; --terminal-green: #00ff00;
+            --terminal-green: #00ff00;
         }
 
-        body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { 
-            background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); 
-            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; position: relative;
-        }
+        header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); display: flex; justify-content: space-between; align-items: center; }
 
-        .version-tag { position: absolute; bottom: 2px; right: 10px; font-size: 0.65rem; color: #444; font-family: monospace; font-weight: bold; }
+        .main-wrapper { display: grid; grid-template-columns: 1fr 450px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
 
-        .main-wrapper { 
-            display: grid; 
-            grid-template-columns: 1fr 320px 450px; 
-            gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; 
-        }
-        
-        .left-side { display: flex; flex-direction: column; overflow: hidden; }
-        .command-bar { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #333; display: flex; gap: 8px; align-items: center; flex-shrink: 0; margin-bottom: 10px; }
-
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; overflow-y: auto; flex-grow: 1; }
-
-        /* TERMINAL PANEL STYLING */
+        /* THE LIVE FEED BOX */
         .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
-        .terminal-header { background: #111; padding: 8px 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: bold; color: #aaa; }
+        .terminal-header { background: #111; padding: 8px 15px; border-bottom: 1px solid #333; font-size: 0.75rem; font-weight: bold; color: #aaa; display: flex; justify-content: space-between; }
         
-        #call-notes { background: #000; color: var(--terminal-green); font-family: 'Courier New', monospace; font-size: 1rem; padding: 15px; border: none; width: 100%; height: 30%; resize: none; outline: none; box-sizing: border-box; border-bottom: 2px solid #333; }
+        .live-feed-container { flex-grow: 1; background: #000; overflow-y: auto; padding: 20px; font-family: 'Courier New', monospace; }
+
+        /* GREEN COMPUTER TEXT STYLING */
+        .incident-entry { border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 20px; border-left: 3px solid var(--fire-red); padding-left: 15px; }
+        .inc-agency { color: var(--terminal-green); font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; }
+        .inc-type { color: #fff; font-size: 1.2rem; font-weight: bold; margin: 2px 0; }
+        .inc-addr { color: var(--directory-yellow); font-size: 0.85rem; }
         
-        /* LIVE DATA FEED */
-        .live-feed-container { flex-grow: 1; background: #000; overflow-y: auto; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--terminal-green); }
-        .incident-entry { border-bottom: 1px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 12px; }
-        .inc-type { color: #fff; font-weight: bold; text-decoration: underline; }
-        .inc-addr { color: #888; font-size: 0.75rem; margin: 3px 0; }
-        .status-row { margin-left: 10px; font-weight: bold; }
-        
-        /* Color Mapping */
-        .scne-text { color: #ff3333; } /* Red */
-        .hosp-text { color: #ffff00; } /* Yellow */
-        .enrt-text { color: #33ff33; } /* Green */
-        .hosp-arr { color: #3399ff; } /* Blue */
+        .status-row { margin-left: 15px; font-weight: bold; font-size: 1.1rem; }
+        .scne-text { color: #ff3333; text-shadow: 0 0 5px #ff3333; } /* On Scene - Red */
+        .hosp-text { color: #ffff00; text-shadow: 0 0 5px #ffff00; } /* To Hospital - Yellow */
+        .enrt-text { color: #33ff33; } /* En Route - Green */
 
-        /* CONFIG BAR */
-        .config-bar { background: #111; padding: 5px 10px; border-top: 1px solid #333; display: flex; gap: 5px; }
-        .config-input { background: #000; border: 1px solid #333; color: var(--timestamp-cyan); font-size: 0.65rem; padding: 4px; flex-grow: 1; border-radius: 3px; }
-
-        /* Unit Cards */
-        .unit-card { position: relative; background-color: var(--panel-bg) !important; border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
-        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
-        .card-content { position: relative; z-index: 10; pointer-events: auto; }
-        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
-        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
-        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); background: #7a5d00; font-size: 0.75rem;}
-
-        /* Directory */
-        .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
-        .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
-        .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray) !important; border: 1px solid #555 !important; border-radius: 4px; cursor: pointer; font-size: 11px; overflow: hidden; margin-bottom: 4px; text-align: center; }
-        .unit-btn span { position: relative; z-index: 5; text-shadow: 1px 1px 3px #000; }
-        .unit-btn .btn-bg { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.25; pointer-events: none; }
-        .is-hidden { display: none !important; }
-
-        .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
-        .cat-label { font-size: 0.6rem; font-weight: bold; color: #aaa; text-transform: uppercase; border-bottom: 1px solid #333; margin: 8px 0 4px; }
-        .cmd-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; outline: none; font-size: 0.85rem;}
-        
-        .refresh-status { font-size: 0.6rem; color: var(--timestamp-cyan); font-weight: normal; }
+        /* CONFIG INPUT BOX */
+        .config-bar { background: #111; padding: 10px; border-top: 1px solid #333; display: flex; gap: 10px; }
+        .config-input { background: #000; border: 1px solid #444; color: var(--timestamp-cyan); padding: 8px; flex-grow: 1; font-family: monospace; font-size: 0.8rem; outline: none; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -82,79 +43,71 @@
 <header>
     <div style="font-weight: 900; font-size: 1.2rem;">OREGON <span style="color:var(--fire-red)">COMMAND DASHBOARD</span></div>
     <div id="clock" style="font-family: monospace; font-size: 1.4rem; font-weight: 900;">00:00:00</div>
-    <div class="version-tag">V 0.0.1050</div>
 </header>
 
 <div class="main-wrapper">
-    <div class="left-side">
-        <div class="command-bar">
-            <input type="text" class="cmd-input" id="addr-input" style="flex: 2;" placeholder="INCIDENT ADDRESS">
-            <select class="cmd-input" id="ops-select" style="flex: 1.2;">
-                <option value="">OPS CHANNEL</option>
-                <optgroup label="CLACKAMAS"><option>OPS 22</option><option>OPS 23</option><option>OPS 24</option><option>OPS 25</option><option>OPS 26</option><option>OPS 27</option><option>OPS 28</option></optgroup>
-            </select>
-            <button onclick="resetBoard()" style="background:var(--fire-red); color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:900; cursor:pointer;">RESET</button>
-        </div>
-        <div class="dashboard-grid" id="active-units"></div>
-    </div>
-    
-    <div class="column">
-        <div class="search-container" style="padding:10px; background:#000;">
-            <input type="text" id="unit-search" class="cmd-input" style="width:100%;" placeholder="SEARCH UNIT/AGENCY..." oninput="filterUnits()">
-        </div>
-        <div class="scroll-area" id="accordion-container"></div>
+    <div class="column" style="background:var(--panel-bg); border-radius:6px; border:1px solid #222;">
+        <div style="padding:20px; text-align:center; opacity:0.3;">[ INCIDENT UNIT CARDS WILL LOAD HERE ]</div>
     </div>
 
     <div class="terminal-panel">
         <div class="terminal-header">
-            <span>COMMAND LOG / NOTES</span>
+            <span>LIVE INTELLIGENCE FEED</span>
+            <span id="sync-indicator" style="color:var(--timestamp-cyan);">STANDBY</span>
         </div>
-        <textarea id="call-notes" placeholder="TYPE CALL NOTES HERE..."></textarea>
         
-        <div class="terminal-header" style="border-top: 1px solid #333;">
-            <span>LIVE INTELLIGENCE FEED <span id="sync-indicator" style="font-size:0.6rem; color:var(--timestamp-cyan);">(STANDBY)</span></span>
-        </div>
         <div class="live-feed-container" id="feed-root">
-            [ WAITING FOR BRIDGE CONNECTION... ]
+            [ INITIALIZING FREQUENCIES... ]
         </div>
+
         <div class="config-bar">
-            <input type="text" id="bridge-url" class="config-input" placeholder="PASTE PINGGY/BRIDGE URL HERE..." value="https://hzgca-204-195-74-174.a.free.pinggy.link/incidents">
+            <input type="text" id="bridge-url" class="config-input" 
+                   placeholder="PASTE PINGGY URL HERE" 
+                   value="https://hzgca-204-195-74-174.a.free.pinggy.link/incidents">
         </div>
     </div>
 </div>
 
 <script>
-    // --- LIVE FEED LOGIC ---
     async function updateLiveFeed() {
-        const url = document.getElementById('bridge-url').value;
+        let url = document.getElementById('bridge-url').value.trim();
         const feedRoot = document.getElementById('feed-root');
         const syncText = document.getElementById('sync-indicator');
 
-        if (!url) return;
+        // Auto-fix: Ensure the URL ends with /incidents
+        if (url && !url.endsWith('/incidents')) {
+            url = url.endsWith('/') ? url + 'incidents' : url + '/incidents';
+        }
 
         try {
-            const response = await fetch(url);
+            // Added {mode: 'cors'} and headers to force connection
+            const response = await fetch(url, { 
+                mode: 'cors',
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            if (!response.ok) throw new Error("HTTP Error");
+            
             const data = await response.json();
             
             if (data.length === 0) {
-                feedRoot.innerHTML = "[ NO ACTIVE CALLS DETECTED ]";
+                feedRoot.innerHTML = "[ MONITORING FREQUENCIES - NO ACTIVE CALLS ]";
             } else {
                 let html = "";
                 data.forEach(inc => {
                     let statuses = "";
                     inc.unitStatuses.forEach(s => {
-                        let colorClass = "";
-                        if (s.includes("On Scene")) colorClass = "scne-text";
-                        if (s.includes("To Hospital")) colorClass = "hosp-text";
-                        if (s.includes("En Route")) colorClass = "enrt-text";
-                        if (s.includes("At Hospital") || s.includes("Transport Arrived")) colorClass = "hosp-arr";
+                        let cClass = "enrt-text";
+                        if (s.includes("On Scene")) cClass = "scne-text";
+                        else if (s.includes("To Hospital")) cClass = "hosp-text";
                         
-                        statuses += `<div class="status-row ${colorClass}">> ${s}</div>`;
+                        statuses += `<div class="status-row ${cClass}">> ${s}</div>`;
                     });
 
                     html += `
                         <div class="incident-entry">
-                            <span style="float:right; opacity:0.5;">${inc.time}</span>
+                            <span style="float:right; color:var(--timestamp-cyan); font-size:0.7rem;">${inc.time}</span>
+                            <div class="inc-agency">[ ${inc.agency} ]</div>
                             <div class="inc-type">${inc.type}</div>
                             <div class="inc-addr">${inc.address}</div>
                             ${statuses}
@@ -162,123 +115,27 @@
                 });
                 feedRoot.innerHTML = html;
             }
-            syncText.innerText = `(LATEST SYNC: ${new Date().toLocaleTimeString()})`;
+            syncText.innerText = `SYNCED: ${new Date().toLocaleTimeString()}`;
         } catch (e) {
-            syncText.innerText = "(BRIDGE OFFLINE)";
-            feedRoot.innerHTML = "[ CHECK BRIDGE TERMINAL / PINGGY LINK ]";
+            syncText.innerText = "BRIDGE OFFLINE";
+            feedRoot.innerHTML = `
+                <div style="color:red; font-weight:bold;">[ BRIDGE CONNECTION ERROR ]</div>
+                <div style="font-size:0.8rem; margin-top:10px; color:#888;">
+                    1. Ensure PowerShell is running 'node server.js'<br>
+                    2. Verify the Pinggy link ends with <b>/incidents</b><br>
+                    3. Check if the bridge URL in the box above matches your terminal.
+                </div>`;
         }
     }
 
+    // Refresh every 5 seconds
     setInterval(updateLiveFeed, 5000);
+    updateLiveFeed();
 
-    // --- EXISTING DASHBOARD LOGIC ---
-    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
-    
-    const counties = [
-      { name: "CLACKAMAS", color: "#FFE119" }, { name: "MULTNOMAH", color: "#FFFF00" }, { name: "WASHINGTON", color: "#FF1493" }
-    ];
-
-    function resetBoard() {
-        if(confirm("Confirm: Reset all incident data?")) {
-            document.getElementById('active-units').innerHTML = "";
-            document.getElementById('addr-input').value = "";
-            document.getElementById('ops-select').selectedIndex = 0;
-            document.getElementById('call-notes').value = "";
-        }
-    }
-
-    function filterUnits() {
-        const q = document.getElementById('unit-search').value.toUpperCase().trim();
-        const btns = document.querySelectorAll('.unit-btn');
-        btns.forEach(btn => {
-            const data = btn.getAttribute('data-search') || "";
-            btn.classList.toggle('is-hidden', !data.includes(q));
-        });
-    }
-
-    function fetchData() {
-        const s = document.createElement('script');
-        s.src = `${GOOGLE_URL}?callback=setup&ts=${Date.now()}`;
-        document.body.appendChild(s);
-    }
-
-    window.setup = function(raw) {
-        let rows = Array.isArray(raw) ? raw : (raw.data || []);
-        if (rows.length < 1) { render(); return; }
-        window.unitMap = rows.slice(1).map(row => ({
-            id: String(row[0] || "").toUpperCase(),
-            county: String(row[1] || "").toUpperCase().trim(), 
-            name: String(row[2] || ""),
-            station: String(row[3] || "Unknown"),
-            agency: String(row[5] || ""), 
-            type: String(row[6] || "Other").toUpperCase().trim(),
-            logoUrl: cleanGitHubUrl(row[8]) 
-        })).filter(u => u.name);
-        window.unitMap.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-        render();
-    }
-
-    function render() {
-        const container = document.getElementById('accordion-container');
-        container.innerHTML = "";
-        const typeOrder = ["ENGINE", "TRUCK", "MEDIC", "CHIEF", "RESCUE", "TENDER"];
-        counties.forEach(county => {
-            const h = document.createElement('div'); h.className = 'accordion-header';
-            h.style.borderLeftColor = county.color; h.innerHTML = `<span>${county.name}</span>`;
-            const content = document.createElement('div'); content.className = "is-hidden"; content.style.padding = "10px";
-            h.onclick = () => content.classList.toggle('is-hidden');
-            typeOrder.forEach(type => {
-                const units = (window.unitMap || []).filter(u => u.county === county.name && u.type === type);
-                if (units.length > 0) {
-                    const label = document.createElement('div'); label.className = 'cat-label'; label.innerText = type; content.appendChild(label);
-                    const grid = document.createElement('div'); grid.style.display = "grid"; grid.style.gridTemplateColumns = "repeat(2, 1fr)"; grid.style.gap = "5px";
-                    units.forEach(u => {
-                        const b = document.createElement('button'); b.className = "unit-btn";
-                        b.setAttribute('data-search', `${u.agency} ${u.name} ${u.id}`.toUpperCase());
-                        const bgDiv = document.createElement('div'); bgDiv.className = 'btn-bg';
-                        if (u.logoUrl) bgDiv.style.backgroundImage = 'url("' + u.logoUrl + '")';
-                        b.appendChild(bgDiv);
-                        const span = document.createElement('span'); span.innerText = u.name;
-                        b.appendChild(span);
-                        b.onclick = () => addCard(u);
-                        grid.appendChild(b);
-                    });
-                    content.appendChild(grid);
-                }
-            });
-            container.appendChild(h);
-            container.appendChild(content);
-        });
-    }
-
-    function addCard(u) {
-        const dash = document.getElementById('active-units');
-        const card = document.createElement('div'); card.className = 'unit-card';
-        const timeNow = new Date().toLocaleTimeString('en-US', {hour12: false, hour:'2-digit', minute:'2-digit'});
-        const bgStyle = u.logoUrl ? 'style="background-image: url(\'' + u.logoUrl + '\')"' : '';
-        card.innerHTML = `<div class="card-background" ${bgStyle}></div><div class="card-content"><div style="display:flex; justify-content:space-between;"><div class="unit-name">${u.name}</div><div class="unit-location">${u.station}</div></div><button class="status-btn" onclick="cycleStatus(this, '${u.name}')">DISPATCHED</button><div class="ts-grid"><div class="ts-box"><span class="ts-label">DISP</span><span class="ts-val">${timeNow}</span></div><div class="ts-box"><span class="ts-label">ENRT</span><span class="ts-val" id="enrt">--:--</span></div><div class="ts-box"><span class="ts-label">SCNE</span><span class="ts-val" id="scne">--:--</span></div></div><textarea style="width:100%; background:rgba(0,0,0,0.7); color:white; border:1px solid #444; margin-top:10px; height:50px; resize:none; box-sizing:border-box;" placeholder="NOTES"></textarea></div>`;
-        dash.prepend(card);
-    }
-
-    function cycleStatus(btn, unitName) {
-        const card = btn.closest('.unit-card');
-        const timeNow = new Date().toLocaleTimeString('en-US', {hour12: false, hour:'2-digit', minute:'2-digit'});
-        if (btn.innerText === "DISPATCHED") { btn.style.background = "#004d99"; btn.innerText = "EN ROUTE"; card.querySelector('#enrt').innerText = timeNow; }
-        else if (btn.innerText === "EN ROUTE") { btn.style.background = "#1e5c33"; btn.innerText = "ON SCENE"; card.querySelector('#scne').innerText = timeNow; }
-        else { card.remove(); }
-    }
-
-    function cleanGitHubUrl(url) {
-        if (!url || typeof url !== 'string') return "";
-        let clean = url.trim();
-        if (clean.includes("github.com") && clean.includes("/blob/")) {
-            clean = clean.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
-        }
-        return clean;
-    }
-
-    window.onload = () => { fetchData(); updateLiveFeed(); };
-    setInterval(() => { const clock = document.getElementById('clock'); if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'}); }, 1000);
+    // Clock Logic
+    setInterval(() => { 
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'}); 
+    }, 1000);
 </script>
 </body>
 </html>
