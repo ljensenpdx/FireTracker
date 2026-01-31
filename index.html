@@ -12,16 +12,43 @@
         }
 
         body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg-dark); color: #e0e0e0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        header { background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
-
-        .main-wrapper { display: grid; grid-template-columns: 1fr 320px 450px; gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; }
         
-        /* DIRECTORY & CARDS */
+        header { 
+            background: #000; padding: 12px 25px; border-bottom: 3px solid var(--fire-red); 
+            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; position: relative;
+        }
+
+        .main-wrapper { 
+            display: grid; 
+            grid-template-columns: 1fr 320px 450px; 
+            gap: 12px; padding: 12px; flex-grow: 1; overflow: hidden; 
+        }
+        
+        .left-side { display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* UNIT CARDS */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; overflow-y: auto; flex-grow: 1; padding: 5px; }
+        .unit-card { position: relative; background-color: var(--panel-bg); border: 1px solid rgba(255,255,255,0.2); border-top: 5px solid var(--fire-red); border-radius: 4px; padding: 10px; min-height: 165px; z-index: 1; overflow: hidden; }
+        .card-background { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; background-position: center; background-size: 75% auto; opacity: 0.18; filter: brightness(1.2); pointer-events: none; }
+        .card-content { position: relative; z-index: 10; }
+        .unit-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
+        .unit-location { font-size: 0.7rem; color: var(--directory-yellow); font-weight: 900; }
+        
+        /* TIMESTAMP GRID */
+        .ts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 8px; border-top: 1px solid #333; padding-top: 8px; }
+        .ts-box { text-align: center; }
+        .ts-label { display: block; font-size: 0.6rem; color: #888; font-weight: bold; }
+        .ts-val { font-family: monospace; font-size: 0.75rem; color: var(--timestamp-cyan); }
+
+        .status-btn { width: 100%; padding: 6px; font-weight: 900; margin-top: 6px; color: white; cursor: pointer; border-radius: 4px; background: #7a5d00; border: 1px solid rgba(255,255,255,0.2); font-size: 0.75rem;}
+
+        /* DIRECTORY COLUMN */
         .column { background: var(--panel-bg); border-radius: 6px; display: flex; flex-direction: column; border: 1px solid #222; overflow: hidden; }
         .scroll-area { padding: 12px; overflow-y: auto; flex-grow: 1; }
         .accordion-header { background: #1a1a1a; padding: 12px; font-weight: 800; border-bottom: 1px solid #000; cursor: pointer; border-left: 8px solid #444; }
         .unit-btn { position: relative; padding: 12px 4px; color: #fff; font-weight: 900; background: var(--btn-light-gray); border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 11px; margin-bottom: 4px; text-align: center; overflow: hidden; }
         .btn-bg { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.25; pointer-events: none; }
+        .unit-btn span { position: relative; z-index: 5; text-shadow: 1px 1px 3px #000; }
 
         /* TERMINAL PANEL */
         .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; border-radius: 6px; overflow: hidden; height: 100%; }
@@ -32,18 +59,14 @@
         .incident-entry { border-left: 2px solid var(--fire-red); padding-left: 10px; margin-bottom: 15px; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px; }
         .inc-agency { color: var(--terminal-green); font-weight: 900; font-size: 0.75rem; }
         
-        /* STATUS COLORS */
+        /* FEED STATUS COLORS */
         .scne-text { color: #ff3333; text-shadow: 0 0 3px #ff3333; }
         .hosp-text { color: #ffff00; text-shadow: 0 0 3px #ffff00; }
         .enrt-text { color: #33ff33; }
 
         .config-bar { background: #111; padding: 8px; border-top: 1px solid #333; display: flex; gap: 5px; }
         .config-input { flex-grow: 1; background: #000; border: 1px solid #444; color: var(--timestamp-cyan); font-size: 0.7rem; padding: 5px; outline: none; }
-        .connect-btn { background: #222; color: #fff; border: 1px solid #444; padding: 2px 10px; font-size: 0.6rem; cursor: pointer; font-weight: bold; border-radius: 3px; }
-
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow-y: auto; flex-grow: 1; padding: 10px; }
-        .unit-card { position: relative; background: var(--panel-bg); border: 1px solid #333; border-top: 4px solid var(--fire-red); padding: 10px; border-radius: 4px; overflow: hidden; }
-        .card-background { position: absolute; inset: 0; opacity: 0.15; background-position: center; background-repeat: no-repeat; background-size: contain; pointer-events: none; }
+        .connect-btn { background: #222; color: #fff; border: 1px solid #444; padding: 2px 10px; font-size: 0.6rem; cursor: pointer; font-weight: bold; }
         .is-hidden { display: none !important; }
     </style>
 </head>
@@ -55,8 +78,11 @@
 </header>
 
 <div class="main-wrapper">
-    <div class="column">
-        <div class="terminal-header">ACTIVE ASSIGNMENTS</div>
+    <div class="left-side">
+        <div style="background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #333; display: flex; gap: 8px; margin-bottom: 10px;">
+            <input type="text" id="addr-input" style="flex: 2; background:#000; color:#fff; padding:8px; border:1px solid #444;" placeholder="INCIDENT ADDRESS">
+            <button onclick="resetBoard()" style="background:var(--fire-red); color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:900; cursor:pointer;">RESET</button>
+        </div>
         <div class="dashboard-grid" id="active-units"></div>
     </div>
     
@@ -84,23 +110,25 @@
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
     let feedInterval = null;
 
-    // --- GITHUB GHOST CONNECT ---
+    // --- 1. THE REINFORCED FEED LOGIC (FOR GITHUB) ---
     async function updateFeed() {
-        let url = document.getElementById('bridge-url').value.trim();
-        if (!url) return;
-        if (!url.endsWith('/incidents')) url += '/incidents';
+        let rawUrl = document.getElementById('bridge-url').value.trim();
+        if (!rawUrl) return;
         
-        // FORCING PROXY FOR GITHUB COMPATIBILITY
-        const proxyUrl = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+        if (!rawUrl.startsWith('http')) rawUrl = 'https://' + rawUrl;
+        if (!rawUrl.endsWith('/incidents')) rawUrl += '/incidents';
+        
+        const syncStatus = document.getElementById('sync-status');
+        const feedRoot = document.getElementById('feed-root');
+
+        // GitHub-Safe AllOrigins Proxy
+        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(rawUrl);
         
         try {
-            const res = await fetch(proxyUrl, {
-                method: 'GET',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' }
-            });
+            const response = await fetch(proxyUrl);
+            const wrapper = await response.json();
+            const data = JSON.parse(wrapper.contents);
             
-            const data = await res.json();
             let html = "";
             data.forEach(inc => {
                 let sHtml = "";
@@ -117,31 +145,33 @@
                         ${sHtml}
                     </div>`;
             });
-            document.getElementById('feed-root').innerHTML = html || "[ NO ACTIVE CALLS ]";
-            document.getElementById('sync-status').innerText = "(LIVE: " + new Date().toLocaleTimeString() + ")";
+            feedRoot.innerHTML = html || "[ NO ACTIVE CALLS ]";
+            syncStatus.innerText = "(LIVE: " + new Date().toLocaleTimeString() + ")";
         } catch (e) {
-            document.getElementById('sync-status').innerText = "(ERROR)";
-            console.error("Connection Refused:", e);
+            syncStatus.innerText = "(ERROR)";
+            console.error("Connection Failed:", e);
         }
     }
 
     function manualConnect() {
         if(!document.getElementById('bridge-url').value) return;
-        document.getElementById('feed-root').innerHTML = "[ ESTABLISHING HANDSHAKE... ]";
+        document.getElementById('feed-root').innerHTML = "[ INITIATING HANDSHAKE... ]";
         updateFeed();
         if(!feedInterval) feedInterval = setInterval(updateFeed, 5000);
     }
 
-    // --- DIRECTORY LOGIC ---
+    // --- 2. THE DIRECTORY & INTERACTIVE CARDS ---
     function initDirectory(raw) {
         const container = document.getElementById('accordion-container');
         const rows = Array.isArray(raw) ? raw : (raw.data || []);
         const groups = {};
+        
         rows.slice(1).forEach(row => {
             const cty = (row[1] || "OTHER").toUpperCase();
             if (!groups[cty]) groups[cty] = [];
             groups[cty].push({ name: row[2], station: row[3], logo: row[8] });
         });
+
         Object.keys(groups).sort().forEach(cty => {
             const h = document.createElement('div'); h.className='accordion-header'; h.innerText=cty;
             const content = document.createElement('div'); content.className='is-hidden';
@@ -149,10 +179,22 @@
                 const b = document.createElement('button'); b.className='unit-btn';
                 const cleanLogo = u.logo ? u.logo.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/") : "";
                 b.innerHTML = cleanLogo ? `<div class="btn-bg" style="background-image:url('${cleanLogo}')"></div><span>${u.name}</span>` : `<span>${u.name}</span>`;
+                
                 b.onclick = () => {
                     const card = document.createElement('div'); card.className='unit-card';
                     const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
-                    card.innerHTML = `<div class="card-background" style="background-image:url('${cleanLogo}')"></div><div style="font-weight:900;">${u.name}</div><div style="font-size:0.7rem; color:var(--timestamp-cyan);">D: ${time}</div><button onclick="this.parentElement.remove()" style="width:100%; background:var(--fire-red); border:none; color:white; margin-top:5px; cursor:pointer;">CLEAR</button>`;
+                    card.innerHTML = `
+                        <div class="card-background" style="background-image:url('${cleanLogo}')"></div>
+                        <div class="card-content">
+                            <div class="unit-name">${u.name}</div>
+                            <div class="unit-location">${u.station || ""}</div>
+                            <button class="status-btn" onclick="cycleStatus(this)">DISPATCHED</button>
+                            <div class="ts-grid">
+                                <div class="ts-box"><span class="ts-label">DISP</span><span class="ts-val">${time}</span></div>
+                                <div class="ts-box"><span class="ts-label">ENRT</span><span class="ts-val">--:--</span></div>
+                                <div class="ts-box"><span class="ts-label">SCNE</span><span class="ts-val">--:--</span></div>
+                            </div>
+                        </div>`;
                     document.getElementById('active-units').prepend(card);
                 };
                 content.appendChild(b);
@@ -160,6 +202,15 @@
             h.onclick = () => content.classList.toggle('is-hidden');
             container.appendChild(h); container.appendChild(content);
         });
+    }
+
+    function cycleStatus(btn) {
+        const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
+        const card = btn.closest('.unit-card');
+        const tsVals = card.querySelectorAll('.ts-val');
+        if (btn.innerText === "DISPATCHED") { btn.style.background = "#004d99"; btn.innerText = "EN ROUTE"; tsVals[1].innerText = time; }
+        else if (btn.innerText === "EN ROUTE") { btn.style.background = "#1e5c33"; btn.innerText = "ON SCENE"; tsVals[2].innerText = time; }
+        else { card.remove(); }
     }
 
     window.onload = () => {
@@ -172,6 +223,8 @@
         const q = document.getElementById('unit-search').value.toUpperCase();
         document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('is-hidden', !b.innerText.toUpperCase().includes(q)));
     }
+
+    function resetBoard() { if(confirm("Reset Board?")) document.getElementById('active-units').innerHTML = ""; }
 </script>
 </body>
 </html>
