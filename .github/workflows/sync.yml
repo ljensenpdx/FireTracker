@@ -18,6 +18,22 @@ jobs:
         with:
           node-version: '20'
 
+      # ⚡ NEW: CACHE START
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Puppeteer Browser
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/puppeteer
+          key: ${{ runner.os }}-puppeteer-${{ hashFiles('**/package.json') }}
+      # ⚡ NEW: CACHE END
+
       - name: Install Dependencies
         run: npm install puppeteer axios
 
