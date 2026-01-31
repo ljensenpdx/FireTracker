@@ -36,6 +36,8 @@ jobs:
 
       - name: Install Dependencies
         run: npm install puppeteer axios
+- name: Install Dependencies
+        run: npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth axios
 
       - name: Run Bridge
         run: node bridge.js
