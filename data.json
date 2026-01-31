@@ -1,0 +1,116 @@
+[
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Fire Alarm",
+    "time": "6:30 PM",
+    "address": "12555 SW LEVETON DR, TUALATIN, OR"
+  },
+  {
+    "agency": "PORTLAND F&R",
+    "type": "Fire",
+    "time": "6:28 PM",
+    "address": "2314 SW IDAHO ST, PORTLAND, OR"
+  },
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Medical Emergency",
+    "time": "6:23 PM",
+    "address": "NW VAUGHAN CT, PORTLAND, OR"
+  },
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Medical Emergency",
+    "time": "6:18 PM",
+    "address": "SW 65TH AVE, LAKE OSWEGO, OR"
+  },
+  {
+    "agency": "CLACKAMAS FD",
+    "type": "Medical Emergency",
+    "time": "6:14 PM",
+    "address": "SE JOHNSON CREEK BLVD, HAPPY VALLEY, OR"
+  },
+  {
+    "agency": "CLACKAMAS FD",
+    "type": "Medical Emergency",
+    "time": "6:13 PM",
+    "address": "LANGENSAND RD, SANDY, OR"
+  },
+  {
+    "agency": "CLACKAMAS FD",
+    "type": "Medical Emergency",
+    "time": "6:10 PM",
+    "address": "SE 147TH AVE, CLACKAMAS, OR"
+  },
+  {
+    "agency": "MARION COUNTY FIRE",
+    "type": "Traffic Collision",
+    "time": "6:08 PM",
+    "address": "2884 HOWELL PRAIRIE RD NE, MARION CO, OR"
+  },
+  {
+    "agency": "CLACKAMAS FD",
+    "type": "Medical Emergency",
+    "time": "6:06 PM",
+    "address": "BLUFF RD, SANDY, OR"
+  },
+  {
+    "agency": "KEIZER FIRE",
+    "type": "Medical Emergency",
+    "time": "6:04 PM",
+    "address": "BELINDA CT SE, SALEM, OR"
+  },
+  {
+    "agency": "CLACKAMAS FD",
+    "type": "Medical Emergency",
+    "time": "5:59 PM",
+    "address": "SE 122ND AVE, CLACKAMAS, OR"
+  },
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Medical Emergency",
+    "time": "5:51 PM",
+    "address": "SW 78TH AVE, PORTLAND, OR"
+  },
+  {
+    "agency": "MOLALLA FIRE",
+    "type": "Medical Emergency",
+    "time": "5:48 PM",
+    "address": "E 5TH ST, MOLALLA, OR"
+  },
+  {
+    "agency": "GASTON RURAL FD",
+    "type": "Medical Emergency",
+    "time": "5:47 PM",
+    "address": "SW SOUTHWIND DR, GASTON, OR"
+  },
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Medical Emergency",
+    "time": "5:45 PM",
+    "address": "E 2ND ST, NEWBERG, OR"
+  },
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Medical Emergency",
+    "time": "5:36 PM",
+    "address": "SW 106TH AVE, TIGARD, OR"
+  },
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Medical Emergency",
+    "time": "5:17 PM",
+    "address": "SW 135TH AVE, TIGARD, OR"
+  },
+  {
+    "agency": "TUALATIN VALLEY F&R",
+    "type": "Medical Emergency",
+    "time": "5:11 PM",
+    "address": "NW 192ND AVE, PORTLAND, OR"
+  },
+  {
+    "agency": "CLACKAMAS FD",
+    "type": "Fire Alarm",
+    "time": "3:16 PM",
+    "address": "11774 SE JENNIFER ST, STE B, CLACKAMAS, OR"
+  }
+]
