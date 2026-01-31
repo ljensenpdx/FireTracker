@@ -1,1 +1,835 @@
-[]
+[
+  {
+    "agency": "Portland F&R",
+    "type": "Fire Alarm",
+    "time": "8:28 PM",
+    "address": "161 NE 82ND AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Banks Fire District",
+    "type": "Medical Emergency",
+    "time": "8:24 PM",
+    "address": "NW NOWAKOWSKI RD, BUXTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "8:17 PM",
+    "address": "NW 6TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Hubbard Fire",
+    "type": "Medical Emergency",
+    "time": "8:12 PM",
+    "address": "PACIFIC HIGHWAY 99E, HUBBARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Lake Oswego Fire",
+    "type": "Medical Emergency",
+    "time": "8:12 PM",
+    "address": "LAKEVIEW BLVD, LAKE OSWEGO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Odor Investigation",
+    "time": "8:10 PM",
+    "address": "525 NW 10TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "8:04 PM",
+    "address": "SW WESTERN AVE & SW ALLEN BLVD, BEAVERTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:51 PM",
+    "address": "SW LEVETON DR, TUALATIN, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:50 PM",
+    "address": "SW 173RD AVE, BEAVERTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "7:50 PM",
+    "address": "SE VISTA SUNRISE CT, MILWAUKIE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "7:49 PM",
+    "address": "SE HEARTHWOOD DR, CLACKAMAS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Estacada Fire",
+    "type": "Medical Emergency",
+    "time": "7:41 PM",
+    "address": "S KINZY RD, ESTACADA, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Hillsboro Fire",
+    "type": "Medical Emergency",
+    "time": "7:40 PM",
+    "address": "NE MANCHESTER WAY, HILLSBORO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:39 PM",
+    "address": "SW MONTAGE LN, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "7:33 PM",
+    "address": "E BERKELEY ST, GLADSTONE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:24 PM",
+    "address": "SW FRENCH GLEN CT, WILSONVILLE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Keizer Fire",
+    "type": "Medical Emergency",
+    "time": "7:19 PM",
+    "address": "LOCKHAVEN DR N, KEIZER, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:11 PM",
+    "address": "N ESTHER ST, NEWBERG, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Fire Alarm",
+    "time": "3:16 PM",
+    "address": "11774 SE JENNIFER ST, STE B, CLACKAMAS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Outside Fire",
+    "time": "8:16 PM",
+    "address": "SE 8TH AVE & SE YAMHILL ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Traffic Collision",
+    "time": "8:12 PM",
+    "address": "SW ARTHUR ST & SW ROSS ISLAND WAY, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "8:02 PM",
+    "address": "SW 11TH AVE & SW JEFFERSON ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Fire",
+    "time": "7:58 PM",
+    "address": "7600 N HEREFORD AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Outside Fire",
+    "time": "7:55 PM",
+    "address": "206 NW 23RD AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "7:54 PM",
+    "address": "SE HOLGATE BLVD, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Marion County Fire",
+    "type": "Medical Emergency",
+    "time": "7:47 PM",
+    "address": "ROYALTY CRK NE, SALEM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "7:47 PM",
+    "address": "SE LINN ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "7:44 PM",
+    "address": "SE 92ND AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:43 PM",
+    "address": "S RIVER ST, NEWBERG, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Fire Alarm",
+    "time": "7:42 PM",
+    "address": "123 W BURNSIDE ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Medical Emergency",
+    "time": "7:41 PM",
+    "address": "NE 5TH ST, GRESHAM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Traffic Collision",
+    "time": "7:41 PM",
+    "address": "SB I405 FWY AT & W BURNSIDE ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Traffic Collision",
+    "time": "7:37 PM",
+    "address": "19170 SW ROSA RD, BEAVERTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Lift Assist",
+    "time": "7:36 PM",
+    "address": "SE 15TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Alarm",
+    "time": "7:32 PM",
+    "address": "2503 NW SUNDIAL RD, TROUTDALE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "7:30 PM",
+    "address": "SE KELSO RD, BORING, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Keizer Fire",
+    "type": "Medical Emergency",
+    "time": "7:30 PM",
+    "address": "22ND ST SE, SALEM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Aumsville Fire",
+    "type": "Medical Emergency",
+    "time": "7:30 PM",
+    "address": "OLNEY ST, WEST, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:26 PM",
+    "address": "SW HEMLOCK ST, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Lake Oswego Fire",
+    "type": "Medical Emergency",
+    "time": "7:22 PM",
+    "address": "CARMAN DR, LAKE OSWEGO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Fire Alarm",
+    "time": "7:11 PM",
+    "address": "18870 NE RIVERSIDE PKWY, GRESHAM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:09 PM",
+    "address": "SW HART RD, BEAVERTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Alarm",
+    "time": "7:06 PM",
+    "address": "3114 NE FREMONT ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "7:05 PM",
+    "address": "SE ROOTS RD, MILWAUKIE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Gas Leak",
+    "time": "7:05 PM",
+    "address": "20015 NE SANDY BLVD, GRESHAM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Estacada Fire",
+    "type": "Medical Emergency",
+    "time": "7:04 PM",
+    "address": "S KINZY RD, ESTACADA, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:02 PM",
+    "address": "SW ALDERBROOK CIR, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "7:00 PM",
+    "address": "W 9TH ST, NEWBERG, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "6:57 PM",
+    "address": "SE RHONE ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Hillsboro Fire",
+    "type": "Medical Emergency",
+    "time": "6:57 PM",
+    "address": "SE 73RD AVE, HILLSBORO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Smoke Detector",
+    "time": "6:54 PM",
+    "address": "3039 NE 181ST AVE, GRESHAM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Traffic Collision",
+    "time": "6:53 PM",
+    "address": "HWY 18 MP 50, DAYTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Odor Investigation",
+    "time": "6:52 PM",
+    "address": "1312 SW 10TH AVE, STE 713, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Forest Grove FR",
+    "type": "Medical Emergency",
+    "time": "6:51 PM",
+    "address": "ELM ST, FOREST GROVE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Public Service",
+    "time": "6:51 PM",
+    "address": "14933 SE NORTH CT, DAMASCUS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Outside Fire",
+    "time": "6:50 PM",
+    "address": "215 SE 9TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "6:47 PM",
+    "address": "NE GLISAN ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:47 PM",
+    "address": "NW 88TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Smoke Detector",
+    "time": "6:43 PM",
+    "address": "1212 SW CLAY ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:42 PM",
+    "address": "SW 182ND AVE, BEAVERTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:42 PM",
+    "address": "SW GRANT AVE, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "6:35 PM",
+    "address": "SW 17TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Hillsboro Fire",
+    "type": "Interfacility Transfer",
+    "time": "6:33 PM",
+    "address": "NE CORNELL RD, HILLSBORO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Outside Fire",
+    "time": "6:31 PM",
+    "address": "7701 N CHAUTAUQUA BLVD, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:31 PM",
+    "address": "SW BRIDGEPORT RD, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Fire Alarm",
+    "time": "6:30 PM",
+    "address": "12555 SW LEVETON DR, TUALATIN, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Gas Leak",
+    "time": "6:28 PM",
+    "address": "2314 SW IDAHO ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "6:24 PM",
+    "address": "NE 16TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:23 PM",
+    "address": "NW VAUGHAN CT, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "6:18 PM",
+    "address": "SW 65TH AVE, LAKE OSWEGO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "6:14 PM",
+    "address": "SE JOHNSON CREEK BLVD, HAPPY VALLEY, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "6:13 PM",
+    "address": "LANGENSAND RD, SANDY, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "6:13 PM",
+    "address": "SW MILES ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "6:10 PM",
+    "address": "SE 147TH AVE, CLACKAMAS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Marion County Fire",
+    "type": "Traffic Collision",
+    "time": "6:08 PM",
+    "address": "2884 HOWELL PRAIRIE RD NE, MARION CO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "6:06 PM",
+    "address": "BLUFF RD, SANDY, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Keizer Fire",
+    "type": "Medical Emergency",
+    "time": "6:04 PM",
+    "address": "BELINDA CT SE, SALEM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "5:59 PM",
+    "address": "SE 122ND AVE, CLACKAMAS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "5:51 PM",
+    "address": "SW 78TH AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "5:49 PM",
+    "address": "SE MATHER RD, CLACKAMAS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Molalla Fire",
+    "type": "Medical Emergency",
+    "time": "5:48 PM",
+    "address": "E 5TH ST, MOLALLA, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gaston Rural FD",
+    "type": "Medical Emergency",
+    "time": "5:47 PM",
+    "address": "SW SOUTHWIND DR, GASTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "5:46 PM",
+    "address": "NW PUMPKIN RIDGE RD, NORTH PLAINS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "5:45 PM",
+    "address": "E 2ND ST, NEWBERG, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "5:36 PM",
+    "address": "SW 106TH AVE, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Smoke Detector",
+    "time": "5:31 PM",
+    "address": "1060 NE CLEVELAND AVE, GRESHAM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Medical Emergency",
+    "time": "5:24 PM",
+    "address": "NE HALSEY ST, FAIRVIEW, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "5:17 PM",
+    "address": "NE 122ND AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "5:17 PM",
+    "address": "SW 135TH AVE, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Molalla Fire",
+    "type": "Medical Emergency",
+    "time": "5:13 PM",
+    "address": "S EBY RD, MOLALLA, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "5:12 PM",
+    "address": "SW 115TH AVE, TUALATIN, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "5:11 PM",
+    "address": "NW 192ND AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "4:57 PM",
+    "address": "SW ALIBHAI ST, BEAVERTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "4:55 PM",
+    "address": "E HAYES ST, NEWBERG, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Marion County Fire",
+    "type": "Medical Emergency",
+    "time": "4:53 PM",
+    "address": "SETTLERS DR NE, MARION COUNTY, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Hillsboro Fire",
+    "type": "Medical Emergency",
+    "time": "4:53 PM",
+    "address": "NE CORNELL RD, HILLSBORO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "4:52 PM",
+    "address": "SE 132ND AVE, CLACKAMAS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Fire Alarm",
+    "time": "4:52 PM",
+    "address": "4655 SW GRIFFITH DR, STE 150, BEAVERTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Hillsboro Fire",
+    "type": "Medical Emergency",
+    "time": "4:48 PM",
+    "address": "NE HYDE ST, HILLSBORO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gresham Fire",
+    "type": "Medical Emergency",
+    "time": "4:47 PM",
+    "address": "SW 14TH ST, GRESHAM, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Lake Oswego Fire",
+    "type": "Medical Emergency",
+    "time": "4:37 PM",
+    "address": "CARMAN DR, LAKE OSWEGO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Hillsboro Fire",
+    "type": "Medical Emergency",
+    "time": "4:34 PM",
+    "address": "NE ALEX WAY, HILLSBORO, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Fire Alarm",
+    "time": "4:33 PM",
+    "address": "4557 NE GOING ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Vehicle Fire",
+    "time": "4:15 PM",
+    "address": "21970 SW SHERWOOD BLVD, SHERWOOD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "4:13 PM",
+    "address": "SE LOSTINE DR, CLACKAMAS, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Gaston Rural FD",
+    "type": "Medical Emergency",
+    "time": "4:12 PM",
+    "address": "NW OLSON RD, GASTON, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "4:08 PM",
+    "address": "NW TULLAMORRIE WAY, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "4:04 PM",
+    "address": "SW BARNES RD, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "4:03 PM",
+    "address": "GILMAN DR, OREGON CITY, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Canby Fire",
+    "type": "Medical Emergency",
+    "time": "3:58 PM",
+    "address": "NW 6TH AVE, CANBY, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Outside Fire",
+    "time": "3:53 PM",
+    "address": "17238 SE DIVISION ST, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Keizer Fire",
+    "type": "Medical Emergency",
+    "time": "3:47 PM",
+    "address": "HIDDEN CREEK DR NE, KEIZER, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "3:47 PM",
+    "address": "NE 2ND AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Clackamas FD",
+    "type": "Medical Emergency",
+    "time": "3:46 PM",
+    "address": "SE ROETHE RD, MILWAUKIE, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "3:39 PM",
+    "address": "N VANCOUVER AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Odor Investigation",
+    "time": "3:35 PM",
+    "address": "22813 SW MAIN ST, STE A, SHERWOOD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "time": "3:35 PM",
+    "address": "N HEREFORD AVE, PORTLAND, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "3:28 PM",
+    "address": "SW SUMMERFIELD DR, TIGARD, OR",
+    "unitStatuses": []
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "time": "3:25 PM",
+    "address": "SW SUMMERFIELD DR, TIGARD, OR",
+    "unitStatuses": []
+  }
+]
