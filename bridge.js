@@ -17,73 +17,74 @@ async function run() {
     });
     
     const page = await browser.newPage();
+    // Use the narrow viewport to keep the interface simple while loading
+    await page.setViewport({ width: 400, height: 800 });
     
-    // 🚨 THE FIX: Force a narrow phone-sized width to kill the map
-    await page.setViewport({ width: 400, height: 1200 }); 
-    await page.emulateTimezone('America/Los_Angeles');
+    let capturedData = null;
+
+    // 📡 INTERCEPTOR: Listens for the exact URL from your screenshot
+    page.on('response', async (response) => {
+        const url = response.url();
+        // Matching the pattern found in your Network tab images
+        if (url.includes('api.pulsepoint.org/v1/webapp?resource=incidents')) {
+            try {
+                const json = await response.json();
+                if (json && json.incidents) {
+                    capturedData = json.incidents;
+                    console.log(`📡 Captured ${capturedData.length} raw incidents from the API!`);
+                }
+            } catch (e) { /* Ignore non-JSON responses */ }
+        }
+    });
 
     try {
-        console.log("🕵️ Navigating to PulsePoint (Mobile Mode)...");
+        console.log("🕵️ Triggering PulsePoint data feed...");
+        // Use the agency list from your screenshot for the URL
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
             waitUntil: 'networkidle2', 
             timeout: 60000 
         });
 
-        // Wait for the mobile list to stabilize
+        // Wait 15s for the API response to be captured
         await new Promise(r => setTimeout(r, 15000));
 
-        const data = await page.evaluate(() => {
-            const results = [];
-            // Target the specific incident cards found in the list view
-            const cards = Array.from(document.querySelectorAll('.incident_row, div[role="button"]'))
-                               .filter(el => el.innerText.length > 50 && !el.innerText.includes('Recent'));
-            
-            cards.forEach((card) => {
-                const text = card.innerText;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                
-                // Units like AMR113 or E35 are colored badges in the DOM
-                const units = [];
-                card.querySelectorAll('*').forEach(el => {
-                    const style = window.getComputedStyle(el);
-                    const val = el.innerText.trim();
-                    if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 8) {
-                        units.push(val);
-                    }
-                });
-
-                results.push({
-                    agency: lines[0] || "Unknown",
-                    type: lines[1] || "Emergency",
-                    address: lines.find(l => l.includes(',')) || "Location Restricted",
-                    time: text.match(/\d{1,2}:\d{2}\s*[AP]M/)?.[0] || "Active",
-                    unitStatuses: [...new Set(units)]
-                });
-            });
-            return results;
-        });
-
-        console.log(`📡 Captured ${data.length} incidents in mobile view.`);
-
-        if (data.length > 0) {
-            const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            let sha = "";
-            try {
-                const res = await axios.get(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-                sha = res.data.sha;
-            } catch (e) {}
-
-            await axios.put(url, {
-                message: "📟 MOBILE SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
-                content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
-                sha: sha || undefined
-            }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            console.log("✅ GitHub Updated.");
+        if (!capturedData) {
+            throw new Error("API data not intercepted. Check if PulsePoint blocked the IP.");
         }
 
+        // 🛠️ DATA CLEANING: Map the raw API fields to your format
+        const cleanData = capturedData.map(inc => ({
+            agency: inc.agency_name || "Unknown",
+            type: inc.pulsepoint_incident_description || "Emergency",
+            address: inc.full_address || "Restricted",
+            time: new Date(inc.call_received_datetime).toLocaleTimeString("en-US", { 
+                hour: '2-digit', minute: '2-digit', timeZone: 'America/Los_Angeles' 
+            }),
+            // API provides clean unit lists directly
+            unitStatuses: inc.units ? inc.units.map(u => u.unit_id) : []
+        }));
+
+        console.log(`✅ Success! Syncing ${cleanData.length} incidents.`);
+
+        // --- PUSH TO GITHUB ---
+        const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
+        let sha = "";
+        try {
+            const res = await axios.get(ghUrl, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+            sha = res.data.sha;
+        } catch (e) {}
+
+        await axios.put(ghUrl, {
+            message: "📟 API SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+            content: Buffer.from(JSON.stringify(cleanData, null, 2)).toString('base64'),
+            sha: sha || undefined
+        }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+
+        console.log("🚀 GitHub Updated.");
+
     } catch (err) {
+        console.error("💥 Sync Failed:", err.message);
         await page.screenshot({ path: 'debug_error.png' });
-        console.error("💥 Run Failed:", err.message);
     } finally {
         await browser.close();
     }
