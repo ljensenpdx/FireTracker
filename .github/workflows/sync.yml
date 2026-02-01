@@ -7,31 +7,21 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      PUPPETEER_CACHE_DIR: ${{ github.workspace }}/.cache/puppeteer # Force cache to local workspace
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # ⚡ CACHE STEP: This skips the long install phase on repeat runs
-      - name: Cache Node Modules
-        id: cache-npm
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-v1-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-v1-
-
       - name: Install dependencies
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: npm install axios puppeteer-extra puppeteer-extra-plugin-stealth puppeteer lru-cache
-
-      # This ensures Chrome is ready without a full re-download
-      - name: Initialize Puppeteer
-        run: npx puppeteer install
+        run: |
+          npm install axios puppeteer-extra puppeteer-extra-plugin-stealth puppeteer lru-cache
+          # Manually install the browser into the forced local cache
+          npx puppeteer browsers install chrome
 
       - name: 90 Second Loop
         env:
