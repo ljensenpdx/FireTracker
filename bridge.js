@@ -12,95 +12,56 @@ async function run() {
 
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security'] 
     });
     
     const page = await browser.newPage();
-    
-    // 🌍 Force Pacific Time and a 400px Narrow View to hide the map
     await page.emulateTimezone('America/Los_Angeles');
+    // Set to 400px to force the mobile "List-Only" view
     await page.setViewport({ width: 400, height: 1200 });
 
     try {
         console.log("🕵️ Navigating to PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle2', 
+            waitUntil: 'networkidle0', 
             timeout: 90000 
         });
 
-        // 🖱️ Give it time to load the mobile-style list
-        console.log("⏳ Waiting for incident list to populate...");
-        await new Promise(r => setTimeout(r, 20000));
+        // 🚨 CRITICAL FIX: Wait specifically for the incident buttons to render
+        console.log("⏳ Waiting for incident cards to appear...");
+        await page.waitForSelector('div[role="button"]', { timeout: 60000 });
 
-        // --- YOUR SCRAPE LOGIC STARTS HERE ---
+        // Extra "settle" time for the unit badges (AMR, Engine, etc) to animate in
+        await new Promise(r => setTimeout(r, 5000));
+
         const data = await page.evaluate(() => {
             const results = [];
-            
             const rows = Array.from(document.querySelectorAll('div[role="button"]')).filter(el => {
                 const text = el.innerText || '';
-                return text.includes('Medical Emergency') || 
-                       text.includes('FIRE') || 
-                       text.includes('Emergency') ||
-                       text.match(/\d{1,2}:\d{2}\s*[AP]M/);
+                return text.includes('Medical') || text.includes('FIRE') || text.match(/\d{1,2}:\d{2}/);
             });
             
-            rows.forEach((card, idx) => {
+            rows.forEach((card) => {
                 try {
                     const text = card.innerText;
                     const lines = text.split('\n').map(l => l.trim()).filter(l => l);
                     
-                    let agency = "Unknown";
-                    let type = "Emergency";
-                    let address = "Restricted";
-                    let time = "Active";
-                    let units = [];
+                    let agency = lines[0] || "Unknown";
+                    let type = lines[1] || "Emergency";
+                    let address = lines.find(l => l.includes(',') || l.match(/\d+\s\w+/)) || "Restricted";
+                    let time = text.match(/\d{1,2}:\d{2}\s*[AP]M/)?.[0] || "Active";
                     
-                    if (lines.length > 0) {
-                        const firstLine = lines[0];
-                        const timeMatch = firstLine.match(/\d{1,2}:\d{2}\s*[AP]M/);
-                        if (timeMatch) {
-                            agency = firstLine.replace(timeMatch[0], '').trim();
-                            time = timeMatch[0];
-                        } else {
-                            agency = firstLine;
-                        }
-                    }
-                    
-                    if (lines.length > 1) { type = lines[1]; }
-                    
-                    const addressLine = lines.find(l => 
-                        l.includes(',') || 
-                        l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LANE|CT|CIRCLE|HIGHWAY)\b/i)
-                    );
-                    if (addressLine) { address = addressLine; }
-                    
-                    // Unit Capture by Color Badge
+                    const units = [];
                     card.querySelectorAll('span, div').forEach(el => {
                         const style = window.getComputedStyle(el);
-                        const elText = el.innerText.trim();
-                        const bgColor = style.backgroundColor;
-                        
-                        if (bgColor !== 'rgba(0, 0, 0, 0)' && 
-                            elText.length > 0 && 
-                            elText.length < 15 &&
-                            elText.match(/^[A-Z]{1,4}\d{1,4}$/)) {
-                            
-                            let status = elText;
-                            const rgb = bgColor.match(/\d+/g);
-                            if (rgb) {
-                                const r = parseInt(rgb[0]);
-                                const g = parseInt(rgb[1]);
-                                if (r > 200 && g < 100) { status = `${elText} (On Scene)`; }
-                                else if (g > 150) { status = `${elText} (En Route)`; }
-                            }
-                            units.push(status);
+                        const val = el.innerText.trim();
+                        // Extract unit IDs (e.g., E1, MED21) based on background color
+                        if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 8) {
+                            units.push(val);
                         }
                     });
                     
-                    results.push({
-                        agency, type, time, address,
-                        unitStatuses: [...new Set(units)]
-                    });
+                    results.push({ agency, type, time, address, unitStatuses: [...new Set(units)] });
                 } catch (e) {}
             });
             return results;
@@ -108,7 +69,6 @@ async function run() {
 
         console.log(`📡 Captured ${data.length} incidents.`);
 
-        // --- PUSH TO GITHUB ---
         if (data.length > 0) {
             const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
@@ -126,7 +86,7 @@ async function run() {
         }
 
     } catch (err) {
-        // If it fails, take a screenshot for the Artifacts defined in your sync.yml
+        // Save a debug image if it fails so we can see what the robot sees
         await page.screenshot({ path: 'debug-screenshot.png' });
         console.error("💥 Run Failed:", err.message);
     } finally {
