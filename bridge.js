@@ -10,72 +10,72 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-// ... (imports remain the same)
-
-const browser = await puppeteer.launch({ 
-    headless: "new", 
-    executablePath: '/usr/bin/google-chrome', // 🚨 Point directly to the server's Chrome
-    args: [
-        '--no-sandbox', 
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage', // ⚡ Prevents memory crashes
-        '--disable-gpu'
-    ] 
-});
+    const browser = await puppeteer.launch({ 
+        headless: "new", 
+        executablePath: '/usr/bin/google-chrome', // Use the runner's built-in Chrome
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage'
+        ] 
+    });
     
     const page = await browser.newPage();
+    
+    // 🌍 SETTING: Force Portland Time and Mobile View
     await page.emulateTimezone('America/Los_Angeles');
-    // Set to 400px to force the mobile "List-Only" view
-    await page.setViewport({ width: 400, height: 1200 });
+    await page.setViewport({ width: 390, height: 844 }); // iPhone-sized for list view
+    await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
 
     try {
-        console.log("🕵️ Navigating to PulsePoint...");
+        console.log("🕵️ Navigating PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle0', 
+            waitUntil: 'networkidle2', 
             timeout: 90000 
         });
 
-        // 🚨 CRITICAL FIX: Wait specifically for the incident buttons to render
-        console.log("⏳ Waiting for incident cards to appear...");
-        await page.waitForSelector('div[role="button"]', { timeout: 60000 });
-
-        // Extra "settle" time for the unit badges (AMR, Engine, etc) to animate in
+        // 🖱️ HUMAN INTERACTION: Slight scroll to trigger data load
+        console.log("🖱️ Mimicking scroll...");
+        await page.mouse.wheel({ deltaY: 300 });
         await new Promise(r => setTimeout(r, 5000));
+
+        // ⏳ WAIT: We'll wait for ANY element that looks like a row
+        console.log("⏳ Watching for list population...");
+        await page.waitForSelector('.incident_row, div[role="button"]', { timeout: 45000 });
 
         const data = await page.evaluate(() => {
             const results = [];
-            const rows = Array.from(document.querySelectorAll('div[role="button"]')).filter(el => {
-                const text = el.innerText || '';
-                return text.includes('Medical') || text.includes('FIRE') || text.match(/\d{1,2}:\d{2}/);
-            });
+            // Target the containers we saw in the screenshot
+            const cards = Array.from(document.querySelectorAll('.incident_row, div[role="button"]'))
+                               .filter(el => el.innerText.length > 50 && !el.innerText.includes('Recent'));
             
-            rows.forEach((card) => {
-                try {
-                    const text = card.innerText;
-                    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                    
-                    let agency = lines[0] || "Unknown";
-                    let type = lines[1] || "Emergency";
-                    let address = lines.find(l => l.includes(',') || l.match(/\d+\s\w+/)) || "Restricted";
-                    let time = text.match(/\d{1,2}:\d{2}\s*[AP]M/)?.[0] || "Active";
-                    
-                    const units = [];
-                    card.querySelectorAll('span, div').forEach(el => {
-                        const style = window.getComputedStyle(el);
-                        const val = el.innerText.trim();
-                        // Extract unit IDs (e.g., E1, MED21) based on background color
-                        if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 8) {
-                            units.push(val);
-                        }
-                    });
-                    
-                    results.push({ agency, type, time, address, unitStatuses: [...new Set(units)] });
-                } catch (e) {}
+            cards.forEach((card) => {
+                const text = card.innerText;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                
+                // Agency is line 0, Type is line 1 (e.g. Medical Emergency)
+                const agency = lines[0] || "Unknown";
+                const type = lines[1] || "Emergency";
+                const address = lines.find(l => l.includes(',')) || "Restricted";
+                const time = text.match(/\d{1,2}:\d{2}\s*[AP]M/)?.[0] || "Active";
+                
+                // UNIT CAPTURE: Looking for the colored badges
+                const units = [];
+                card.querySelectorAll('*').forEach(el => {
+                    const style = window.getComputedStyle(el);
+                    const val = el.innerText.trim();
+                    // Grab short text with a background (The unit IDs)
+                    if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 8) {
+                        units.push(val);
+                    }
+                });
+                
+                results.push({ agency, type, time, address, unitStatuses: [...new Set(units)] });
             });
             return results;
         });
 
-        console.log(`📡 Captured ${data.length} incidents.`);
+        console.log(`📡 Success! Captured ${data.length} incidents.`);
 
         if (data.length > 0) {
             const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -86,7 +86,7 @@ const browser = await puppeteer.launch({
             } catch (e) {}
 
             await axios.put(url, {
-                message: "📟 SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+                message: "📟 REFRESH: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
@@ -94,7 +94,6 @@ const browser = await puppeteer.launch({
         }
 
     } catch (err) {
-        // Save a debug image if it fails so we can see what the robot sees
         await page.screenshot({ path: 'debug-screenshot.png' });
         console.error("💥 Run Failed:", err.message);
     } finally {
