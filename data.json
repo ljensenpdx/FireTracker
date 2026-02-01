@@ -1,12 +1,21 @@
 [
   {
+    "agency": "Clackamas FD",
+    "type": "Public Service",
+    "address": "19822 PROSPERITY LN, STE 310, OREGON CITY, OR",
+    "time": "11:37 AM",
+    "unitStatuses": [
+      "T316 (En Route)"
+    ]
+  },
+  {
     "agency": "Tualatin Valley F&R",
     "type": "Medical Emergency",
     "address": "SW CASCADE LOOP, WILSONVILLE, OR",
     "time": "11:30 AM",
     "unitStatuses": [
-      "E52 (En Route)",
       "AMR220 (On Scene)",
+      "E52 (On Scene)",
       "AMRDS (Cleared)"
     ]
   },
@@ -59,7 +68,7 @@
     "time": "11:22 AM",
     "unitStatuses": [
       "AMR118 (On Scene)",
-      "E05 (On Scene)"
+      "E05 (Cleared)"
     ]
   },
   {
@@ -91,7 +100,7 @@
     "address": "SW 182ND AVE, BEAVERTON, OR",
     "time": "11:09 AM",
     "unitStatuses": [
-      "AMR119 (On Scene)",
+      "AMR119 (To Hospital)",
       "E62 (Cleared)"
     ]
   },
@@ -177,29 +186,6 @@
     "unitStatuses": [
       "AMR122 (At Hospital)",
       "E64 (Cleared)"
-    ]
-  },
-  {
-    "agency": "Hillsboro Fire",
-    "type": "Medical Emergency",
-    "address": "SE AUSTIN DR, HILLSBORO, OR",
-    "time": "10:23 AM",
-    "unitStatuses": [
-      "AMR123 (At Hospital)",
-      "E02 (Cleared)",
-      "E06 (Cleared)",
-      "R06 (Cleared)"
-    ]
-  },
-  {
-    "agency": "Clackamas FD",
-    "type": "Medical Emergency",
-    "address": "S POWDER RD, BEAVERCREEK, OR",
-    "time": "10:19 AM",
-    "unitStatuses": [
-      "AMR245 (At Hospital)",
-      "AMRDD (Cleared)",
-      "E310 (Cleared)"
     ]
   },
   {
