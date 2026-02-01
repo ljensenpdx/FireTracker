@@ -39,3 +39,20 @@ jobs:
         run: node bridge.js
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      # NEW: Upload debug artifacts
+      - name: Upload Debug Screenshot
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-screenshot
+          path: debug-screenshot.png
+          retention-days: 5
+
+      - name: Upload Error Page (if exists)
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: error-page
+          path: error-page.html
+          retention-days: 5
