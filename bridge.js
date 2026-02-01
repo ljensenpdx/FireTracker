@@ -5,10 +5,9 @@ import { LRUCache } from 'lru-cache';
 
 puppeteer.use(StealthPlugin());
 
-// --- CACHE CONFIG ---
-// We only need to remember the last state to compare.
-const options = { max: 5 };
-const localCache = new LRUCache(options);
+// --- 🧠 CACHE CONFIG ---
+// This keeps the script "smart" between cycles in the same Action run.
+const localCache = new LRUCache({ max: 10 });
 
 async function run() {
     const GITHUB_TOKEN = process.env.GH_TOKEN;
@@ -16,9 +15,15 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
+    console.log("🚀 Initializing Stealth Browser...");
     const browser = await puppeteer.launch({ 
         headless: "new",
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] 
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox', 
+            '--disable-dev-shm-usage', 
+            '--disable-gpu'
+        ] 
     });
     
     const page = await browser.newPage();
@@ -30,27 +35,35 @@ async function run() {
             waitUntil: 'networkidle2' 
         });
 
-        console.log("⏳ Waiting for incident cards...");
+        console.log("⏳ Waiting for incident cards to render...");
         await page.waitForSelector('.css-i11ep2', { timeout: 45000 });
 
         const data = await page.evaluate(() => {
             const results = [];
             const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
+            
             const statusMap = {
-                'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
-                'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
-                'css-1tgt22r': 'At Hospital', 'css-xts122': 'Cleared'
+                'css-vni3px': 'Toned Out',
+                'css-kne7t2': 'En Route',
+                'css-qvlduj': 'On Scene',
+                'css-1oizron': 'To Hospital',
+                'css-1tgt22r': 'At Hospital',
+                'css-xts122': 'Cleared'
             };
 
             cards.forEach(card => {
                 const text = card.innerText;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                
+                // Skip summary boxes or empty cards
                 if (lines[0] === "Active" || lines[0] === "Recent" || lines.length < 3) return;
 
                 const agency = lines[0];
                 const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
                 const time = timeMatch ? timeMatch[0] : "Active";
                 const type = lines.find(l => l !== agency && l !== time) || "Emergency";
+                
+                // Address logic: Looks for comma or street suffixes
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
@@ -59,48 +72,57 @@ async function run() {
                 const unitStatuses = [];
                 Object.keys(statusMap).forEach(className => {
                     card.querySelectorAll(`.${className}`).forEach(badge => {
-                        if (badge.innerText.trim()) unitStatuses.push(`${badge.innerText.trim()} (${statusMap[className]})`);
+                        const unitID = badge.innerText.trim();
+                        if (unitID) {
+                            // 🏷️ AGENCY PREFIX: Agency Name: Unit ID (Status)
+                            unitStatuses.push(`${agency}: ${unitID} (${statusMap[className]})`);
+                        }
                     });
                 });
 
                 results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
             });
             return results;
-        }) || [];
+        }) || []; // Safety fallback to empty array
 
-        // --- 🧠 LRU-CACHE LOGIC ---
+        // --- 🧠 LRU-CACHE COMPARISON ---
         const currentDataString = JSON.stringify(data);
         const previousDataString = localCache.get('last_push');
 
-        if (currentDataString === previousDataString) {
-            console.log("♻️ DATA UNCHANGED: Skipping GitHub commit to prevent redundancy.");
-        } else if (data.length > 0) {
-            console.log(`📡 CHANGE DETECTED: Found ${data.length} incidents. Updating GitHub...`);
+        if (data.length === 0) {
+            console.log("⚠️ Scrape returned 0 incidents. Check selector or PulsePoint status.");
+        } else if (currentDataString === previousDataString) {
+            console.log("♻️ DATA UNCHANGED: Skipping GitHub push to save resources.");
+        } else {
+            console.log(`📡 CHANGE DETECTED: Found ${data.length} incidents. Syncing to GitHub...`);
             
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
             try {
                 const res = await axios.get(ghUrl, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
                 sha = res.data.sha;
-            } catch (e) {}
+            } catch (e) {
+                console.log("📄 No existing data.json found; creating new file.");
+            }
 
             const timeStamp = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
+            
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${timeStamp}]`,
+                message: `📟 SYNC [${timeStamp}] - ${data.length} ACTIVE`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
-            // Save current state to cache after successful push
+            // Update cache with what we just pushed
             localCache.set('last_push', currentDataString);
-            console.log("✅ GitHub Updated.");
-        } else {
-            console.log("⚠️ No active incidents found.");
+            console.log(`✅ GitHub Updated Successfully at ${timeStamp}`);
         }
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
     } finally {
         await browser.close();
+        console.log("🏁 Browser Closed.");
     }
 }
+
 run();
