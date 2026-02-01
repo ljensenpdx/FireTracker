@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oregon Command Dashboard | GAS Build</title>
+    <title>Oregon Command Dashboard | MASTER BUILD</title>
     <style>
         :root {
             --bg: #050505;
             --panel: #111;
+            --header: #1a1a1a;
             --red: #ff3b30;
             --green: #00ff41;
             --border: #333;
@@ -16,7 +16,7 @@
         body {
             background-color: var(--bg);
             color: #eee;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 10px;
             display: grid;
@@ -26,144 +26,108 @@
             height: 98vh;
         }
 
-        header { 
-            grid-column: 1 / -1; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 2px solid var(--red); 
-        }
+        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--red); padding-bottom: 5px; }
+        
+        .panel { background: var(--panel); border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+        .panel-header { background: var(--header); padding: 8px 12px; font-weight: bold; color: var(--red); border-bottom: 1px solid var(--border); text-transform: uppercase; font-size: 0.8rem; }
 
-        .panel { 
-            background: var(--panel); 
-            border: 1px solid var(--border); 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
-
-        .panel-header { 
-            background: #1a1a1a; 
-            padding: 8px 12px; 
-            font-weight: bold; 
-            color: var(--red); 
-            border-bottom: 1px solid var(--border); 
-            text-transform: uppercase; 
-            font-size: 0.8rem; 
-        }
-
-        /* --- LEFT SIDEBAR: STATUS BUTTONS --- */
+        /* Left: Unit Status Buttons */
         .sidebar-left { grid-row: 2 / 4; }
-        .unit-btn { 
+        .btn { 
             background: #222; color: #fff; border: 1px solid #444; 
-            padding: 12px; margin: 8px; text-align: left; cursor: pointer;
-            font-weight: bold; font-size: 0.75rem;
+            padding: 12px; margin: 6px 10px; text-align: left; cursor: pointer;
+            font-weight: bold; font-size: 0.75rem; transition: 0.2s;
         }
+        .btn:hover { background: #333; border-color: var(--red); }
 
-        /* --- CENTER: GOOGLE SHEETS UNIT DATA --- */
-        .sheets-container { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 10px; 
-        }
-        .sheet-row { 
-            display: grid; 
-            grid-template-columns: 80px 1fr 100px; 
-            border-bottom: 1px solid #222; 
-            padding: 5px 0; 
-            font-size: 0.85rem; 
-        }
+        /* Center: Google Sheets Assignments */
+        .sheets-container { flex: 1; overflow-y: auto; padding: 10px; background: #080808; }
+        .sheet-entry { display: grid; grid-template-columns: 90px 1fr 120px; border-bottom: 1px solid #222; padding: 6px 0; font-size: 0.9rem; }
 
-        /* --- LOWER RIGHT: GROUPED REGIONAL FEED --- */
+        /* Lower Right: Live Regional Feed (Grouped) */
         #regional-feed { grid-column: 3; grid-row: 3; }
-        .feed-scroll { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 12px; 
-            background: #000; 
-            font-family: 'Consolas', monospace; 
-        }
-
-        .incident { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 8px; }
-        .inc-header { color: var(--red); font-weight: bold; font-size: 0.9rem; }
-        .inc-addr { color: #fff; font-size: 0.85rem; margin: 2px 0; }
+        .feed-content { flex: 1; overflow-y: auto; padding: 12px; background: #000; font-family: 'Consolas', monospace; }
+        
+        .incident-card { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 8px; }
+        .inc-type { color: var(--red); font-weight: bold; font-size: 0.9rem; }
+        .inc-addr { color: #fff; font-size: 0.85rem; margin: 3px 0; }
         .unit-group { margin-top: 5px; line-height: 1.4; }
         .unit-ids { color: var(--green); font-weight: bold; font-size: 0.85rem; }
-        .status-text { color: #777; font-size: 0.75rem; margin-left: 5px; }
+        .status-tag { color: #888; font-size: 0.75rem; margin-left: 5px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 style="margin:0; font-size: 1.6rem;">OREGON <span style="color:var(--red)">COMMAND</span></h1>
-        <div id="clock" style="color:var(--green); font-family:monospace; font-size:1.2rem;">--:--:-- PST</div>
+        <h1 style="margin:0; font-size: 1.7rem;">OREGON <span style="color:var(--red)">COMMAND</span></h1>
+        <div id="clock" style="color:var(--green); font-family:monospace; font-size:1.3rem;">--:--:-- PST</div>
     </header>
 
     <div class="panel sidebar-left">
         <div class="panel-header">Unit Status Selectors</div>
-        <button class="unit-btn">TONED OUT</button>
-        <button class="unit-btn">EN ROUTE</button>
-        <button class="unit-btn">ON SCENE</button>
-        <button class="unit-btn">TO HOSPITAL</button>
-        <button class="unit-btn">AT HOSPITAL</button>
-        <button class="unit-btn">CLEARED</button>
+        <button class="btn">TONED OUT</button>
+        <button class="btn">EN ROUTE</button>
+        <button class="btn">ON SCENE</button>
+        <button class="btn">TO HOSPITAL</button>
+        <button class="btn">AT HOSPITAL</button>
+        <button class="btn">CLEARED</button>
     </div>
 
     <div class="panel" style="grid-column: 2; grid-row: 2/4;">
-        <div class="panel-header">Current Unit Assignments (Google Sheets)</div>
+        <div class="panel-header">Google Sheets: Current Assignments</div>
         <div class="sheets-container" id="sheets-list">
-            <div style="color: #666;">Waiting for GAS Uplink...</div>
+            <div style="color:#444;">Awaiting GAS Uplink...</div>
         </div>
     </div>
 
     <div class="panel" style="grid-column: 3; grid-row: 2;">
         <div class="panel-header">Agency Selectors</div>
         <div style="padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-            <button class="unit-btn" style="margin:2px;">CLACKAMAS</button>
-            <button class="unit-btn" style="margin:2px;">MULTNOMAH</button>
-            <button class="unit-btn" style="margin:2px;">MARION</button>
-            <button class="unit-btn" style="margin:2px;">WASHINGTON</button>
+            <button class="btn" style="margin:2px;">CLACKAMAS</button>
+            <button class="btn" style="margin:2px;">MULTNOMAH</button>
+            <button class="btn" style="margin:2px;">MARION</button>
+            <button class="btn" style="margin:2px;">WASHINGTON</button>
         </div>
     </div>
 
     <div class="panel" id="regional-feed">
         <div class="panel-header">Live Regional Feed</div>
-        <div class="feed-scroll" id="live-feed">
-            <div style="color:var(--green)">SYNCING...</div>
+        <div class="feed-content" id="live-feed">
+            <div style="color:var(--green)">SEARCHING FOR INCIDENTS...</div>
         </div>
     </div>
 
     <script>
-        // 🚨 YOUR GOOGLE APPS SCRIPT WEB APP URL
-        const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+        // REPLACE WITH YOUR ACTUAL DEPLOYED APPS SCRIPT URL
+        const GAS_WEBAPP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
 
         // 1. Clock
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString() + ' PST';
         }, 1000);
 
-        // 2. Main Fetch Logic (Calls GAS for both Sheets & PulsePoint)
-        async function updateDashboard() {
+        // 2. Data Sync
+        async function syncDashboard() {
             try {
-                const response = await fetch(GAS_URL);
+                const response = await fetch(GAS_WEBAPP_URL);
                 const data = await response.json();
 
-                // UPDATE GOOGLE SHEETS SECTION
+                // Update Google Sheets Panel
                 if (data.sheets) {
-                    const sheetsContainer = document.getElementById('sheets-list');
-                    sheetsContainer.innerHTML = data.sheets.map(row => `
-                        <div class="sheet-row">
-                            <span style="color:var(--green); font-weight:bold;">${row.unitId}</span>
-                            <span>${row.personnel}</span>
-                            <span style="color:#aaa;">${row.assignment}</span>
+                    const sheetsEl = document.getElementById('sheets-list');
+                    sheetsEl.innerHTML = data.sheets.map(u => `
+                        <div class="sheet-entry">
+                            <b style="color:var(--green)">${u.unitId}</b>
+                            <span>${u.personnel}</span>
+                            <span style="color:#777;">${u.assignment}</span>
                         </div>
                     `).join('');
                 }
 
-                // UPDATE PULSEPOINT FEED (Grouped)
+                // Update PulsePoint Feed (Grouping Logic)
                 if (data.incidents) {
-                    const feedContainer = document.getElementById('live-feed');
-                    feedContainer.innerHTML = data.incidents.map(inc => {
+                    const feedEl = document.getElementById('live-feed');
+                    feedEl.innerHTML = data.incidents.map(inc => {
                         const groups = {};
                         inc.unitStatuses.forEach(u => {
                             const match = u.match(/(.+) \((.+)\)/);
@@ -177,28 +141,27 @@
                         const statusRows = Object.keys(groups).map(s => `
                             <div class="unit-group">
                                 <span class="unit-ids">${groups[s].join(', ')}</span>
-                                <span class="status-text">(${s})</span>
+                                <span class="status-tag">(${s})</span>
                             </div>
                         `).join('');
 
                         return `
-                            <div class="incident">
-                                <div class="inc-header">${inc.type}</div>
+                            <div class="incident-card">
+                                <div class="inc-type">${inc.type}</div>
                                 <div class="inc-addr">${inc.address}</div>
                                 ${statusRows}
-                                <div style="color:#444; font-size:10px; margin-top:4px;">${inc.agency} • ${inc.time}</div>
+                                <div style="color:#444; font-size:10px; margin-top:5px;">${inc.agency} • ${inc.time}</div>
                             </div>
                         `;
                     }).join('');
                 }
             } catch (err) {
-                console.error("GAS Sync Error:", err);
+                console.error("Master Sync Failure:", err);
             }
         }
 
-        // Auto-refresh every 30 seconds
-        setInterval(updateDashboard, 30000);
-        updateDashboard();
+        setInterval(syncDashboard, 30000);
+        syncDashboard();
     </script>
 </body>
 </html>
