@@ -28,15 +28,17 @@
         .unit-btn { width: 100%; padding: 10px; background: #333; color: #fff; border: 1px solid #444; margin-bottom: 2px; cursor: pointer; position: relative; overflow: hidden; text-align: left; }
         .btn-bg { position: absolute; inset: 0; opacity: 0.2; background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; }
 
-        /* TERMINAL (Right) - UPDATED FOR GROUPED FEED */
+        /* 📟 TERMINAL (Lower Right) */
         .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; height: 100%; border-radius: 6px; overflow: hidden; }
         #call-notes { height: 35%; background: #000; color: var(--green); border: none; padding: 15px; font-family: monospace; outline: none; border-bottom: 2px solid #333; resize: none; }
-        .live-feed-container { flex-grow: 1; overflow-y: auto; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; }
         
-        .incident-entry { border-left: 2px solid var(--red); padding-left: 12px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #1a1a1a; }
-        .unit-group { margin: 4px 0 0 10px; line-height: 1.4; }
-        .unit-ids { color: var(--green); font-weight: 900; }
-        .status-label { color: #888; font-size: 0.75rem; font-style: italic; margin-left: 5px; }
+        /* Smaller Terminal Font for Live Feed */
+        .live-feed-container { flex-grow: 1; overflow-y: auto; padding: 15px; font-family: 'Courier New', monospace; background: #000; }
+        .incident-entry { border-left: 2px solid var(--red); padding-left: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #111; }
+        
+        .unit-group-row { margin-top: 4px; font-size: 0.75rem; line-height: 1.2; }
+        .unit-ids { color: var(--green); font-weight: bold; }
+        .status-label { color: #888; margin-left: 4px; font-style: italic; }
 
         .config-bar { background: #111; padding: 8px; border-top: 1px solid #333; display: flex; gap: 8px; }
         .config-input { flex-grow: 1; background: #000; border: 1px solid #444; color: var(--cyan); padding: 6px; font-size: 0.75rem; }
@@ -60,7 +62,7 @@
 
     <div class="terminal-panel">
         <textarea id="call-notes" placeholder="TYPE COMMAND NOTES..."></textarea>
-        <div style="background:#111; padding:5px 15px; font-size:0.7rem; color:#888; border-bottom:1px solid #333;">LIVE REGIONAL FEED <span id="sync-status">STANDBY</span></div>
+        <div style="background:#111; padding:5px 15px; font-size:0.7rem; color:#888; border-bottom:1px solid #333;">LIVE REGIONAL FEED <span id="sync-status">(STANDBY)</span></div>
         <div class="live-feed-container" id="feed-root">[ READY FOR CONNECTION ]</div>
         <div class="config-bar">
             <input type="text" id="bridge-url" class="config-input" placeholder="PASTE PINGGY LINK...">
@@ -73,7 +75,6 @@
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
     let feedInterval = null;
 
-    // --- REPLACED: Grouped Unit Logic ---
     async function updateFeed() {
         let url = document.getElementById('bridge-url').value.trim();
         if (!url) return;
@@ -85,7 +86,7 @@
             let html = "";
             
             data.forEach(inc => {
-                // 1. Group IDs by their Status
+                // Group units by status
                 const groups = {};
                 inc.unitStatuses.forEach(u => {
                     const match = u.match(/(.+) \((.+)\)/);
@@ -96,28 +97,20 @@
                     }
                 });
 
-                // 2. Format: "E35, T56 (On Scene)"
-                let statusHtml = "";
+                let sHtml = "";
                 Object.keys(groups).forEach(status => {
-                    statusHtml += `
-                        <div class="unit-group">
-                            <span class="unit-ids">> ${groups[status].join(', ')}</span>
-                            <span class="status-label">(${status})</span>
-                        </div>
-                    `;
+                    sHtml += `<div class="unit-group-row">> <span class="unit-ids">${groups[status].join(', ')}</span> <span class="status-label">(${status})</span></div>`;
                 });
 
-                // 3. Incident Container
                 html += `
                     <div class="incident-entry">
                         <span style="float:right; opacity:0.5; font-size:0.6rem;">${inc.time}</span>
                         <div style="color:var(--green); font-weight:900; font-size:0.75rem;">[ ${inc.agency} ]</div>
-                        <div style="color:#fff; font-weight:bold;">${inc.type}</div>
+                        <div style="color:#fff; font-weight:bold; font-size:0.8rem;">${inc.type}</div>
                         <div style="color:var(--yellow); font-size:0.75rem;">${inc.address}</div>
-                        ${statusHtml || '<div style="color:#444; margin-left:10px;">> PENDING UNITS</div>'}
+                        ${sHtml}
                     </div>`;
             });
-
             document.getElementById('feed-root').innerHTML = html || "[ MONITORING... ]";
             document.getElementById('sync-status').innerText = "(LIVE: " + new Date().toLocaleTimeString() + ")";
         } catch (e) { document.getElementById('sync-status').innerText = "(OFFLINE)"; }
@@ -125,11 +118,10 @@
 
     function connectFeed() {
         if(feedInterval) clearInterval(feedInterval);
-        updateFeed(); 
-        feedInterval = setInterval(updateFeed, 5000); // 5 second refresh
+        updateFeed(); feedInterval = setInterval(updateFeed, 5000);
     }
 
-    // --- Directory and UI logic remains exactly as you had it ---
+    // Previous Directory and Clock Logic Preserved
     function initDirectory(raw) {
         const rows = Array.isArray(raw) ? raw : (raw.data || []);
         const groups = {};
