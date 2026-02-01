@@ -31,9 +31,11 @@ async function run() {
 
         const data = await page.evaluate(() => {
             const results = [];
-            const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
+            const allElements = Array.from(document.querySelectorAll('.css-i11ep2, h2, .header_class')); // Target cards and headers
 
-            // 🗺️ YOUR STATUS MAP
+            let isPastRecentHeader = false;
+
+            // 🗺️ FULL STATUS MAP (Includes Cleared)
             const statusMap = {
                 'css-vni3px': 'Toned Out',
                 'css-kne7t2': 'En Route',
@@ -43,50 +45,50 @@ async function run() {
                 'css-xts122': 'Cleared'
             };
 
-            cards.forEach(card => {
-                const text = card.innerText;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                
-                // 🛑 EXCLUSION LOGIC: Skip headers
-                const agencyCandidate = lines[0] || "";
-                if (agencyCandidate === "Active" || agencyCandidate === "Recent" || lines.length < 3) {
-                    return; 
+            for (const el of allElements) {
+                const text = el.innerText || "";
+
+                // 🛑 STOP SIGN: If we hit the "Recent" section, stop adding to results
+                if (text.includes("Recent") && (el.tagName === 'H2' || text.length < 15)) {
+                    isPastRecentHeader = true;
+                    break; 
                 }
 
-                // 🎯 PRECISION PARSING
-                const agency = agencyCandidate;
-                const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
-                const time = timeMatch ? timeMatch[0] : "Active";
+                // If it's a card and we are still in the Active section
+                if (el.classList.contains('css-i11ep2') && !isPastRecentHeader) {
+                    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                    
+                    // Skip the very first "Active" summary box
+                    if (lines[0] === "Active" || lines.length < 3) continue;
 
-                // Incident Type is usually the first line that isn't the agency or the time
-                const type = lines.find(l => l !== agency && l !== time) || "Emergency";
+                    const agency = lines[0];
+                    const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
+                    const time = timeMatch ? timeMatch[0] : "Active";
+                    const type = lines.find(l => l !== agency && l !== time) || "Emergency";
+                    const address = lines.find(l => 
+                        l !== agency && l !== time && l !== type && 
+                        (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
+                    ) || "Location Restricted";
 
-                // Address usually contains a comma or common street suffix, and isn't the type
-                const address = lines.find(l => 
-                    l !== agency && 
-                    l !== time && 
-                    l !== type && 
-                    (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
-                ) || "Location Restricted";
-
-                // 🚑 UNIT STATUS SCANNER
-                const units = [];
-                Object.keys(statusMap).forEach(className => {
-                    const unitBadges = card.querySelectorAll(`.${className}`);
-                    unitBadges.forEach(badge => {
-                        const unitID = badge.innerText.trim();
-                        if (unitID) {
-                            units.push(`${unitID} (${statusMap[className]})`);
-                        }
+                    // 🚑 UNIT STATUS SCANNER (Grabs everything)
+                    const units = [];
+                    Object.keys(statusMap).forEach(className => {
+                        const unitBadges = el.querySelectorAll(`.${className}`);
+                        unitBadges.forEach(badge => {
+                            const unitID = badge.innerText.trim();
+                            if (unitID) {
+                                units.push(`${unitID} (${statusMap[className]})`);
+                            }
+                        });
                     });
-                });
 
-                results.push({ agency, type, address, time, unitStatuses: [...new Set(units)] });
-            });
+                    results.push({ agency, type, address, time, unitStatuses: [...new Set(units)] });
+                }
+            }
             return results;
         });
 
-        console.log(`📡 Captured ${data.length} actual incidents (Skipped headers).`);
+        console.log(`📡 Captured ${data.length} incidents from the ACTIVE section.`);
 
         // --- PUSH TO GITHUB ---
         const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -97,12 +99,10 @@ async function run() {
         } catch (e) {}
 
         await axios.put(ghUrl, {
-            message: "📟 CLEAN-SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+            message: "📟 ACTIVE-FOLDER SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
             content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
             sha: sha || undefined
         }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-
-        console.log("🚀 GitHub Updated with clean data.");
 
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
