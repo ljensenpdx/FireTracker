@@ -32,7 +32,7 @@
         .terminal-panel { display: flex; flex-direction: column; background: #000; border: 1px solid #333; height: 100%; border-radius: 6px; overflow: hidden; }
         #call-notes { height: 35%; background: #000; color: var(--green); border: none; padding: 15px; font-family: monospace; outline: none; border-bottom: 2px solid #333; resize: none; }
         
-        /* Smaller Terminal Font for Live Feed */
+        /* Green Computer Font Styling */
         .live-feed-container { flex-grow: 1; overflow-y: auto; padding: 15px; font-family: 'Courier New', monospace; background: #000; }
         .incident-entry { border-left: 2px solid var(--red); padding-left: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #111; }
         
@@ -40,8 +40,7 @@
         .unit-ids { color: var(--green); font-weight: bold; }
         .status-label { color: #888; margin-left: 4px; font-style: italic; }
 
-        .config-bar { background: #111; padding: 8px; border-top: 1px solid #333; display: flex; gap: 8px; }
-        .config-input { flex-grow: 1; background: #000; border: 1px solid #444; color: var(--cyan); padding: 6px; font-size: 0.75rem; }
+        .config-bar { background: #111; padding: 8px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .is-hidden { display: none !important; }
     </style>
 </head>
@@ -53,35 +52,36 @@
 </header>
 
 <div class="main-wrapper">
-    <div class="column"><div style="background:#111; padding:8px; font-size:0.7rem; color:#888;">UNIT ASSIGNMENTS</div><div class="dashboard-grid scroll-area" id="active-units"></div></div>
+    <div class="column">
+        <div style="background:#111; padding:8px; font-size:0.7rem; color:#888;">UNIT ASSIGNMENTS</div>
+        <div class="dashboard-grid scroll-area" id="active-units"></div>
+    </div>
     
     <div class="column">
-        <div style="padding:10px; background:#000;"><input type="text" id="unit-search" class="config-input" placeholder="SEARCH DIRECTORY..." oninput="filterUnits()"></div>
+        <div style="padding:10px; background:#000;">
+            <input type="text" id="unit-search" style="width:100%; background:#000; border:1px solid #444; color:var(--cyan); padding:6px; font-size:0.75rem;" placeholder="SEARCH DIRECTORY..." oninput="filterUnits()">
+        </div>
         <div class="scroll-area" id="accordion-container"></div>
     </div>
 
     <div class="terminal-panel">
         <textarea id="call-notes" placeholder="TYPE COMMAND NOTES..."></textarea>
         <div style="background:#111; padding:5px 15px; font-size:0.7rem; color:#888; border-bottom:1px solid #333;">LIVE REGIONAL FEED <span id="sync-status">(STANDBY)</span></div>
-        <div class="live-feed-container" id="feed-root">[ READY FOR CONNECTION ]</div>
+        <div class="live-feed-container" id="feed-root">[ INITIALIZING UPLINK... ]</div>
         <div class="config-bar">
-            <input type="text" id="bridge-url" class="config-input" placeholder="PASTE PINGGY LINK...">
-            <button onclick="connectFeed()" style="background:#333; color:#fff; border:1px solid #555; cursor:pointer; padding:0 10px; font-weight:bold;">CONNECT</button>
+            <span style="font-size: 0.65rem; color: #555; margin-left: 10px;">SOURCE: DATA.JSON</span>
+            <div id="connection-dot" style="width:8px; height:8px; background:var(--green); border-radius:50%; margin-right:15px; box-shadow: 0 0 5px var(--green);"></div>
         </div>
     </div>
 </div>
 
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz6CvzVCi8CKRrskgLl7IDZVpjl819vft0j5SRzY9AXWsnqmOEU-4TSwujBg5VlOneiyA/exec";
-    let feedInterval = null;
 
+    // --- 📡 DATA.JSON FEED LOGIC ---
     async function updateFeed() {
-        let url = document.getElementById('bridge-url').value.trim();
-        if (!url) return;
-        if (!url.endsWith('/incidents')) url += '/incidents';
-        
         try {
-            const res = await fetch(url);
+            const res = await fetch('data.json?t=' + Date.now()); // Prevent caching
             const data = await res.json();
             let html = "";
             
@@ -113,12 +113,10 @@
             });
             document.getElementById('feed-root').innerHTML = html || "[ MONITORING... ]";
             document.getElementById('sync-status').innerText = "(LIVE: " + new Date().toLocaleTimeString() + ")";
-        } catch (e) { document.getElementById('sync-status').innerText = "(OFFLINE)"; }
-    }
-
-    function connectFeed() {
-        if(feedInterval) clearInterval(feedInterval);
-        updateFeed(); feedInterval = setInterval(updateFeed, 5000);
+        } catch (e) { 
+            document.getElementById('sync-status').innerText = "(OFFLINE)";
+            document.getElementById('connection-dot').style.background = "var(--red)";
+        }
     }
 
     // Previous Directory and Clock Logic Preserved
@@ -154,7 +152,11 @@
     window.onload = () => {
         const s = document.createElement('script'); s.src = `${GOOGLE_URL}?callback=initDirectory&ts=${Date.now()}`;
         document.body.appendChild(s);
+        
+        // Start Loops
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
+        setInterval(updateFeed, 10000); // Pulse check every 10 seconds
+        updateFeed();
     };
 
     function filterUnits() {
