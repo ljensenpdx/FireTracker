@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
 
       - name: Cache Node Modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -27,7 +27,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Cache Puppeteer Browser
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/puppeteer
           key: ${{ runner.os }}-puppeteer-${{ hashFiles('**/package.json') }}
@@ -40,19 +40,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      # NEW: Upload debug artifacts
+      # FIXED: Upload debug artifacts with v4
       - name: Upload Debug Screenshot
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: debug-screenshot
           path: debug-screenshot.png
           retention-days: 5
+          if-no-files-found: warn
 
       - name: Upload Error Page (if exists)
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: error-page
           path: error-page.html
           retention-days: 5
+          if-no-files-found: ignore
