@@ -36,6 +36,17 @@ async function run() {
             // In mobile view, the selector often changes to target the vertical list
             const rows = Array.from(document.querySelectorAll('.incident_row, [role="row"]'))
                              .filter(r => r.innerText.length > 30 && !r.innerText.includes('Recent'));
+
+         // After the page.evaluate() section, add:
+console.log("📊 RAW DATA SAMPLE:", JSON.stringify(data.slice(0, 2), null, 2));
+console.log("🔍 Total rows found:", data.length);
+
+// Inside page.evaluate(), before the forEach:
+console.log("DEBUG: Found", rows.length, "rows");
+if (rows.length > 0) {
+    console.log("First row HTML:", rows[0].outerHTML.substring(0, 500));
+}
+
             
             rows.forEach(row => {
                 const text = row.innerText;
