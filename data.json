@@ -1,12 +1,32 @@
 [
   {
+    "agency": "Portland F&R",
+    "type": "Medical Emergency",
+    "address": "SE HOLGATE BLVD, PORTLAND, OR",
+    "time": "11:56 AM",
+    "unitStatuses": [
+      "E25 (En Route)",
+      "M302 (En Route)"
+    ]
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Interfacility Transfer",
+    "address": "SW WESTERN AVE, BEAVERTON, OR",
+    "time": "11:54 AM",
+    "unitStatuses": [
+      "AMR103 (On Scene)"
+    ]
+  },
+  {
     "agency": "Tualatin Valley F&R",
     "type": "Medical Emergency",
     "address": "SW WOLDS DR, BEAVERTON, OR",
     "time": "11:50 AM",
     "unitStatuses": [
-      "?AMR128 (Toned Out)",
-      "E62 (En Route)",
+      "AMR127 (En Route)",
+      "E62 (On Scene)",
+      "AMR128 (Cleared)",
       "AMR151 (Cleared)"
     ]
   },
@@ -16,8 +36,8 @@
     "address": "NW WALKER RD, BEAVERTON, OR",
     "time": "11:46 AM",
     "unitStatuses": [
-      "AMR122 (En Route)",
       "E61 (On Scene)",
+      "AMR122 (Cleared)",
       "E64 (Cleared)"
     ]
   },
@@ -36,7 +56,7 @@
     "address": "SW CASCADE LOOP, WILSONVILLE, OR",
     "time": "11:30 AM",
     "unitStatuses": [
-      "AMR220 (On Scene)",
+      "AMR220 (To Hospital)",
       "AMRDS (Cleared)",
       "E52 (Cleared)"
     ]
@@ -47,7 +67,7 @@
     "address": "SW EDY RD, SHERWOOD, OR",
     "time": "11:24 AM",
     "unitStatuses": [
-      "AMR113 (On Scene)"
+      "AMR113 (To Hospital)"
     ]
   },
   {
@@ -67,8 +87,8 @@
     "address": "SW TUALATIN RD, TUALATIN, OR",
     "time": "11:23 AM",
     "unitStatuses": [
-      "AMR110 (On Scene)",
       "AMR160 (On Scene)",
+      "AMR110 (Cleared)",
       "E34 (Cleared)"
     ]
   },
@@ -88,7 +108,7 @@
     "address": "E HAYES ST, NEWBERG, OR",
     "time": "11:21 AM",
     "unitStatuses": [
-      "MED21 (To Hospital)",
+      "MED21 (At Hospital)",
       "E21 (Cleared)",
       "M023 (Cleared)",
       "T21 (Cleared)"
@@ -111,7 +131,7 @@
     "address": "SW 182ND AVE, BEAVERTON, OR",
     "time": "11:09 AM",
     "unitStatuses": [
-      "AMR119 (To Hospital)",
+      "AMR119 (At Hospital)",
       "E62 (Cleared)"
     ]
   },
@@ -121,7 +141,7 @@
     "address": "SW GREYSTONE CT, BEAVERTON, OR",
     "time": "11:08 AM",
     "unitStatuses": [
-      "AMR125 (To Hospital)"
+      "AMR125 (At Hospital)"
     ]
   },
   {
@@ -141,9 +161,9 @@
     "address": "HWY 22, STRAIGHT CREEK RD & MARION LAKE RD, HWY 22, OR",
     "time": "11:04 AM",
     "unitStatuses": [
-      "?E585 (Toned Out)",
       "E586 (On Scene)",
       "SQ584 (On Scene)",
+      "E585 (Cleared)",
       "STA590 (Cleared)"
     ]
   },
@@ -156,27 +176,6 @@
       "AMR230 (At Hospital)",
       "AMRDC (Cleared)",
       "E315 (Cleared)"
-    ]
-  },
-  {
-    "agency": "Clackamas FD",
-    "type": "Medical Emergency",
-    "address": "S FOOTHILLS AVE, OREGON CITY, OR",
-    "time": "10:52 AM",
-    "unitStatuses": [
-      "AMR228 (At Hospital)",
-      "AMRDC (Cleared)",
-      "E310 (Cleared)"
-    ]
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "address": "SW BONNIE BRAE ST, BEAVERTON, OR",
-    "time": "10:51 AM",
-    "unitStatuses": [
-      "AMR115 (At Hospital)",
-      "E67 (Cleared)"
     ]
   },
   {
