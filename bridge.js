@@ -1,8 +1,14 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import axios from 'axios';
+import { LRUCache } from 'lru-cache';
 
 puppeteer.use(StealthPlugin());
+
+// --- CACHE CONFIG ---
+// We only need to remember the last state to compare.
+const options = { max: 5 };
+const localCache = new LRUCache(options);
 
 async function run() {
     const GITHUB_TOKEN = process.env.GH_TOKEN;
@@ -16,7 +22,6 @@ async function run() {
     });
     
     const page = await browser.newPage();
-    // High timeout for slow GitHub runners
     page.setDefaultNavigationTimeout(90000); 
 
     try {
@@ -25,15 +30,12 @@ async function run() {
             waitUntil: 'networkidle2' 
         });
 
-        // Hard wait for cards to render
         console.log("⏳ Waiting for incident cards...");
         await page.waitForSelector('.css-i11ep2', { timeout: 45000 });
 
         const data = await page.evaluate(() => {
             const results = [];
             const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
-            
-            // MAP: Group IDs by status for your dash
             const statusMap = {
                 'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
                 'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
@@ -64,13 +66,19 @@ async function run() {
                 results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
             });
             return results;
-        }) || []; // Fallback to empty array if evaluation fails
+        }) || [];
 
-        if (data && data.length > 0) {
-            console.log(`📡 Found ${data.length} incidents. Updating GitHub...`);
+        // --- 🧠 LRU-CACHE LOGIC ---
+        const currentDataString = JSON.stringify(data);
+        const previousDataString = localCache.get('last_push');
+
+        if (currentDataString === previousDataString) {
+            console.log("♻️ DATA UNCHANGED: Skipping GitHub commit to prevent redundancy.");
+        } else if (data.length > 0) {
+            console.log(`📡 CHANGE DETECTED: Found ${data.length} incidents. Updating GitHub...`);
+            
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
-            
             try {
                 const res = await axios.get(ghUrl, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
                 sha = res.data.sha;
@@ -79,13 +87,15 @@ async function run() {
             const timeStamp = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
             await axios.put(ghUrl, {
                 message: `📟 SYNC [${timeStamp}]`,
-                content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
+                content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
+            // Save current state to cache after successful push
+            localCache.set('last_push', currentDataString);
             console.log("✅ GitHub Updated.");
         } else {
-            console.log("⚠️ No active incidents found this cycle.");
+            console.log("⚠️ No active incidents found.");
         }
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
