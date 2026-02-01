@@ -12,86 +12,62 @@ async function run() {
 
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        executablePath: '/usr/bin/google-chrome', // Use the runner's built-in Chrome
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage'
-        ] 
+        executablePath: '/usr/bin/google-chrome',
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
     });
     
     const page = await browser.newPage();
-    
-    // 🌍 SETTING: Force Portland Time and Mobile View
-    await page.emulateTimezone('America/Los_Angeles');
-    await page.setViewport({ width: 390, height: 844 }); // iPhone-sized for list view
-    await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
+    let interceptedData = null;
+
+    // 📡 Intercept the actual data feed
+    page.on('response', async (response) => {
+        const url = response.url();
+        if (url.includes('getIncidents') || url.includes('active_incidents')) {
+            try {
+                interceptedData = await response.json();
+                console.log("📡 Data packet intercepted!");
+            } catch (e) {}
+        }
+    });
 
     try {
-        console.log("🕵️ Navigating PulsePoint...");
+        console.log("🕵️ Navigating to PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
             waitUntil: 'networkidle2', 
-            timeout: 90000 
+            timeout: 60000 
         });
 
-        // 🖱️ HUMAN INTERACTION: Slight scroll to trigger data load
-        console.log("🖱️ Mimicking scroll...");
-        await page.mouse.wheel({ deltaY: 300 });
-        await new Promise(r => setTimeout(r, 5000));
+        // Wait a few seconds for the background data to fly in
+        await new Promise(r => setTimeout(r, 10000));
 
-        // ⏳ WAIT: We'll wait for ANY element that looks like a row
-        console.log("⏳ Watching for list population...");
-        await page.waitForSelector('.incident_row, div[role="button"]', { timeout: 45000 });
-
-        const data = await page.evaluate(() => {
-            const results = [];
-            // Target the containers we saw in the screenshot
-            const cards = Array.from(document.querySelectorAll('.incident_row, div[role="button"]'))
-                               .filter(el => el.innerText.length > 50 && !el.innerText.includes('Recent'));
-            
-            cards.forEach((card) => {
-                const text = card.innerText;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                
-                // Agency is line 0, Type is line 1 (e.g. Medical Emergency)
-                const agency = lines[0] || "Unknown";
-                const type = lines[1] || "Emergency";
-                const address = lines.find(l => l.includes(',')) || "Restricted";
-                const time = text.match(/\d{1,2}:\d{2}\s*[AP]M/)?.[0] || "Active";
-                
-                // UNIT CAPTURE: Looking for the colored badges
-                const units = [];
-                card.querySelectorAll('*').forEach(el => {
-                    const style = window.getComputedStyle(el);
-                    const val = el.innerText.trim();
-                    // Grab short text with a background (The unit IDs)
-                    if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && val.length > 0 && val.length < 8) {
-                        units.push(val);
-                    }
-                });
-                
-                results.push({ agency, type, time, address, unitStatuses: [...new Set(units)] });
-            });
-            return results;
-        });
-
-        console.log(`📡 Success! Captured ${data.length} incidents.`);
-
-        if (data.length > 0) {
-            const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            let sha = "";
-            try {
-                const res = await axios.get(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-                sha = res.data.sha;
-            } catch (e) {}
-
-            await axios.put(url, {
-                message: "📟 REFRESH: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
-                content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
-                sha: sha || undefined
-            }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-            console.log("✅ GitHub Updated.");
+        if (!interceptedData) {
+            throw new Error("Could not intercept the data feed. Site might be blocking the runner.");
         }
+
+        // 🛠️ Process the raw data into your clean format
+        const cleanData = interceptedData.incidents.map(inc => ({
+            agency: inc.agency_name || "Unknown",
+            type: inc.pulsepoint_incident_description || "Emergency",
+            address: inc.full_address || "Restricted",
+            time: new Date(inc.call_received_datetime).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' }),
+            unitStatuses: inc.units ? inc.units.map(u => u.unit_id) : []
+        }));
+
+        console.log(`✅ Success! Extracted ${cleanData.length} incidents from API.`);
+
+        // --- PUSH TO GITHUB ---
+        const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
+        let sha = "";
+        try {
+            const res = await axios.get(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+            sha = res.data.sha;
+        } catch (e) {}
+
+        await axios.put(url, {
+            message: "📟 API SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+            content: Buffer.from(JSON.stringify(cleanData, null, 2)).toString('base64'),
+            sha: sha || undefined
+        }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
 
     } catch (err) {
         await page.screenshot({ path: 'debug-screenshot.png' });
