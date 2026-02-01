@@ -11,49 +11,84 @@ async function run() {
     const FILE_PATH = 'data.json';
 
     const browser = await puppeteer.launch({ 
-        headless: "new", 
-        executablePath: '/usr/bin/google-chrome',
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        headless: "new",
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] 
     });
     
     const page = await browser.newPage();
-    await page.setViewport({ width: 400, height: 1200 });
+    // High timeout for slow GitHub runners
+    page.setDefaultNavigationTimeout(90000); 
 
     try {
-        console.log("🕵️ Fetching PulsePoint Data...");
+        console.log("🕵️ Navigating to PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle2', timeout: 60000 
+            waitUntil: 'networkidle2' 
         });
 
-        await page.waitForSelector('.css-i11ep2', { timeout: 30000 });
+        // Hard wait for cards to render
+        console.log("⏳ Waiting for incident cards...");
+        await page.waitForSelector('.css-i11ep2', { timeout: 45000 });
 
         const data = await page.evaluate(() => {
-            // ... (Your existing scraping/grouping logic here)
-            // This part remains the same as our previous working version
-        });
+            const results = [];
+            const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
+            
+            // MAP: Group IDs by status for your dash
+            const statusMap = {
+                'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
+                'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
+                'css-1tgt22r': 'At Hospital', 'css-xts122': 'Cleared'
+            };
 
-        if (data.length > 0) {
-            const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            cards.forEach(card => {
+                const text = card.innerText;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                if (lines[0] === "Active" || lines[0] === "Recent" || lines.length < 3) return;
+
+                const agency = lines[0];
+                const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
+                const time = timeMatch ? timeMatch[0] : "Active";
+                const type = lines.find(l => l !== agency && l !== time) || "Emergency";
+                const address = lines.find(l => 
+                    l !== agency && l !== time && l !== type && 
+                    (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
+                ) || "Location Restricted";
+
+                const unitStatuses = [];
+                Object.keys(statusMap).forEach(className => {
+                    card.querySelectorAll(`.${className}`).forEach(badge => {
+                        if (badge.innerText.trim()) unitStatuses.push(`${badge.innerText.trim()} (${statusMap[className]})`);
+                    });
+                });
+
+                results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
+            });
+            return results;
+        }) || []; // Fallback to empty array if evaluation fails
+
+        if (data && data.length > 0) {
+            console.log(`📡 Found ${data.length} incidents. Updating GitHub...`);
+            const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
+            
             try {
-                const res = await axios.get(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+                const res = await axios.get(ghUrl, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
                 sha = res.data.sha;
             } catch (e) {}
 
-            // 🏷️ THE RETITLE FIX: Generate unique commit message
             const timeStamp = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
-            const commitMessage = `📟 SYNC [${timeStamp}] - ${data.length} ACTIVE`;
-
-            await axios.put(url, {
-                message: commitMessage,
+            await axios.put(ghUrl, {
+                message: `📟 SYNC [${timeStamp}]`,
                 content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
-            console.log(`✅ GitHub Updated: ${commitMessage}`);
+            console.log("✅ GitHub Updated.");
+        } else {
+            console.log("⚠️ No active incidents found this cycle.");
         }
     } catch (err) {
-        console.error("💥 Sync Failed:", err.message);
+        console.error("💥 Run Failed:", err.message);
     } finally {
         await browser.close();
     }
