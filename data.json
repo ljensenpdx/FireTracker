@@ -1,11 +1,33 @@
 [
   {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "address": "SW WOLDS DR, BEAVERTON, OR",
+    "time": "11:50 AM",
+    "unitStatuses": [
+      "?AMR128 (Toned Out)",
+      "E62 (En Route)",
+      "AMR151 (Cleared)"
+    ]
+  },
+  {
+    "agency": "Tualatin Valley F&R",
+    "type": "Medical Emergency",
+    "address": "NW WALKER RD, BEAVERTON, OR",
+    "time": "11:46 AM",
+    "unitStatuses": [
+      "AMR122 (En Route)",
+      "E61 (On Scene)",
+      "E64 (Cleared)"
+    ]
+  },
+  {
     "agency": "Clackamas FD",
     "type": "Public Service",
     "address": "19822 PROSPERITY LN, STE 310, OREGON CITY, OR",
     "time": "11:37 AM",
     "unitStatuses": [
-      "T316 (En Route)"
+      "T316 (On Scene)"
     ]
   },
   {
@@ -15,8 +37,8 @@
     "time": "11:30 AM",
     "unitStatuses": [
       "AMR220 (On Scene)",
-      "E52 (On Scene)",
-      "AMRDS (Cleared)"
+      "AMRDS (Cleared)",
+      "E52 (Cleared)"
     ]
   },
   {
@@ -34,9 +56,9 @@
     "address": "S ROSEMONT RD, WEST LINN, OR",
     "time": "11:24 AM",
     "unitStatuses": [
-      "AMR226 (On Scene)",
-      "T55 (On Scene)",
-      "AMRDS (Cleared)"
+      "AMR226 (To Hospital)",
+      "AMRDS (Cleared)",
+      "T55 (Cleared)"
     ]
   },
   {
@@ -45,20 +67,9 @@
     "address": "SW TUALATIN RD, TUALATIN, OR",
     "time": "11:23 AM",
     "unitStatuses": [
-      "AMR160 (En Route)",
       "AMR110 (On Scene)",
-      "E34 (On Scene)"
-    ]
-  },
-  {
-    "agency": "Lake Oswego Fire",
-    "type": "Medical Emergency",
-    "address": "CHERRY CRST, LAKE OSWEGO, OR",
-    "time": "11:23 AM",
-    "unitStatuses": [
-      "AMR227 (On Scene)",
-      "E212 (On Scene)",
-      "AMRDL (Cleared)"
+      "AMR160 (On Scene)",
+      "E34 (Cleared)"
     ]
   },
   {
@@ -67,7 +78,7 @@
     "address": "NE TIMOTHY LN, HILLSBORO, OR",
     "time": "11:22 AM",
     "unitStatuses": [
-      "AMR118 (On Scene)",
+      "AMR118 (To Hospital)",
       "E05 (Cleared)"
     ]
   },
@@ -77,10 +88,10 @@
     "address": "E HAYES ST, NEWBERG, OR",
     "time": "11:21 AM",
     "unitStatuses": [
-      "MED21 (On Scene)",
-      "T21 (On Scene)",
+      "MED21 (To Hospital)",
       "E21 (Cleared)",
-      "M023 (Cleared)"
+      "M023 (Cleared)",
+      "T21 (Cleared)"
     ]
   },
   {
@@ -89,7 +100,7 @@
     "address": "SE 114TH CT, CLACKAMAS, OR",
     "time": "11:12 AM",
     "unitStatuses": [
-      "AMR224 (On Scene)",
+      "AMR224 (To Hospital)",
       "AMRDF (Cleared)",
       "R301 (Cleared)"
     ]
@@ -120,7 +131,7 @@
     "time": "11:07 AM",
     "unitStatuses": [
       "E31 (On Scene)",
-      "M304 (To Hospital)",
+      "M304 (At Hospital)",
       "R31 (Cleared)"
     ]
   },
@@ -176,16 +187,6 @@
     "unitStatuses": [
       "AMR126 (At Hospital)",
       "E35 (Cleared)"
-    ]
-  },
-  {
-    "agency": "Tualatin Valley F&R",
-    "type": "Medical Emergency",
-    "address": "NW OLD CORNELIUS PASS RD, HILLSBORO, OR",
-    "time": "10:37 AM",
-    "unitStatuses": [
-      "AMR122 (At Hospital)",
-      "E64 (Cleared)"
     ]
   },
   {
