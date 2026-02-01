@@ -27,7 +27,6 @@ async function run() {
             timeout: 60000 
         });
 
-        // Use the main container class you found earlier to ensure the list is loaded
         await page.waitForSelector('.css-i11ep2', { timeout: 30000 });
 
         const data = await page.evaluate(() => {
@@ -48,14 +47,30 @@ async function run() {
                 const text = card.innerText;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
                 
-                const agency = lines[0] || "Unknown";
-                const type = lines[1] || "Emergency";
-                const address = lines.find(l => l.match(/\d/) && (l.includes(',') || l.length > 5)) || "Restricted";
-                const time = text.match(/\d{1,2}:\d{2}\s*[AP]M/)?.[0] || "Active";
+                // 🛑 EXCLUSION LOGIC: Skip headers
+                const agencyCandidate = lines[0] || "";
+                if (agencyCandidate === "Active" || agencyCandidate === "Recent" || lines.length < 3) {
+                    return; 
+                }
+
+                // 🎯 PRECISION PARSING
+                const agency = agencyCandidate;
+                const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
+                const time = timeMatch ? timeMatch[0] : "Active";
+
+                // Incident Type is usually the first line that isn't the agency or the time
+                const type = lines.find(l => l !== agency && l !== time) || "Emergency";
+
+                // Address usually contains a comma or common street suffix, and isn't the type
+                const address = lines.find(l => 
+                    l !== agency && 
+                    l !== time && 
+                    l !== type && 
+                    (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
+                ) || "Location Restricted";
 
                 // 🚑 UNIT STATUS SCANNER
                 const units = [];
-                // Look for any element that matches your provided classes
                 Object.keys(statusMap).forEach(className => {
                     const unitBadges = card.querySelectorAll(`.${className}`);
                     unitBadges.forEach(badge => {
@@ -71,7 +86,7 @@ async function run() {
             return results;
         });
 
-        console.log(`📡 Captured ${data.length} incidents with precise unit statuses.`);
+        console.log(`📡 Captured ${data.length} actual incidents (Skipped headers).`);
 
         // --- PUSH TO GITHUB ---
         const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -82,16 +97,15 @@ async function run() {
         } catch (e) {}
 
         await axios.put(ghUrl, {
-            message: "📟 STATUS-SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+            message: "📟 CLEAN-SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
             content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
             sha: sha || undefined
         }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
 
-        console.log("🚀 GitHub Updated.");
+        console.log("🚀 GitHub Updated with clean data.");
 
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
-        await page.screenshot({ path: 'debug_error.png' });
     } finally {
         await browser.close();
     }
