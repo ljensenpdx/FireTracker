@@ -10,10 +10,18 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-    const browser = await puppeteer.launch({ 
-        headless: "new", 
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security'] 
-    });
+// ... (imports remain the same)
+
+const browser = await puppeteer.launch({ 
+    headless: "new", 
+    executablePath: '/usr/bin/google-chrome', // 🚨 Point directly to the server's Chrome
+    args: [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage', // ⚡ Prevents memory crashes
+        '--disable-gpu'
+    ] 
+});
     
     const page = await browser.newPage();
     await page.emulateTimezone('America/Los_Angeles');
