@@ -2,7 +2,7 @@ name: PulsePoint 90s Sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/10 * * * *' # Starts the loop every 10 mins
+    - cron: '*/30 * * * *' # Backup trigger every 30 mins
 
 jobs:
   sync:
@@ -14,14 +14,18 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install axios puppeteer-extra puppeteer-extra-plugin-stealth puppeteer
+        run: |
+          npm install axios puppeteer-extra puppeteer-extra-plugin-stealth puppeteer
+          # Force Chrome install to prevent hanging
+          npx puppeteer install
 
       - name: 90 Second Loop
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          # Run 3 times (Total ~5 mins) to stay within Action limits
-          for i in {1..3}
+          # This loop runs for 25 minutes (about 15-16 cycles)
+          # then finishes so the next scheduled job can take over.
+          for i in {1..150}
           do
             echo "Cycle $i starting..."
             node bridge.js
