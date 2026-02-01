@@ -3,204 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oregon Fire/EMS Command Dashboard</title>
+    <title>Oregon Command Dashboard</title>
     <style>
-        :root {
-            --bg-color: #050505;
-            --panel-bg: #111111;
-            --border-color: #333333;
-            --text-main: #e0e0e0;
-            --accent-red: #ff3b30;
-            --accent-green: #00ff41; /* Terminal Green */
-            --accent-yellow: #ffcc00;
-        }
-
+        /* Keeping your original dashboard styling */
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background-color: #050505;
+            color: #e0e0e0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 10px;
+            height: 98vh;
             display: grid;
-            grid-template-columns: 250px 1fr 400px;
-            grid-template-rows: 60px 1fr 300px;
-            gap: 10px;
-            height: 97vh;
+            grid-template-columns: 250px 1fr 450px;
+            grid-template-rows: auto 1fr;
+            gap: 15px;
         }
 
-        /* Generic Panel Style */
+        .header-bar {
+            grid-column: 1 / -1;
+            border-bottom: 2px solid #ff3b30;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .panel {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border-color);
+            background-color: #111;
+            border: 1px solid #333;
             border-radius: 4px;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
         .panel-header {
             background-color: #1a1a1a;
-            padding: 8px 12px;
+            padding: 10px;
             font-weight: bold;
-            font-size: 0.85rem;
+            color: #ff3b30;
+            border-bottom: 1px solid #333;
             text-transform: uppercase;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--accent-red);
-            display: flex;
-            justify-content: space-between;
+            font-size: 0.85rem;
         }
 
-        /* TOP BAR */
-        header {
-            grid-column: 1 / -1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
-            border-bottom: 2px solid var(--accent-red);
-        }
-
-        /* LEFT SIDEBAR (Counties) */
-        .sidebar {
-            grid-row: 2 / 4;
-            grid-column: 1;
-        }
-
-        /* MAIN CONTENT (Map/Center) */
-        .main-content {
-            grid-column: 2;
-            grid-row: 2 / 4;
-        }
-
-        /* BOTTOM RIGHT: LIVE REGIONAL FEED */
-        #regional-feed {
-            grid-column: 3;
-            grid-row: 3;
-            border: 1px solid #444;
-        }
-
-        .feed-container {
+        /* 📡 THE FEED CONTAINER (Where PulsePoint used to be) */
+        .live-regional-feed-content {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
-            font-family: 'Consolas', 'Courier New', monospace;
+            padding: 15px;
             background-color: #000;
+            font-family: 'Consolas', 'Courier New', monospace;
         }
 
-        /* INCIDENT ITEM STYLING */
-        .incident-card {
-            margin-bottom: 15px;
+        /* Incident Row Styling */
+        .incident-entry {
+            margin-bottom: 18px;
             border-bottom: 1px solid #222;
-            padding-bottom: 8px;
-            animation: fadeIn 0.5s ease;
+            padding-bottom: 10px;
         }
 
-        .incident-header {
-            color: var(--accent-red);
+        .incident-type {
+            color: #ff3b30;
             font-weight: bold;
-            font-size: 0.9rem;
-            margin-bottom: 3px;
+            font-size: 14px;
+            text-transform: uppercase;
         }
 
-        .incident-location {
+        .incident-addr {
             color: #fff;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
+            font-size: 14px;
+            margin-bottom: 4px;
         }
 
-        .status-group-row {
-            margin-top: 4px;
-            line-height: 1.4;
+        .unit-group {
+            margin-top: 5px;
+            line-height: 1.5;
         }
 
-        .unit-list {
-            color: var(--accent-green);
+        .unit-ids {
+            color: #00ff41; /* Terminal Green */
             font-weight: bold;
         }
 
-        .status-label {
+        .unit-status {
             color: #888;
-            font-size: 0.75rem;
+            font-size: 12px;
             margin-left: 4px;
         }
 
         .incident-meta {
-            font-size: 0.7rem;
             color: #555;
-            margin-top: 4px;
+            font-size: 11px;
+            margin-top: 5px;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div style="font-size: 1.5rem; font-weight: bold; color: white;">OREGON COMMAND <span style="color: var(--accent-red);">DASHBOARD</span></div>
-        <div id="clock" style="font-family: monospace; font-size: 1.2rem; color: var(--accent-green);">--:--:--</div>
-    </header>
+    <div class="header-bar">
+        <h1 style="margin:0;">OREGON <span style="color:#ff3b30;">COMMAND</span></h1>
+        <div id="clock" style="color:#00ff41; font-family:monospace; font-size:1.2rem;">--:--:-- PST</div>
+    </div>
 
-    <div class="panel sidebar">
-        <div class="panel-header">COUNTY SELECTORS</div>
-        <div style="padding: 15px; display: flex; flex-direction: column; gap: 10px;">
-            <button style="background: #222; color: white; border: 1px solid #444; padding: 10px; text-align: left; cursor: pointer;">CLACKAMAS</button>
-            <button style="background: #222; color: white; border: 1px solid #444; padding: 10px; text-align: left; cursor: pointer;">MARION</button>
-            <button style="background: #222; color: white; border: 1px solid #444; padding: 10px; text-align: left; cursor: pointer;">MULTNOMAH</button>
-            <button style="background: #222; color: white; border: 1px solid #444; padding: 10px; text-align: left; cursor: pointer;">WASHINGTON</button>
+    <div class="panel">
+        <div class="panel-header">Agency Selectors</div>
+        <div style="padding:10px; display:flex; flex-direction:column; gap:8px;">
+            <button style="background:#222; color:white; border:1px solid #444; padding:8px; text-align:left;">CLACKAMAS</button>
+            <button style="background:#222; color:white; border:1px solid #444; padding:8px; text-align:left;">MARION</button>
+            <button style="background:#222; color:white; border:1px solid #444; padding:8px; text-align:left;">MULTNOMAH</button>
         </div>
     </div>
 
-    <div class="panel main-content">
-        <div class="panel-header">SITUATIONAL AWARENESS MAP</div>
-        <div style="background: #111; flex: 1; display: flex; align-items: center; justify-content: center; color: #333;">
-            [ MAP INTERFACE LOADED ]
-        </div>
-    </div>
-
-    <div class="panel" id="regional-feed">
-        <div class="panel-header">
-            <span>LIVE REGIONAL FEED</span>
-            <span id="sync-status" style="color: var(--accent-green); font-size: 0.7rem;">SYNC ACTIVE</span>
-        </div>
-        <div class="feed-container" id="feed-items">
-            <div style="color: var(--accent-green);">INITIALIZING DATA STREAM...</div>
+    <div class="panel" style="grid-column: 2 / 4;">
+        <div class="panel-header">Live Regional Feed</div>
+        <div class="live-regional-feed-content" id="feed-display">
+            <div style="color: #00ff41;">ESTABLISHING UPLINK TO DATA.JSON...</div>
         </div>
     </div>
 
     <script>
-        // 1. Update the dashboard clock
+        // 1. Clock Logic
         function updateClock() {
             const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('clock').innerText = time + ' PST';
+            document.getElementById('clock').innerText = now.toLocaleTimeString() + ' PST';
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 2. Fetch and Format the Regional Feed
-        async function fetchFeed() {
-            const container = document.getElementById('feed-items');
+        // 2. The Grouped Feed Logic
+        async function fetchPulseData() {
+            const container = document.getElementById('feed-display');
+            
             try {
-                // Ensure we fetch the most recent data.json from your GitHub
+                // Fetch your scraped data.json
                 const response = await fetch('data.json?t=' + Date.now());
                 const data = await response.json();
 
                 if (!data || data.length === 0) {
-                    container.innerHTML = '<div style="color: #666;">[ STANDBY ] NO ACTIVE INCIDENTS DETECTED</div>';
+                    container.innerHTML = '<div style="color:#444;">[ STANDBY ] NO ACTIVE INCIDENTS</div>';
                     return;
                 }
 
                 container.innerHTML = data.map(incident => {
-                    // Group units by their status
+                    // --- GROUPING LOGIC ---
+                    // Creates an object: { "On Scene": ["E35", "T56"], "En Route": ["AMR113"] }
                     const groups = {};
                     incident.unitStatuses.forEach(u => {
                         const match = u.match(/(.+) \((.+)\)/);
@@ -211,37 +157,38 @@
                         }
                     });
 
-                    // Build strings: "ID, ID (Status)"
-                    const formattedStatusStrings = Object.keys(groups).map(status => {
-                        return `<div class="status-group-row">
-                            <span class="unit-list">${groups[status].join(', ')}</span>
-                            <span class="status-label">(${status})</span>
-                        </div>`;
+                    // Convert groups into: "ID, ID (Status)"
+                    const statusLines = Object.keys(groups).map(status => {
+                        return `
+                            <div class="unit-group">
+                                <span class="unit-ids">${groups[status].join(', ')}</span>
+                                <span class="unit-status">(${status})</span>
+                            </div>
+                        `;
                     }).join('');
 
                     return `
-                        <div class="incident-card">
-                            <div class="incident-header">${incident.type}</div>
-                            <div class="incident-location">${incident.address}</div>
-                            <div class="status-area">
-                                ${formattedStatusStrings || '<div style="color:#444; font-size:0.75rem;">NO UNITS ASSIGNED</div>'}
+                        <div class="incident-entry">
+                            <div class="incident-type">${incident.type}</div>
+                            <div class="incident-addr">${incident.address}</div>
+                            <div class="status-rows">
+                                ${statusLines || '<div style="color:#333;">PENDING UNIT ASSIGNMENT</div>'}
                             </div>
                             <div class="incident-meta">
-                                ${incident.agency} | ${incident.time}
+                                ${incident.agency} | DISPATCHED: ${incident.time}
                             </div>
                         </div>
                     `;
                 }).join('');
 
-                document.getElementById('sync-status').innerText = 'LAST SYNC: ' + new Date().toLocaleTimeString();
             } catch (err) {
-                container.innerHTML = '<div style="color: var(--accent-red);">[!] DATA SYNC ERROR: CHECK BRIDGE.JS</div>';
+                container.innerHTML = '<div style="color:#ff3b30;">[!] OFFLINE: DATA.JSON SYNC FAILED</div>';
             }
         }
 
-        // Auto-refresh every 30 seconds
-        setInterval(fetchFeed, 30000);
-        fetchFeed();
+        // Refresh every 30 seconds
+        setInterval(fetchPulseData, 30000);
+        fetchPulseData();
     </script>
 </body>
 </html>
