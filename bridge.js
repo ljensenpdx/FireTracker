@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth');
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import axios from 'axios';
 
 puppeteer.use(StealthPlugin());
@@ -21,41 +21,41 @@ async function run() {
     try {
         console.log("🕵️ Attempting diagnostic navigation...");
         
-        // Try to go to the site
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
             waitUntil: 'domcontentloaded', 
             timeout: 60000 
         });
 
-        // Wait 10 seconds to see what the final screen looks like
-        await new Promise(r => setTimeout(r, 10000));
+        // Wait 15 seconds to let any security checks (like Cloudflare) finish
+        console.log("⏳ Waiting to see what loads...");
+        await new Promise(r => setTimeout(r, 15000));
 
         console.log("📸 Taking diagnostic screenshot...");
         const screenshot = await page.screenshot({ encoding: 'base64' });
 
-        // Upload the screenshot directly to your repo so you can see it
+        // Get the SHA if the file already exists so we can overwrite it
+        let currentSha = undefined;
+        try {
+            const res = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/DIAGNOSTIC_SCREEN.png`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            currentSha = res.data.sha;
+        } catch (e) {
+            console.log("No existing diagnostic image, creating new one.");
+        }
+
         await axios.put(`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/DIAGNOSTIC_SCREEN.png`, {
             message: "📸 Diagnostic: PulsePoint blocked screen",
             content: screenshot,
-            // We need the SHA if the file already exists
-            sha: await getSha(GITHUB_USER, REPO_NAME, 'DIAGNOSTIC_SCREEN.png', GITHUB_TOKEN)
+            sha: currentSha
         }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
 
-        console.log("✅ Diagnostic image uploaded to your main folder as DIAGNOSTIC_SCREEN.png");
+        console.log("✅ DIAGNOSTIC_SCREEN.png has been uploaded to your main folder.");
 
     } catch (err) {
         console.error("💥 Diagnostic Failed:", err.message);
     } finally {
         await browser.close();
     }
-}
-
-async function getSha(user, repo, path, token) {
-    try {
-        const res = await axios.get(`https://api.github.com/repos/${user}/${repo}/contents/${path}`, {
-            headers: { 'Authorization': `token ${token}` }
-        });
-        return res.data.sha;
-    } catch (e) { return undefined; }
 }
 run();
