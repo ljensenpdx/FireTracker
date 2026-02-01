@@ -17,54 +17,61 @@ async function run() {
     });
     
     const page = await browser.newPage();
-    // Use the narrow viewport to keep the interface simple while loading
-    await page.setViewport({ width: 400, height: 800 });
-    
-    let capturedData = null;
-
-    // 📡 INTERCEPTOR: Listens for the exact URL from your screenshot
-    page.on('response', async (response) => {
-        const url = response.url();
-        // Matching the pattern found in your Network tab images
-        if (url.includes('api.pulsepoint.org/v1/webapp?resource=incidents')) {
-            try {
-                const json = await response.json();
-                if (json && json.incidents) {
-                    capturedData = json.incidents;
-                    console.log(`📡 Captured ${capturedData.length} raw incidents from the API!`);
-                }
-            } catch (e) { /* Ignore non-JSON responses */ }
-        }
-    });
+    await page.emulateTimezone('America/Los_Angeles');
+    await page.setViewport({ width: 400, height: 1200 });
 
     try {
-        console.log("🕵️ Triggering PulsePoint data feed...");
-        // Use the agency list from your screenshot for the URL
+        console.log("🕵️ Navigating to PulsePoint...");
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
             waitUntil: 'networkidle2', 
             timeout: 60000 
         });
 
-        // Wait 15s for the API response to be captured
-        await new Promise(r => setTimeout(r, 15000));
+        // Use the main container class you found earlier to ensure the list is loaded
+        await page.waitForSelector('.css-i11ep2', { timeout: 30000 });
 
-        if (!capturedData) {
-            throw new Error("API data not intercepted. Check if PulsePoint blocked the IP.");
-        }
+        const data = await page.evaluate(() => {
+            const results = [];
+            const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
 
-        // 🛠️ DATA CLEANING: Map the raw API fields to your format
-        const cleanData = capturedData.map(inc => ({
-            agency: inc.agency_name || "Unknown",
-            type: inc.pulsepoint_incident_description || "Emergency",
-            address: inc.full_address || "Restricted",
-            time: new Date(inc.call_received_datetime).toLocaleTimeString("en-US", { 
-                hour: '2-digit', minute: '2-digit', timeZone: 'America/Los_Angeles' 
-            }),
-            // API provides clean unit lists directly
-            unitStatuses: inc.units ? inc.units.map(u => u.unit_id) : []
-        }));
+            // 🗺️ YOUR STATUS MAP
+            const statusMap = {
+                'css-vni3px': 'Toned Out',
+                'css-kne7t2': 'En Route',
+                'css-qvlduj': 'On Scene',
+                'css-1oizron': 'To Hospital',
+                'css-1tgt22r': 'At Hospital',
+                'css-xts122': 'Cleared'
+            };
 
-        console.log(`✅ Success! Syncing ${cleanData.length} incidents.`);
+            cards.forEach(card => {
+                const text = card.innerText;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                
+                const agency = lines[0] || "Unknown";
+                const type = lines[1] || "Emergency";
+                const address = lines.find(l => l.match(/\d/) && (l.includes(',') || l.length > 5)) || "Restricted";
+                const time = text.match(/\d{1,2}:\d{2}\s*[AP]M/)?.[0] || "Active";
+
+                // 🚑 UNIT STATUS SCANNER
+                const units = [];
+                // Look for any element that matches your provided classes
+                Object.keys(statusMap).forEach(className => {
+                    const unitBadges = card.querySelectorAll(`.${className}`);
+                    unitBadges.forEach(badge => {
+                        const unitID = badge.innerText.trim();
+                        if (unitID) {
+                            units.push(`${unitID} (${statusMap[className]})`);
+                        }
+                    });
+                });
+
+                results.push({ agency, type, address, time, unitStatuses: [...new Set(units)] });
+            });
+            return results;
+        });
+
+        console.log(`📡 Captured ${data.length} incidents with precise unit statuses.`);
 
         // --- PUSH TO GITHUB ---
         const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -75,15 +82,15 @@ async function run() {
         } catch (e) {}
 
         await axios.put(ghUrl, {
-            message: "📟 API SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
-            content: Buffer.from(JSON.stringify(cleanData, null, 2)).toString('base64'),
+            message: "📟 STATUS-SYNC: " + new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"}),
+            content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
             sha: sha || undefined
         }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
 
         console.log("🚀 GitHub Updated.");
 
     } catch (err) {
-        console.error("💥 Sync Failed:", err.message);
+        console.error("💥 Run Failed:", err.message);
         await page.screenshot({ path: 'debug_error.png' });
     } finally {
         await browser.close();
