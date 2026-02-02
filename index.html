@@ -102,14 +102,16 @@
                     sHtml += `<div class="unit-group-row">> <span class="unit-ids">${groups[status].join(', ')}</span> <span class="status-label">(${status})</span></div>`;
                 });
 
-                html += `
-                    <div class="incident-entry">
-                        <span style="float:right; opacity:0.5; font-size:0.6rem;">${inc.time}</span>
-                        <div style="color:var(--green); font-weight:900; font-size:0.75rem;">[ ${inc.agency} ]</div>
-                        <div style="color:#fff; font-weight:bold; font-size:0.8rem;">${inc.type}</div>
-                        <div style="color:var(--yellow); font-size:0.75rem;">${inc.address}</div>
-                        ${sHtml}
-                    </div>`;
+html += `
+    <div class="incident-entry">
+        <span style="float:right; opacity:0.5; font-size:0.6rem;">${inc.time}</span>
+        <div style="color:var(--green); font-weight:900; font-size:0.75rem;">[ ${inc.agency} ]</div>
+        
+        <div style="color:#fff; font-weight:900; font-size:0.85rem; text-transform:uppercase;">${inc.type}</div>
+        
+        <div style="color:var(--yellow); font-size:0.75rem;">${inc.address}</div>
+        ${sHtml}
+    </div>`;
             });
             document.getElementById('feed-root').innerHTML = html || "[ MONITORING... ]";
             document.getElementById('sync-status').innerText = "(LIVE: " + new Date().toLocaleTimeString() + ")";
@@ -166,3 +168,4 @@
 </script>
 </body>
 </html>
+
