@@ -12,7 +12,7 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-    console.log("🚀 Initializing Console Scraper (System Chrome)...");
+    console.log("🚀 Initializing Console Scraper...");
     const browser = await puppeteer.launch({ 
         headless: "new",
         executablePath: '/usr/bin/google-chrome', 
@@ -38,19 +38,20 @@ async function run() {
             cards.forEach(card => {
                 const text = card.innerText;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+                
+                // PulsePoint Safety: Skip headers
                 if (lines[0] === "Active" || lines[0] === "Recent" || lines.length < 3) return;
 
-                // 🏷️ LOGIC: Agency is usually the first line
                 const agency = lines[0];
                 
-                // 🏷️ LOGIC: Call Type is usually the line immediately before the address or after the agency
-                // In PulsePoint, the Call Type often sits in a bolded sub-header
+                // --- 🚨 FIXED CALL TYPE LOGIC ---
+                // The second line is almost always the Call Type (e.g. "Medical", "Structure Fire")
                 const type = lines[1] || "Emergency"; 
                 
                 const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
                 const time = timeMatch ? timeMatch[0] : "Active";
                 
-                // Address search (looks for street suffixes)
+                // Address logic: Finds the line that looks like a street address
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
@@ -60,10 +61,8 @@ async function run() {
                 Object.keys(statusMap).forEach(className => {
                     card.querySelectorAll(`.${className}`).forEach(badge => {
                         const unitID = badge.innerText.trim();
-                        if (unitID) {
-                            // 🚫 DUPLICATE AGENCY REMOVED: Just "Unit (Status)"
-                            unitStatuses.push(`${unitID} (${statusMap[className]})`);
-                        }
+                        // 🚫 NO DUPLICATE AGENCY: Just "Unit (Status)"
+                        if (unitID) unitStatuses.push(`${unitID} (${statusMap[className]})`);
                     });
                 });
 
@@ -76,7 +75,7 @@ async function run() {
         const previousDataString = localCache.get('last_push');
 
         if (currentDataString === previousDataString) {
-            console.log("♻️ DATA UNCHANGED: Standby.");
+            console.log("♻️ STANDBY: No scene updates detected.");
         } else if (data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
@@ -87,16 +86,16 @@ async function run() {
 
             const timeStamp = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${timeStamp}]`,
+                message: `📟 UNIT UPDATE [${timeStamp}]`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log("✅ GitHub Updated.");
+            console.log("✅ LIVE FEED UPDATED");
         }
     } catch (err) {
-        console.error("💥 Run Failed:", err.message);
+        console.error("💥 Loop Interrupted:", err.message);
     } finally {
         await browser.close();
     }
