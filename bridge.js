@@ -12,17 +12,18 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
+    console.log("🚀 Initializing Scraper (System Chrome)...");
     const browser = await puppeteer.launch({ 
         headless: "new",
+        // Force the use of the pre-installed GitHub runner Chrome
         executablePath: '/usr/bin/google-chrome', 
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] 
     });
     
     const page = await browser.newPage();
     
-    // 🕒 FORCE PACIFIC TIME IN BROWSER
+    // 🕒 FORCE PACIFIC TIME IN SCRAPE
     await page.emulateTimezone('America/Los_Angeles');
-    
     page.setDefaultNavigationTimeout(90000); 
 
     try {
@@ -32,7 +33,6 @@ async function run() {
         const data = await page.evaluate(() => {
             const results = [];
             const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
-            
             const statusMap = {
                 'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
                 'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
@@ -42,14 +42,14 @@ async function run() {
             cards.forEach(card => {
                 const agency = card.firstChild?.innerText?.trim() || "Unknown Agency";
                 
-                // 🚨 CLASS-BASED TARGETING
-                const typeEl = card.querySelector('.css-bgqa2g'); // Call Type
-                const timeEl = card.querySelector('.css-1wbyehr'); // Incident Time
+                // 🚨 DIRECT CSS CLASS TARGETING
+                const typeEl = card.querySelector('.css-bgqa2g'); // Call Type Class
+                const timeEl = card.querySelector('.css-1wbyehr'); // Time Class
                 
                 const type = typeEl ? typeEl.innerText.trim() : "EMERGENCY";
                 const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
                 
-                // Address logic (Find remaining text line)
+                // Address: Look for line with numbers or street suffixes
                 const lines = card.innerText.split('\n').map(l => l.trim());
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
@@ -60,6 +60,7 @@ async function run() {
                 Object.keys(statusMap).forEach(className => {
                     card.querySelectorAll(`.${className}`).forEach(badge => {
                         const unitID = badge.innerText.trim();
+                        // 🚫 No Agency Prefix: Just Unit (Status)
                         if (unitID) unitStatuses.push(`${unitID} (${statusMap[className]})`);
                     });
                 });
@@ -73,7 +74,7 @@ async function run() {
         const previousDataString = localCache.get('last_push');
 
         if (currentDataString === previousDataString) {
-            console.log("♻️ STANDBY: No scene changes.");
+            console.log("♻️ STANDBY: No scene updates.");
         } else if (data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
@@ -82,19 +83,20 @@ async function run() {
                 sha = res.data.sha;
             } catch (e) {}
 
-            const pstTime = new Intl.DateTimeFormat('en-US', {
+            // PST Format for commit message
+            const pstLog = new Intl.DateTimeFormat('en-US', {
                 timeZone: 'America/Los_Angeles',
                 hour: '2-digit', minute: '2-digit', second: '2-digit'
             }).format(new Date());
 
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${pstTime} PST]`,
+                message: `📟 SYNC [${pstLog} PST]`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log(`✅ SYNC COMPLETE: ${pstTime}`);
+            console.log(`✅ SUCCESS: ${pstLog} PST`);
         }
     } catch (err) {
         console.error("💥 ERROR:", err.message);
