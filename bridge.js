@@ -39,19 +39,14 @@ async function run() {
                 const text = card.innerText;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
                 
-                // PulsePoint Safety: Skip headers
                 if (lines[0] === "Active" || lines[0] === "Recent" || lines.length < 3) return;
 
                 const agency = lines[0];
-                
-                // --- 🚨 FIXED CALL TYPE LOGIC ---
-                // The second line is almost always the Call Type (e.g. "Medical", "Structure Fire")
-                const type = lines[1] || "Emergency"; 
+                const type = lines[1] || "Emergency"; // Captures "Structure Fire", "Medical", etc.
                 
                 const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
                 const time = timeMatch ? timeMatch[0] : "Active";
                 
-                // Address logic: Finds the line that looks like a street address
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
@@ -61,7 +56,6 @@ async function run() {
                 Object.keys(statusMap).forEach(className => {
                     card.querySelectorAll(`.${className}`).forEach(badge => {
                         const unitID = badge.innerText.trim();
-                        // 🚫 NO DUPLICATE AGENCY: Just "Unit (Status)"
                         if (unitID) unitStatuses.push(`${unitID} (${statusMap[className]})`);
                     });
                 });
@@ -75,7 +69,7 @@ async function run() {
         const previousDataString = localCache.get('last_push');
 
         if (currentDataString === previousDataString) {
-            console.log("♻️ STANDBY: No scene updates detected.");
+            console.log("♻️ STANDBY: No scene updates.");
         } else if (data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
@@ -84,18 +78,25 @@ async function run() {
                 sha = res.data.sha;
             } catch (e) {}
 
-            const timeStamp = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
+            // 🕒 FIX: Force Pacific Time for the GitHub Commit
+            const timeStamp = new Date().toLocaleString("en-US", {
+                timeZone: "America/Los_Angeles",
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
             await axios.put(ghUrl, {
-                message: `📟 UNIT UPDATE [${timeStamp}]`,
+                message: `📟 UPDATE [${timeStamp} PST]`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log("✅ LIVE FEED UPDATED");
+            console.log(`✅ LIVE FEED UPDATED: ${timeStamp}`);
         }
     } catch (err) {
-        console.error("💥 Loop Interrupted:", err.message);
+        console.error("💥 Error:", err.message);
     } finally {
         await browser.close();
     }
