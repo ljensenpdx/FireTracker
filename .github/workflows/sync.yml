@@ -13,9 +13,19 @@ jobs:
         with:
           node-version: 18
 
-      - name: Fast Dependency Install
+      # ⚡ SPEED FIX: Updated key "v2" forces a clean, fast cache reset
+      - name: Cache dependencies
+        id: cache-npm
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-v2-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-v2-
+
+      - name: Install Dependencies
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
-          # Using puppeteer-core to avoid any browser downloads
           npm install axios puppeteer-extra puppeteer-extra-plugin-stealth puppeteer-core lru-cache
 
       - name: 90 Second Loop
