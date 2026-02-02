@@ -20,7 +20,6 @@ async function run() {
     
     const page = await browser.newPage();
     await page.emulateTimezone('America/Los_Angeles');
-    page.setDefaultNavigationTimeout(90000); 
 
     try {
         await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { waitUntil: 'networkidle2' });
@@ -28,41 +27,50 @@ async function run() {
 
         const data = await page.evaluate(() => {
             const results = [];
-            const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
+            // Target all possible elements to detect the section header exactly
+            const allElements = Array.from(document.querySelectorAll('.css-i11ep2, .css-175oi2r'));
+            
             const statusMap = {
                 'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
                 'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
                 'css-1tgt22r': 'At Hospital', 'css-xts122': 'Cleared'
             };
 
-            cards.forEach(card => {
-                const typeEl = card.querySelector('.css-bgqa2g'); 
-                const timeEl = card.querySelector('.css-1wbyehr');
-                const agency = card.firstChild?.innerText?.trim() || "Unknown";
-                
-                const type = typeEl ? typeEl.innerText.trim().toUpperCase() : "EMERGENCY";
-                const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
+            for (const el of allElements) {
+                const text = el.innerText || "";
 
-                // --- 🚑 MEDICAL FILTER ---
-                if (/MEDICAL|MEDIC|HEALTH|SICK|INJURY/i.test(type)) return;
+                // 🛑 THE KILL SWITCH: Stop if we hit the "RECENT" header
+                if (text.includes("RECENT") && text.length < 20) break; 
 
-                // --- ✂️ CLEAN DATA MAPPING ---
-                const lines = card.innerText.split('\n').map(l => l.trim());
-                const address = lines.find(l => 
-                    l !== agency && l !== time && l !== type && 
-                    (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
-                ) || "ADDRESS RESTRICTED";
+                if (el.classList.contains('css-i11ep2')) {
+                    const agency = el.firstChild?.innerText?.trim() || "Unknown";
+                    const typeEl = el.querySelector('.css-bgqa2g'); 
+                    const timeEl = el.querySelector('.css-1wbyehr');
+                    
+                    const type = typeEl ? typeEl.innerText.trim() : "EMERGENCY";
+                    const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
 
-                const unitStatuses = [];
-                Object.keys(statusMap).forEach(className => {
-                    card.querySelectorAll(`.${className}`).forEach(badge => {
-                        const id = badge.innerText.trim();
-                        if (id) unitStatuses.push(`${id} (${statusMap[className]})`);
+                    // 🚑 MEDICAL FILTER: Skip if type includes medical keywords
+                    if (/MEDICAL|MEDIC|HEALTH|SICK|INJURY/i.test(type)) continue;
+
+                    // Clean the address by finding the line that isn't a header or unit status
+                    const lines = text.split('\n').map(l => l.trim());
+                    const address = lines.find(l => 
+                        l !== agency && l !== time && l !== type && 
+                        (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
+                    ) || "ADDRESS RESTRICTED";
+
+                    const unitStatuses = [];
+                    Object.keys(statusMap).forEach(className => {
+                        el.querySelectorAll(`.${className}`).forEach(badge => {
+                            const id = badge.innerText.trim();
+                            if (id) unitStatuses.push(`${id} (${statusMap[className]})`);
+                        });
                     });
-                });
 
-                results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
-            });
+                    results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
+                }
+            }
             return results;
         }) || [];
 
@@ -76,7 +84,7 @@ async function run() {
             } catch (e) {}
 
             const pstTime = new Intl.DateTimeFormat('en-US', {
-                timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit'
             }).format(new Date());
 
             await axios.put(ghUrl, {
@@ -86,7 +94,7 @@ async function run() {
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log(`✅ SYNC COMPLETE: ${pstTime}`);
+            console.log(`✅ SYNC COMPLETE: ${pstTime} (${data.length} Incidents)`);
         }
     } catch (err) {
         console.error("💥 ERROR:", err.message);
