@@ -12,7 +12,6 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-    console.log("🚀 Initializing Console Scraper...");
     const browser = await puppeteer.launch({ 
         headless: "new",
         executablePath: '/usr/bin/google-chrome', 
@@ -29,6 +28,7 @@ async function run() {
         const data = await page.evaluate(() => {
             const results = [];
             const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
+            
             const statusMap = {
                 'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
                 'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
@@ -38,19 +38,22 @@ async function run() {
             cards.forEach(card => {
                 const text = card.innerText;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                
                 if (lines[0] === "Active" || lines[0] === "Recent" || lines.length < 3) return;
 
                 const agency = lines[0];
-                const type = lines[1] || "Emergency"; // Captures "Structure Fire", "Medical", etc.
+                
+                // --- 🚨 TARGETING CALL TYPE BY CSS CLASS ---
+                const typeEl = card.querySelector('.css-bgqa2g');
+                const type = typeEl ? typeEl.innerText.trim() : "EMERGENCY";
                 
                 const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
                 const time = timeMatch ? timeMatch[0] : "Active";
                 
+                // Address: Look for line with numbers or street suffixes
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
-                ) || "Location Restricted";
+                ) || "ADDRESS RESTRICTED";
 
                 const unitStatuses = [];
                 Object.keys(statusMap).forEach(className => {
@@ -78,25 +81,23 @@ async function run() {
                 sha = res.data.sha;
             } catch (e) {}
 
-            // 🕒 FIX: Force Pacific Time for the GitHub Commit
+            // 🕒 PACIFIC TIME STAMP
             const timeStamp = new Date().toLocaleString("en-US", {
                 timeZone: "America/Los_Angeles",
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
+                hour12: true, hour: '2-digit', minute: '2-digit'
             });
 
             await axios.put(ghUrl, {
-                message: `📟 UPDATE [${timeStamp} PST]`,
+                message: `📟 SYNC [${timeStamp} PST]`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log(`✅ LIVE FEED UPDATED: ${timeStamp}`);
+            console.log(`✅ SUCCESS: ${timeStamp} PST`);
         }
     } catch (err) {
-        console.error("💥 Error:", err.message);
+        console.error("💥 ERROR:", err.message);
     } finally {
         await browser.close();
     }
