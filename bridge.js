@@ -4,9 +4,6 @@ import axios from 'axios';
 import { LRUCache } from 'lru-cache';
 
 puppeteer.use(StealthPlugin());
-
-// --- 🧠 CACHE CONFIG ---
-// This keeps the script "smart" between cycles in the same Action run.
 const localCache = new LRUCache({ max: 10 });
 
 async function run() {
@@ -15,55 +12,45 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-    console.log("🚀 Initializing Stealth Browser...");
+    console.log("🚀 Initializing Console Scraper (System Chrome)...");
     const browser = await puppeteer.launch({ 
         headless: "new",
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox', 
-            '--disable-dev-shm-usage', 
-            '--disable-gpu'
-        ] 
+        executablePath: '/usr/bin/google-chrome', 
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] 
     });
     
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(90000); 
 
     try {
-        console.log("🕵️ Navigating to PulsePoint...");
-        await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { 
-            waitUntil: 'networkidle2' 
-        });
-
-        console.log("⏳ Waiting for incident cards to render...");
+        await page.goto("https://web.pulsepoint.org/?agencies=00291,00144,00057,00042,00195,00233,00109,00485,00161,01200,00740,01260,00530,00016,00015,00165,00167,00176,00186,00219", { waitUntil: 'networkidle2' });
         await page.waitForSelector('.css-i11ep2', { timeout: 45000 });
 
         const data = await page.evaluate(() => {
             const results = [];
             const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
-            
             const statusMap = {
-                'css-vni3px': 'Toned Out',
-                'css-kne7t2': 'En Route',
-                'css-qvlduj': 'On Scene',
-                'css-1oizron': 'To Hospital',
-                'css-1tgt22r': 'At Hospital',
-                'css-xts122': 'Cleared'
+                'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
+                'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
+                'css-1tgt22r': 'At Hospital', 'css-xts122': 'Cleared'
             };
 
             cards.forEach(card => {
                 const text = card.innerText;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                
-                // Skip summary boxes or empty cards
                 if (lines[0] === "Active" || lines[0] === "Recent" || lines.length < 3) return;
 
+                // 🏷️ LOGIC: Agency is usually the first line
                 const agency = lines[0];
+                
+                // 🏷️ LOGIC: Call Type is usually the line immediately before the address or after the agency
+                // In PulsePoint, the Call Type often sits in a bolded sub-header
+                const type = lines[1] || "Emergency"; 
+                
                 const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
                 const time = timeMatch ? timeMatch[0] : "Active";
-                const type = lines.find(l => l !== agency && l !== time) || "Emergency";
                 
-                // Address logic: Looks for comma or street suffixes
+                // Address search (looks for street suffixes)
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
@@ -74,8 +61,8 @@ async function run() {
                     card.querySelectorAll(`.${className}`).forEach(badge => {
                         const unitID = badge.innerText.trim();
                         if (unitID) {
-                            // 🏷️ AGENCY PREFIX: Agency Name: Unit ID (Status)
-                            unitStatuses.push(`${agency}: ${unitID} (${statusMap[className]})`);
+                            // 🚫 DUPLICATE AGENCY REMOVED: Just "Unit (Status)"
+                            unitStatuses.push(`${unitID} (${statusMap[className]})`);
                         }
                     });
                 });
@@ -83,46 +70,35 @@ async function run() {
                 results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
             });
             return results;
-        }) || []; // Safety fallback to empty array
+        }) || [];
 
-        // --- 🧠 LRU-CACHE COMPARISON ---
         const currentDataString = JSON.stringify(data);
         const previousDataString = localCache.get('last_push');
 
-        if (data.length === 0) {
-            console.log("⚠️ Scrape returned 0 incidents. Check selector or PulsePoint status.");
-        } else if (currentDataString === previousDataString) {
-            console.log("♻️ DATA UNCHANGED: Skipping GitHub push to save resources.");
-        } else {
-            console.log(`📡 CHANGE DETECTED: Found ${data.length} incidents. Syncing to GitHub...`);
-            
+        if (currentDataString === previousDataString) {
+            console.log("♻️ DATA UNCHANGED: Standby.");
+        } else if (data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
             try {
                 const res = await axios.get(ghUrl, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
                 sha = res.data.sha;
-            } catch (e) {
-                console.log("📄 No existing data.json found; creating new file.");
-            }
+            } catch (e) {}
 
             const timeStamp = new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles"});
-            
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${timeStamp}] - ${data.length} ACTIVE`,
+                message: `📟 SYNC [${timeStamp}]`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
-            // Update cache with what we just pushed
             localCache.set('last_push', currentDataString);
-            console.log(`✅ GitHub Updated Successfully at ${timeStamp}`);
+            console.log("✅ GitHub Updated.");
         }
     } catch (err) {
         console.error("💥 Run Failed:", err.message);
     } finally {
         await browser.close();
-        console.log("🏁 Browser Closed.");
     }
 }
-
 run();
