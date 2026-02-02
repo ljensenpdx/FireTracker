@@ -12,10 +12,10 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-    console.log("🚀 Initializing Scraper (System Chrome)...");
+    console.log("🚀 Initializing Scraper (Using System Chrome)...");
     const browser = await puppeteer.launch({ 
         headless: "new",
-        // Force the use of the pre-installed GitHub runner Chrome
+        // Force use of the built-in GitHub runner Chrome
         executablePath: '/usr/bin/google-chrome', 
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] 
     });
@@ -43,8 +43,8 @@ async function run() {
                 const agency = card.firstChild?.innerText?.trim() || "Unknown Agency";
                 
                 // 🚨 DIRECT CSS CLASS TARGETING
-                const typeEl = card.querySelector('.css-bgqa2g'); // Call Type Class
-                const timeEl = card.querySelector('.css-1wbyehr'); // Time Class
+                const typeEl = card.querySelector('.css-bgqa2g'); // Incident Type Class
+                const timeEl = card.querySelector('.css-1wbyehr'); // Incident Time Class
                 
                 const type = typeEl ? typeEl.innerText.trim() : "EMERGENCY";
                 const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
@@ -74,7 +74,7 @@ async function run() {
         const previousDataString = localCache.get('last_push');
 
         if (currentDataString === previousDataString) {
-            console.log("♻️ STANDBY: No scene updates.");
+            console.log("♻️ STANDBY: No scene updates detected.");
         } else if (data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
