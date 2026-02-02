@@ -19,6 +19,10 @@ async function run() {
     });
     
     const page = await browser.newPage();
+    
+    // 🕒 FORCE PACIFIC TIME IN BROWSER
+    await page.emulateTimezone('America/Los_Angeles');
+    
     page.setDefaultNavigationTimeout(90000); 
 
     try {
@@ -36,20 +40,17 @@ async function run() {
             };
 
             cards.forEach(card => {
-                const text = card.innerText;
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-                if (lines[0] === "Active" || lines[0] === "Recent" || lines.length < 3) return;
-
-                const agency = lines[0];
+                const agency = card.firstChild?.innerText?.trim() || "Unknown Agency";
                 
-                // --- 🚨 TARGETING CALL TYPE BY CSS CLASS ---
-                const typeEl = card.querySelector('.css-bgqa2g');
+                // 🚨 CLASS-BASED TARGETING
+                const typeEl = card.querySelector('.css-bgqa2g'); // Call Type
+                const timeEl = card.querySelector('.css-1wbyehr'); // Incident Time
+                
                 const type = typeEl ? typeEl.innerText.trim() : "EMERGENCY";
+                const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
                 
-                const timeMatch = text.match(/\d{1,2}:\d{2}\s*[AP]M/);
-                const time = timeMatch ? timeMatch[0] : "Active";
-                
-                // Address: Look for line with numbers or street suffixes
+                // Address logic (Find remaining text line)
+                const lines = card.innerText.split('\n').map(l => l.trim());
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
@@ -72,7 +73,7 @@ async function run() {
         const previousDataString = localCache.get('last_push');
 
         if (currentDataString === previousDataString) {
-            console.log("♻️ STANDBY: No scene updates.");
+            console.log("♻️ STANDBY: No scene changes.");
         } else if (data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
@@ -81,20 +82,19 @@ async function run() {
                 sha = res.data.sha;
             } catch (e) {}
 
-            // 🕒 PACIFIC TIME STAMP
-            const timeStamp = new Date().toLocaleString("en-US", {
-                timeZone: "America/Los_Angeles",
-                hour12: true, hour: '2-digit', minute: '2-digit'
-            });
+            const pstTime = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'America/Los_Angeles',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            }).format(new Date());
 
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${timeStamp} PST]`,
+                message: `📟 SYNC [${pstTime} PST]`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log(`✅ SUCCESS: ${timeStamp} PST`);
+            console.log(`✅ SYNC COMPLETE: ${pstTime}`);
         }
     } catch (err) {
         console.error("💥 ERROR:", err.message);
