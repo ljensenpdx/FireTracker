@@ -27,8 +27,8 @@ async function run() {
 
         const data = await page.evaluate(() => {
             const results = [];
-            // Target all possible elements to detect the section header exactly
-            const allElements = Array.from(document.querySelectorAll('.css-i11ep2, .css-175oi2r'));
+            // Target all incident cards
+            const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
             
             const statusMap = {
                 'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
@@ -36,44 +36,50 @@ async function run() {
                 'css-1tgt22r': 'At Hospital', 'css-xts122': 'Cleared'
             };
 
-            for (const el of allElements) {
-                const text = el.innerText || "";
+            for (const card of cards) {
+                const text = card.innerText || "";
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
-                // 🛑 THE KILL SWITCH: Stop if we hit the "RECENT" header
-                if (text.includes("RECENT") && text.length < 20) break; 
+                // 🛑 STOP if we reach the Recent section
+                if (text.includes("Recent\n(")) break;
+                
+                // ⏭️ SKIP the Active section header
+                if (text.includes("Active\n(")) continue;
 
-                if (el.classList.contains('css-i11ep2')) {
-                    const agency = el.firstChild?.innerText?.trim() || "Unknown";
-                    const typeEl = el.querySelector('.css-bgqa2g'); 
-                    const timeEl = el.querySelector('.css-1wbyehr');
-                    
-                    const type = typeEl ? typeEl.innerText.trim() : "EMERGENCY";
-                    const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
+                // 🏷️ TARGET specific elements for clean data
+                const typeEl = card.querySelector('.css-bgqa2g'); 
+                const timeEl = card.querySelector('.css-1wbyehr');
+                
+                const agency = lines[0]; // Line 1 is always the Agency Name
+                const type = typeEl ? typeEl.innerText.trim() : "Emergency";
+                const time = timeEl ? timeEl.innerText.trim() : "Active";
 
-                    // 🚑 MEDICAL FILTER: Skip if type includes medical keywords
-                    if (/MEDICAL|MEDIC|HEALTH|SICK|INJURY/i.test(type)) continue;
+                // 🚑 MEDICAL/LIFT ASSIST FILTER
+                // Skips any medical, assist, or health related calls
+                const isMedical = /MEDICAL|MEDIC|HEALTH|SICK|INJURY|LIFT ASSIST|ASSIST/i.test(type);
+                if (isMedical) continue;
 
-                    // Clean the address by finding the line that isn't a header or unit status
-                    const lines = text.split('\n').map(l => l.trim());
-                    const address = lines.find(l => 
-                        l !== agency && l !== time && l !== type && 
-                        (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
-                    ) || "ADDRESS RESTRICTED";
+                // 📍 ADDRESS LOGIC
+                // Look for the line that looks like an address and isn't a known field
+                const address = lines.find(l => 
+                    l !== agency && l !== time && l !== type && 
+                    (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
+                ) || "Address Restricted";
 
-                    const unitStatuses = [];
-                    Object.keys(statusMap).forEach(className => {
-                        el.querySelectorAll(`.${className}`).forEach(badge => {
-                            const id = badge.innerText.trim();
-                            if (id) unitStatuses.push(`${id} (${statusMap[className]})`);
-                        });
+                const unitStatuses = [];
+                Object.keys(statusMap).forEach(className => {
+                    card.querySelectorAll(`.${className}`).forEach(badge => {
+                        const id = badge.innerText.trim();
+                        if (id) unitStatuses.push(`${id} (${statusMap[className]})`);
                     });
+                });
 
-                    results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
-                }
+                results.push({ agency, type, address, time, unitStatuses: [...new Set(unitStatuses)] });
             }
             return results;
         }) || [];
 
+        // --- COMMIT LOGIC ---
         const currentDataString = JSON.stringify(data);
         if (localCache.get('last_push') !== currentDataString && data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -83,21 +89,21 @@ async function run() {
                 sha = res.data.sha;
             } catch (e) {}
 
-            const pstTime = new Intl.DateTimeFormat('en-US', {
+            const pstNow = new Intl.DateTimeFormat('en-US', {
                 timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit'
             }).format(new Date());
 
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${pstTime} PST] - FIRE ONLY`,
+                message: `📟 SYNC [${pstNow} PST] - FIRE ONLY`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log(`✅ SYNC COMPLETE: ${pstTime} (${data.length} Incidents)`);
+            console.log(`✅ ${data.length} LIVE FIRE INCIDENTS SYNCED AT ${pstNow}`);
         }
     } catch (err) {
-        console.error("💥 ERROR:", err.message);
+        console.error("💥 Error:", err.message);
     } finally {
         await browser.close();
     }
