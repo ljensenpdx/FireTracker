@@ -9,16 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Fast Dependency Install
         run: |
-          # Skip Chromium download to prevent hangs
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install axios puppeteer-extra puppeteer-extra-plugin-stealth puppeteer lru-cache
+          # Using puppeteer-core to avoid any browser downloads
+          npm install axios puppeteer-extra puppeteer-extra-plugin-stealth puppeteer-core lru-cache
 
       - name: 90 Second Loop
         env:
