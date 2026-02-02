@@ -1,12 +1,9 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import axios from 'axios';
 import { LRUCache } from 'lru-cache';
 
-// Use standard puppeteer-extra logic with core
-import puppeteerExtra from 'puppeteer-extra';
-puppeteerExtra.use(StealthPlugin());
-
+puppeteer.use(StealthPlugin());
 const localCache = new LRUCache({ max: 10 });
 
 async function run() {
@@ -15,7 +12,7 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-    const browser = await puppeteerExtra.launch({ 
+    const browser = await puppeteer.launch({ 
         headless: "new",
         executablePath: '/usr/bin/google-chrome', 
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] 
@@ -32,7 +29,6 @@ async function run() {
         const data = await page.evaluate(() => {
             const results = [];
             const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
-            
             const statusMap = {
                 'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
                 'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
@@ -40,26 +36,22 @@ async function run() {
             };
 
             cards.forEach(card => {
-                // 🏷️ Target exactly what we need using the classes you found
                 const typeEl = card.querySelector('.css-bgqa2g'); 
                 const timeEl = card.querySelector('.css-1wbyehr');
                 const agency = card.firstChild?.innerText?.trim() || "Unknown";
                 
-                const type = typeEl ? typeEl.innerText.trim() : "Emergency";
-                const time = timeEl ? timeEl.innerText.trim() : "Active";
+                const type = typeEl ? typeEl.innerText.trim().toUpperCase() : "EMERGENCY";
+                const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
 
                 // --- 🚑 MEDICAL FILTER ---
-                // Skip the incident if it contains medical keywords
-                const isMedical = /MEDICAL|MEDIC|HEALTH|SICK|INJURY/i.test(type);
-                if (isMedical) return;
+                if (/MEDICAL|MEDIC|HEALTH|SICK|INJURY/i.test(type)) return;
 
-                // --- ✂️ HEADER REMOVAL ---
-                // We only grab the clean address and unit list, skipping the first summary line
+                // --- ✂️ CLEAN DATA MAPPING ---
                 const lines = card.innerText.split('\n').map(l => l.trim());
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
-                ) || "Address Restricted";
+                ) || "ADDRESS RESTRICTED";
 
                 const unitStatuses = [];
                 Object.keys(statusMap).forEach(className => {
@@ -74,11 +66,8 @@ async function run() {
             return results;
         }) || [];
 
-        // Cache and Push logic
         const currentDataString = JSON.stringify(data);
-        if (localCache.get('last_push') === currentDataString) {
-            console.log("♻️ Feed identical. Skipping push.");
-        } else if (data.length > 0) {
+        if (localCache.get('last_push') !== currentDataString && data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
             try {
@@ -86,21 +75,21 @@ async function run() {
                 sha = res.data.sha;
             } catch (e) {}
 
-            const pstNow = new Intl.DateTimeFormat('en-US', {
-                timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit'
+            const pstTime = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit'
             }).format(new Date());
 
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${pstNow} PST] - FIRE/RESCUE ONLY`,
+                message: `📟 SYNC [${pstTime} PST] - FIRE ONLY`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log(`✅ ${data.length} Non-Medical Incidents Pushed at ${pstNow}`);
+            console.log(`✅ SYNC COMPLETE: ${pstTime}`);
         }
     } catch (err) {
-        console.error("💥 Error:", err.message);
+        console.error("💥 ERROR:", err.message);
     } finally {
         await browser.close();
     }
