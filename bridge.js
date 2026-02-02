@@ -1,9 +1,12 @@
-import puppeteer from 'puppeteer-extra';
+import puppeteer from 'puppeteer-core';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import axios from 'axios';
 import { LRUCache } from 'lru-cache';
 
-puppeteer.use(StealthPlugin());
+// Use standard puppeteer-extra logic with core
+import puppeteerExtra from 'puppeteer-extra';
+puppeteerExtra.use(StealthPlugin());
+
 const localCache = new LRUCache({ max: 10 });
 
 async function run() {
@@ -12,17 +15,13 @@ async function run() {
     const REPO_NAME = 'FireTracker';
     const FILE_PATH = 'data.json';
 
-    console.log("🚀 Initializing Scraper (Using System Chrome)...");
-    const browser = await puppeteer.launch({ 
+    const browser = await puppeteerExtra.launch({ 
         headless: "new",
-        // Force use of the built-in GitHub runner Chrome
         executablePath: '/usr/bin/google-chrome', 
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] 
     });
     
     const page = await browser.newPage();
-    
-    // 🕒 FORCE PACIFIC TIME IN SCRAPE
     await page.emulateTimezone('America/Los_Angeles');
     page.setDefaultNavigationTimeout(90000); 
 
@@ -33,6 +32,7 @@ async function run() {
         const data = await page.evaluate(() => {
             const results = [];
             const cards = Array.from(document.querySelectorAll('.css-i11ep2'));
+            
             const statusMap = {
                 'css-vni3px': 'Toned Out', 'css-kne7t2': 'En Route',
                 'css-qvlduj': 'On Scene', 'css-1oizron': 'To Hospital',
@@ -40,28 +40,32 @@ async function run() {
             };
 
             cards.forEach(card => {
-                const agency = card.firstChild?.innerText?.trim() || "Unknown Agency";
+                // 🏷️ Target exactly what we need using the classes you found
+                const typeEl = card.querySelector('.css-bgqa2g'); 
+                const timeEl = card.querySelector('.css-1wbyehr');
+                const agency = card.firstChild?.innerText?.trim() || "Unknown";
                 
-                // 🚨 DIRECT CSS CLASS TARGETING
-                const typeEl = card.querySelector('.css-bgqa2g'); // Incident Type Class
-                const timeEl = card.querySelector('.css-1wbyehr'); // Incident Time Class
-                
-                const type = typeEl ? typeEl.innerText.trim() : "EMERGENCY";
-                const time = timeEl ? timeEl.innerText.trim() : "ACTIVE";
-                
-                // Address: Look for line with numbers or street suffixes
+                const type = typeEl ? typeEl.innerText.trim() : "Emergency";
+                const time = timeEl ? timeEl.innerText.trim() : "Active";
+
+                // --- 🚑 MEDICAL FILTER ---
+                // Skip the incident if it contains medical keywords
+                const isMedical = /MEDICAL|MEDIC|HEALTH|SICK|INJURY/i.test(type);
+                if (isMedical) return;
+
+                // --- ✂️ HEADER REMOVAL ---
+                // We only grab the clean address and unit list, skipping the first summary line
                 const lines = card.innerText.split('\n').map(l => l.trim());
                 const address = lines.find(l => 
                     l !== agency && l !== time && l !== type && 
                     (l.includes(',') || l.match(/\b(AVE|ST|RD|BLVD|DR|WAY|LN|CT|CIR)\b/i))
-                ) || "ADDRESS RESTRICTED";
+                ) || "Address Restricted";
 
                 const unitStatuses = [];
                 Object.keys(statusMap).forEach(className => {
                     card.querySelectorAll(`.${className}`).forEach(badge => {
-                        const unitID = badge.innerText.trim();
-                        // 🚫 No Agency Prefix: Just Unit (Status)
-                        if (unitID) unitStatuses.push(`${unitID} (${statusMap[className]})`);
+                        const id = badge.innerText.trim();
+                        if (id) unitStatuses.push(`${id} (${statusMap[className]})`);
                     });
                 });
 
@@ -70,11 +74,10 @@ async function run() {
             return results;
         }) || [];
 
+        // Cache and Push logic
         const currentDataString = JSON.stringify(data);
-        const previousDataString = localCache.get('last_push');
-
-        if (currentDataString === previousDataString) {
-            console.log("♻️ STANDBY: No scene updates detected.");
+        if (localCache.get('last_push') === currentDataString) {
+            console.log("♻️ Feed identical. Skipping push.");
         } else if (data.length > 0) {
             const ghUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FILE_PATH}`;
             let sha = "";
@@ -83,23 +86,21 @@ async function run() {
                 sha = res.data.sha;
             } catch (e) {}
 
-            // PST Format for commit message
-            const pstLog = new Intl.DateTimeFormat('en-US', {
-                timeZone: 'America/Los_Angeles',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            const pstNow = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit'
             }).format(new Date());
 
             await axios.put(ghUrl, {
-                message: `📟 SYNC [${pstLog} PST]`,
+                message: `📟 SYNC [${pstNow} PST] - FIRE/RESCUE ONLY`,
                 content: Buffer.from(currentDataString).toString('base64'),
                 sha: sha || undefined
             }, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
             
             localCache.set('last_push', currentDataString);
-            console.log(`✅ SUCCESS: ${pstLog} PST`);
+            console.log(`✅ ${data.length} Non-Medical Incidents Pushed at ${pstNow}`);
         }
     } catch (err) {
-        console.error("💥 ERROR:", err.message);
+        console.error("💥 Error:", err.message);
     } finally {
         await browser.close();
     }
