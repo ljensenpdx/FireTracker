@@ -1,1 +1,1 @@
-[{"agency":"Clackamas FD","type":"Traffic Collision","address":"HWY 213 SB & 2 MP, OREGON CITY, OR","time":"12:48 AM","unitStatuses":[]},{"agency":"Aurora Fire","type":"Fire Alarm","address":"29502 S MERIDIAN RD, HUBBARD, OR","time":"12:33 AM","unitStatuses":["E915 (On Scene)"]}]
+[{"agency":"Clackamas FD","type":"Traffic Collision","address":"HWY 213 SB & 2 MP, OREGON CITY, OR","time":"12:48 AM","unitStatuses":["E309 (En Route)"]},{"agency":"Aurora Fire","type":"Fire Alarm","address":"29502 S MERIDIAN RD, HUBBARD, OR","time":"12:33 AM","unitStatuses":["E915 (On Scene)"]}]
