@@ -1,1 +1,1 @@
-[{"agency":"Lake Oswego Fire","type":"Fire Alarm","address":"5850 MCEWAN RD, LAKE OSWEGO, OR","time":"2:04 PM","unitStatuses":["?T211 (Toned Out)"]},{"agency":"Gresham Fire","type":"Fire","address":"1203 NE 183RD AVE, GRESHAM, OR","time":"2:02 PM","unitStatuses":[]}]
+[{"agency":"Lake Oswego Fire","type":"Fire Alarm","address":"5850 MCEWAN RD, LAKE OSWEGO, OR","time":"2:04 PM","unitStatuses":["T211 (En Route)"]},{"agency":"Gresham Fire","type":"Fire","address":"1203 NE 183RD AVE, GRESHAM, OR","time":"2:02 PM","unitStatuses":[]}]
