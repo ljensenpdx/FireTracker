@@ -1,1 +1,1 @@
-[{"agency":"Hillsboro Fire","type":"Fire Alarm","address":"1200 NE 48TH AVE, STE 700, HILLSBORO, OR","time":"8:43 AM","unitStatuses":["E06 (On Scene)"]}]
+[{"agency":"Hillsboro Fire","type":"Interfacility Transfer","address":"SE CIRCUIT DR, HILLSBORO, OR","time":"9:07 AM","unitStatuses":["AMR124 (En Route)","AMRSAM2 (Cleared)"]},{"agency":"Hillsboro Fire","type":"Fire Alarm","address":"1200 NE 48TH AVE, STE 700, HILLSBORO, OR","time":"8:43 AM","unitStatuses":["E06 (Cleared)"]}]
