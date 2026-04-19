@@ -1,1 +1,1 @@
-[{"agency":"Portland F&R","type":"Fire","address":"9024 N EDISON ST, PORTLAND, OR","time":"4:25 AM","unitStatuses":[]},{"agency":"Tualatin Valley F&R","type":"Fire Alarm","address":"1 BOWERMAN DR, BEAVERTON, OR","time":"4:14 AM","unitStatuses":["E61 (En Route)"]}]
+[{"agency":"Portland F&R","type":"Fire","address":"9024 N EDISON ST, PORTLAND, OR","time":"4:25 AM","unitStatuses":["?E22 (Toned Out)"]},{"agency":"Tualatin Valley F&R","type":"Fire Alarm","address":"1 BOWERMAN DR, BEAVERTON, OR","time":"4:14 AM","unitStatuses":["E61 (On Scene)"]}]
