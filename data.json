@@ -1,1 +1,1 @@
-[{"agency":"Portland F&R","type":"Fire","address":"SE 17TH AVE & SE MCLOUGHLIN BLVD, PORTLAND, OR","time":"8:38 AM","unitStatuses":[]},{"agency":"Lake Oswego Fire","type":"Alarm","address":"13188 VERMEER DR, LAKE OSWEGO, OR","time":"8:33 AM","unitStatuses":["E210 (En Route)","T211 (Cleared)"]}]
+[{"agency":"Portland F&R","type":"Fire","address":"SE 17TH AVE & SE MCLOUGHLIN BLVD, PORTLAND, OR","time":"8:38 AM","unitStatuses":["?E23 (Toned Out)","M312 (En Route)"]}]
