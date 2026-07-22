@@ -1,1 +1,1 @@
-[{"agency":"Hillsboro Fire","type":"Traffic Collision","address":"SW 185TH AVE & W BASELINE RD, BEAVERTON, OR","time":"1:11 PM","unitStatuses":[]},{"agency":"Portland F&R","type":"Fire","address":"20 SE 103RD AVE, STE 339, PORTLAND, OR","time":"1:08 PM","unitStatuses":[]}]
+[{"agency":"Hillsboro Fire","type":"Traffic Collision","address":"SW 185TH AVE & W BASELINE RD, BEAVERTON, OR","time":"1:11 PM","unitStatuses":["?E03 (Toned Out)"]}]
